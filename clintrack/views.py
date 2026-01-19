@@ -197,7 +197,7 @@ def admin_dashboard(request):
     
     # === ENROLLMENT TRENDS - Last 30 days (for line chart) ===
     enrollment_daily = Participant.objects.filter(
-        enrollment_date__gte=last_30_days.date()
+        enrollment_date__gte=last_30_days
     ).annotate(
         day=TruncDay('enrollment_date')
     ).values('day').annotate(
@@ -232,7 +232,7 @@ def admin_dashboard(request):
     susar_trend_labels = []
     susar_trend_data = []
     current_date = last_30_days.date()
-    susar_dict = {item['day'].date(): item['count'] for item in susar_daily}
+    susar_dict = {item['day']: item['count'] for item in susar_daily}
     
     while current_date <= end_date.date():
         susar_trend_labels.append(current_date.strftime('%b %d'))
@@ -246,7 +246,7 @@ def admin_dashboard(request):
     
     # === ENROLLMENT BY MONTH - Last 12 months (for main chart) ===
     enrollment_monthly = Participant.objects.filter(
-        enrollment_date__gte=start_date.date()
+        enrollment_date__gte=start_date
     ).annotate(
         month=TruncMonth('enrollment_date')
     ).values('month').annotate(
@@ -256,7 +256,7 @@ def admin_dashboard(request):
     monthly_labels = []
     monthly_data = []
     current_month = start_date.date().replace(day=1)
-    enrollment_month_dict = {item['month'].date(): item['count'] for item in enrollment_monthly}
+    enrollment_month_dict = {item['month']: item['count'] for item in enrollment_monthly}
     
     for _ in range(12):
         monthly_labels.append(current_month.strftime('%b %Y'))

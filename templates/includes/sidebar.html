@@ -48,13 +48,13 @@
       <div class="collapse" id="participants-menu">
         <ul class="nav flex-column sub-menu">
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'participants:list' %}">All Participants</a>
+            <a class="nav-link" href="{% url 'participant_list' %}">All Participants</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'participants:create' %}">Add Participant</a>
+            <a class="nav-link" href="{% url 'participant_create' %}">Add Participant</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'participants:search' %}">Search Participant</a>
+            <a class="nav-link" href="{% url 'participant_search' %}">Search Participant</a>
           </li>
         </ul>
       </div>
@@ -64,7 +64,7 @@
     <!-- All Roles can view participants (read-only for viewers) -->
     {% if user.role == 'staff' or user.role == 'viewer' %}
     <li class="nav-item">
-      <a class="nav-link" href="{% url 'participants:list' %}">
+      <a class="nav-link" href="{% url 'participant_list' %}">
         <i class="mdi mdi-account-multiple menu-icon"></i>
         <span class="menu-title">Participants</span>
       </a>
@@ -82,11 +82,11 @@
       <div class="collapse" id="studies-menu">
         <ul class="nav flex-column sub-menu">
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'studies:list' %}">All Studies</a>
+            <a class="nav-link" href="{% url 'study_list' %}">All Studies</a>
           </li>
           {% if user.role == 'admin' %}
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'studies:create' %}">Create Study</a>
+            <a class="nav-link" href="{% url 'study_create' %}">Create Study</a>
           </li>
           {% endif %}
         </ul>
@@ -104,15 +104,15 @@
       <div class="collapse" id="susar-menu">
         <ul class="nav flex-column sub-menu">
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'susars:list' %}">All Reports</a>
+            <a class="nav-link" href="{% url 'susars_list' %}">All Reports</a>
           </li>
           {% if user.role != 'viewer' %}
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'susars:create' %}">Report SUSAR</a>
+            <a class="nav-link" href="{% url 'susars_create' %}">Report SUSAR</a>
           </li>
           {% endif %}
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'susars:pending' %}">Pending Follow-up</a>
+            <a class="nav-link" href="{% url 'susars_pending' %}">Pending Follow-up</a>
           </li>
         </ul>
       </div>
@@ -129,13 +129,13 @@
       <div class="collapse" id="staff-menu">
         <ul class="nav flex-column sub-menu">
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'users:list' %}">All Staff</a>
+            <a class="nav-link" href="{% url 'users_list' %}">All Staff</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'users:create' %}">Add Staff</a>
+            <a class="nav-link" href="{% url 'users_create' %}">Add Staff</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'attendance:list' %}">Attendance Log</a>
+            <a class="nav-link" href="{% url 'attendance_list' %}">Attendance Log</a>
           </li>
         </ul>
       </div>
@@ -145,7 +145,7 @@
     <!-- Reports - Admin & Coordinator -->
     {% if user.role == 'admin' or user.role == 'coordinator' %}
     <li class="nav-item">
-      <a class="nav-link" href="{% url 'reports:index' %}">
+      <a class="nav-link" href="{% url 'reports_index' %}">
         <i class="mdi mdi-chart-bar menu-icon"></i>
         <span class="menu-title">Reports</span>
       </a>
@@ -155,7 +155,7 @@
     <!-- Audit Logs - Admin Only -->
     {% if user.role == 'admin' %}
     <li class="nav-item">
-      <a class="nav-link" href="{% url 'audit:logs' %}">
+      <a class="nav-link" href="{% url 'audit_logs' %}">
         <i class="mdi mdi-history menu-icon"></i>
         <span class="menu-title">Audit Logs</span>
       </a>
