@@ -4,395 +4,974 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Reports - ClinTrack{% endblock %}
+{% block title %}Analytics Dashboard - ClinTrack{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Professional Apple-like typography */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Smaller font sizes */
+h4 { font-size: 1.125rem; }
+h5 { font-size: 1rem; }
+h6 { font-size: 0.875rem; }
+p, td, li, th, label { font-size: 0.8125rem; }
+small { font-size: 0.75rem; }
+
+/* Card design */
+.card {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+}
+
+.card-body {
+    padding: 1.25rem;
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+}
+
+.small-chart {
+    height: 250px;
+}
+
+.metric-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1.25rem;
+    border: 1px solid #f0f0f0;
+    transition: transform 0.2s ease;
+}
+
+.metric-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.metric-value {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #2a2a2a;
+    margin-bottom: 0.25rem;
+    line-height: 1;
+}
+
+.metric-label {
+    font-size: 0.75rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+}
+
+.metric-change {
+    font-size: 0.6875rem;
+    padding: 0.125rem 0.375rem;
+    border-radius: 3px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.metric-change.positive {
+    background: rgba(40, 199, 111, 0.1);
+    color: #28c76f;
+}
+
+.metric-change.negative {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+}
+
+/* Filter bar */
+.filter-bar {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid #f0f0f0;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.filter-input {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8125rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    min-width: 150px;
+}
+
+.filter-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+}
+
+/* Chart tabs */
+.chart-tabs {
+    display: flex;
+    border-bottom: 1px solid #f0f0f0;
+    margin-bottom: 1rem;
+}
+
+.chart-tab {
+    padding: 0.5rem 1rem;
+    font-size: 0.8125rem;
+    color: #6c757d;
+    background: none;
+    border: none;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.chart-tab:hover {
+    color: #495057;
+}
+
+.chart-tab.active {
+    color: #667eea;
+    border-bottom-color: #667eea;
+    font-weight: 500;
+}
+
+/* Responsive grid */
+.chart-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .card {
+        background: #2d2d2d;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+    }
+    
+    .metric-card {
+        background: #3d3d3d;
+        border-color: #404040;
+    }
+    
+    .metric-value {
+        color: #ffffff;
+    }
+    
+    .filter-bar {
+        background: #3d3d3d;
+        border-color: #404040;
+    }
+    
+    .filter-input {
+        background: #4d4d4d;
+        border-color: #505050;
+        color: #e0e0e0;
+    }
+}
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="content-wrapper">
-  <div class="page-header">
-    <h3 class="page-title">Reports Dashboard</h3>
+<div class="page-header">
+    <h3 class="page-title">Analytics Dashboard</h3>
     <nav aria-label="breadcrumb">
-      <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
-        <li class="breadcrumb-item active">Reports</li>
-      </ol>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item active">Analytics</li>
+        </ol>
     </nav>
-  </div>
+</div>
 
-  <div class="row">
-    <!-- Enrollment Reports -->
-    <div class="col-md-6">
-      <div class="card">
-        <div class="card-body">
-          <div class="card-header">
-            <h4>
-              <i class="bi bi-people"></i>
-              Enrollment Reports
-            </h4>
-          </div>
-
-          <div class="report-list">
-            <div class="report-item">
-              <div class="report-icon">
-                <i class="bi bi-bar-chart"></i>
-              </div>
-              <div class="report-info">
-                <div class="report-title">Monthly Enrollment Summary</div>
-                <div class="report-description">Participant enrollment trends by month</div>
-              </div>
-              <div class="report-actions">
-                <button class="btn btn-sm btn-primary">
-                  <i class="bi bi-eye"></i>
-                  View
-                </button>
-                <button class="btn btn-sm btn-outline-secondary">
-                  <i class="bi bi-download"></i>
-                  Export
-                </button>
-              </div>
-            </div>
-
-            <div class="report-item">
-              <div class="report-icon">
-                <i class="bi bi-graph-up"></i>
-              </div>
-              <div class="report-info">
-                <div class="report-title">Enrollment by Study</div>
-                <div class="report-description">Breakdown of participants across all studies</div>
-              </div>
-              <div class="report-actions">
-                <button class="btn btn-sm btn-primary">
-                  <i class="bi bi-eye"></i>
-                  View
-                </button>
-                <button class="btn btn-sm btn-outline-secondary">
-                  <i class="bi bi-download"></i>
-                  Export
-                </button>
-              </div>
-            </div>
-
-            <div class="report-item">
-              <div class="report-icon">
-                <i class="bi bi-pie-chart"></i>
-              </div>
-              <div class="report-info">
-                <div class="report-title">Demographics Report</div>
-                <div class="report-description">Participant demographics and distribution</div>
-              </div>
-              <div class="report-actions">
-                <button class="btn btn-sm btn-primary">
-                  <i class="bi bi-eye"></i>
-                  View
-                </button>
-                <button class="btn btn-sm btn-outline-secondary">
-                  <i class="bi bi-download"></i>
-                  Export
-                </button>
-              </div>
-            </div>
-          </div>
+<!-- Filter Bar -->
+<div class="filter-bar">
+    <form method="get" class="filter-group">
+        <div>
+            <label style="font-size: 0.75rem; color: #6c757d; margin-bottom: 0.25rem; display: block;">Start Date</label>
+            <input type="date" name="start_date" class="filter-input" value="{{ start_date }}">
         </div>
-      </div>
-    </div>
-
-    <!-- SUSAR Reports -->
-    <div class="col-md-6">
-      <div class="card">
-        <div class="card-body">
-          <div class="card-header">
-            <h4>
-              <i class="bi bi-exclamation-triangle"></i>
-              SUSAR Reports
-            </h4>
-          </div>
-
-          <div class="report-list">
-            <div class="report-item">
-              <div class="report-icon">
-                <i class="bi bi-clipboard-data"></i>
-              </div>
-              <div class="report-info">
-                <div class="report-title">SUSAR Summary Report</div>
-                <div class="report-description">Overview of all reported SUSARs</div>
-              </div>
-              <div class="report-actions">
-                <button class="btn btn-sm btn-primary">
-                  <i class="bi bi-eye"></i>
-                  View
-                </button>
-                <button class="btn btn-sm btn-outline-secondary">
-                  <i class="bi bi-download"></i>
-                  Export
-                </button>
-              </div>
-            </div>
-
-            <div class="report-item">
-              <div class="report-icon">
-                <i class="bi bi-activity"></i>
-              </div>
-              <div class="report-info">
-                <div class="report-title">Severity Analysis</div>
-                <div class="report-description">SUSAR events by severity level</div>
-              </div>
-              <div class="report-actions">
-                <button class="btn btn-sm btn-primary">
-                  <i class="bi bi-eye"></i>
-                  View
-                </button>
-                <button class="btn btn-sm btn-outline-secondary">
-                  <i class="bi bi-download"></i>
-                  Export
-                </button>
-              </div>
-            </div>
-
-            <div class="report-item">
-              <div class="report-icon">
-                <i class="bi bi-clock-history"></i>
-              </div>
-              <div class="report-info">
-                <div class="report-title">Pending Follow-ups</div>
-                <div class="report-description">SUSARs requiring follow-up action</div>
-              </div>
-              <div class="report-actions">
-                <button class="btn btn-sm btn-primary">
-                  <i class="bi bi-eye"></i>
-                  View
-                </button>
-                <button class="btn btn-sm btn-outline-secondary">
-                  <i class="bi bi-download"></i>
-                  Export
-                </button>
-              </div>
-            </div>
-          </div>
+        
+        <div>
+            <label style="font-size: 0.75rem; color: #6c757d; margin-bottom: 0.25rem; display: block;">End Date</label>
+            <input type="date" name="end_date" class="filter-input" value="{{ end_date }}">
         </div>
-      </div>
-    </div>
-
-    <!-- Study Reports -->
-    <div class="col-md-6">
-      <div class="card">
-        <div class="card-body">
-          <div class="card-header">
-            <h4>
-              <i class="bi bi-flask"></i>
-              Study Reports
-            </h4>
-          </div>
-
-          <div class="report-list">
-            <div class="report-item">
-              <div class="report-icon">
-                <i class="bi bi-list-check"></i>
-              </div>
-              <div class="report-info">
-                <div class="report-title">Active Studies Overview</div>
-                <div class="report-description">Status of all active clinical studies</div>
-              </div>
-              <div class="report-actions">
-                <button class="btn btn-sm btn-primary">
-                  <i class="bi bi-eye"></i>
-                  View
-                </button>
-                <button class="btn btn-sm btn-outline-secondary">
-                  <i class="bi bi-download"></i>
-                  Export
-                </button>
-              </div>
-            </div>
-
-            <div class="report-item">
-              <div class="report-icon">
-                <i class="bi bi-calendar-check"></i>
-              </div>
-              <div class="report-info">
-                <div class="report-title">Study Timeline Report</div>
-                <div class="report-description">Study start/end dates and milestones</div>
-              </div>
-              <div class="report-actions">
-                <button class="btn btn-sm btn-primary">
-                  <i class="bi bi-eye"></i>
-                  View
-                </button>
-                <button class="btn btn-sm btn-outline-secondary">
-                  <i class="bi bi-download"></i>
-                  Export
-                </button>
-              </div>
-            </div>
-
-            <div class="report-item">
-              <div class="report-icon">
-                <i class="bi bi-bullseye"></i>
-              </div>
-              <div class="report-info">
-                <div class="report-title">Enrollment vs Target</div>
-                <div class="report-description">Actual enrollment compared to targets</div>
-              </div>
-              <div class="report-actions">
-                <button class="btn btn-sm btn-primary">
-                  <i class="bi bi-eye"></i>
-                  View
-                </button>
-                <button class="btn btn-sm btn-outline-secondary">
-                  <i class="bi bi-download"></i>
-                  Export
-                </button>
-              </div>
-            </div>
-          </div>
+        
+        <div>
+            <label style="font-size: 0.75rem; color: #6c757d; margin-bottom: 0.25rem; display: block;">Study</label>
+            <select name="study" class="filter-input">
+                <option value="">All Studies</option>
+                {% for study in studies %}
+                <option value="{{ study.id }}" {% if study_id == study.id|stringformat:"s" %}selected{% endif %}>
+                    {{ study.code }} - {{ study.name|truncatechars:20 }}
+                </option>
+                {% endfor %}
+            </select>
         </div>
-      </div>
-    </div>
-
-    <!-- Staff Reports -->
-    <div class="col-md-6">
-      <div class="card">
-        <div class="card-body">
-          <div class="card-header">
-            <h4>
-              <i class="bi bi-person-badge"></i>
-              Staff Reports
-            </h4>
-          </div>
-
-          <div class="report-list">
-            <div class="report-item">
-              <div class="report-icon">
-                <i class="bi bi-calendar3"></i>
-              </div>
-              <div class="report-info">
-                <div class="report-title">Attendance Summary</div>
-                <div class="report-description">Staff attendance and login statistics</div>
-              </div>
-              <div class="report-actions">
-                <button class="btn btn-sm btn-primary">
-                  <i class="bi bi-eye"></i>
-                  View
-                </button>
-                <button class="btn btn-sm btn-outline-secondary">
-                  <i class="bi bi-download"></i>
-                  Export
-                </button>
-              </div>
-            </div>
-
-            <div class="report-item">
-              <div class="report-icon">
-                <i class="bi bi-activity"></i>
-              </div>
-              <div class="report-info">
-                <div class="report-title">Staff Activity Report</div>
-                <div class="report-description">User actions and contributions</div>
-              </div>
-              <div class="report-actions">
-                <button class="btn btn-sm btn-primary">
-                  <i class="bi bi-eye"></i>
-                  View
-                </button>
-                <button class="btn btn-sm btn-outline-secondary">
-                  <i class="bi bi-download"></i>
-                  Export
-                </button>
-              </div>
-            </div>
-
-            <div class="report-item">
-              <div class="report-icon">
-                <i class="bi bi-person-check"></i>
-              </div>
-              <div class="report-info">
-                <div class="report-title">Role Distribution</div>
-                <div class="report-description">Breakdown of staff by role</div>
-              </div>
-              <div class="report-actions">
-                <button class="btn btn-sm btn-primary">
-                  <i class="bi bi-eye"></i>
-                  View
-                </button>
-                <button class="btn btn-sm btn-outline-secondary">
-                  <i class="bi bi-download"></i>
-                  Export
-                </button>
-              </div>
-            </div>
-          </div>
+        
+        <div style="margin-top: 1.75rem;">
+            <button type="submit" class="btn btn-primary btn-sm" style="padding: 0.5rem 1.25rem;">
+                <i class="bi bi-funnel"></i>
+                Apply Filters
+            </button>
+            <a href="{% url 'reports_index' %}" class="btn btn-secondary btn-sm" style="padding: 0.5rem 1.25rem;">
+                <i class="bi bi-x-circle"></i>
+                Clear
+            </a>
         </div>
-      </div>
+    </form>
+</div>
+
+<!-- Summary Metrics -->
+<div class="chart-grid">
+    <div class="metric-card">
+        <div class="metric-label">
+            <i class="bi bi-people me-1"></i>
+            Total Participants
+        </div>
+        <div class="metric-value">{{ total_participants }}</div>
+        <div class="metric-change {% if participant_growth_rate >= 0 %}positive{% else %}negative{% endif %}">
+            <i class="bi bi-arrow-{% if participant_growth_rate >= 0 %}up{% else %}down{% endif %}"></i>
+            {{ participant_growth_rate }}%
+        </div>
     </div>
-  </div>
+    
+    <div class="metric-card">
+        <div class="metric-label">
+            <i class="bi bi-clipboard-pulse me-1"></i>
+            SUSAR Reports
+        </div>
+        <div class="metric-value">{{ total_susars }}</div>
+        <div class="metric-change positive">
+            <i class="bi bi-check-circle"></i>
+            {{ susar_resolution_rate }}% Resolved
+        </div>
+    </div>
+    
+    <div class="metric-card">
+        <div class="metric-label">
+            <i class="bi bi-flask me-1"></i>
+            Avg Study Duration
+        </div>
+        <div class="metric-value">{{ avg_study_duration }} days</div>
+        <small class="text-muted">Average active period</small>
+    </div>
+    
+    <div class="metric-card">
+        <div class="metric-label">
+            <i class="bi bi-calendar-check me-1"></i>
+            Follow-up Compliance
+        </div>
+        <div class="metric-value">{{ follow_up_compliance }}%</div>
+        <small class="text-muted">SUSAR follow-up completion</small>
+    </div>
+</div>
 
-  <!-- Custom Report Generator -->
-  <div class="row">
-    <div class="col-12">
-      <div class="card">
-        <div class="card-body">
-          <div class="card-header">
-            <h4>
-              <i class="bi bi-sliders"></i>
-              Custom Report Generator
-            </h4>
-          </div>
-
-          <form method="post" class="custom-report-form">
-            {% csrf_token %}
-            
-            <div class="row">
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label>Report Type</label>
-                  <select class="form-control" name="report_type">
-                    <option value="">Select type...</option>
-                    <option value="enrollment">Enrollment</option>
-                    <option value="susar">SUSAR</option>
-                    <option value="study">Study</option>
-                    <option value="staff">Staff</option>
-                  </select>
+<!-- Charts Grid -->
+<div class="row">
+    <!-- Enrollment Trends -->
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-graph-up me-2"></i>
+                        Participant Enrollment Trends
+                    </h5>
+                    <div class="chart-tabs">
+                        <button class="chart-tab active" onclick="showChart('daily', this)">Daily</button>
+                        <button class="chart-tab" onclick="showChart('monthly', this)">Monthly</button>
+                    </div>
                 </div>
-              </div>
-
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label>Date From</label>
-                  <input type="date" class="form-control" name="date_from">
+                <div class="chart-container">
+                    <canvas id="enrollmentChart"></canvas>
                 </div>
-              </div>
-
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label>Date To</label>
-                  <input type="date" class="form-control" name="date_to">
-                </div>
-              </div>
-
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label>Format</label>
-                  <select class="form-control" name="format">
-                    <option value="pdf">PDF</option>
-                    <option value="excel">Excel</option>
-                    <option value="csv">CSV</option>
-                  </select>
-                </div>
-              </div>
             </div>
-
-            <div class="form-actions">
-              <button type="submit" class="btn btn-primary">
-                <i class="bi bi-file-earmark-text"></i>
-                Generate Report
-              </button>
-            </div>
-          </form>
         </div>
-      </div>
     </div>
-  </div>
+    
+    <!-- Status Distribution -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title mb-3">
+                    <i class="bi bi-pie-chart me-2"></i>
+                    Participant Status
+                </h5>
+                <div class="chart-container small-chart">
+                    <canvas id="statusChart"></canvas>
+                </div>
+                <div id="status-legend" class="mt-3"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <!-- Study Distribution -->
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title mb-3">
+                    <i class="bi bi-bar-chart me-2"></i>
+                    Study-wise Distribution
+                </h5>
+                <div class="chart-container small-chart">
+                    <canvas id="studyChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- SUSAR Analysis -->
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title mb-3">
+                    <i class="bi bi-activity me-2"></i>
+                    SUSAR Severity Analysis
+                </h5>
+                <div class="chart-container small-chart">
+                    <canvas id="susarChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <!-- Gender & Age Distribution -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title mb-3">
+                    <i class="bi bi-gender-ambiguous me-2"></i>
+                    Gender Distribution
+                </h5>
+                <div class="chart-container" style="height: 200px;">
+                    <canvas id="genderChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Age Distribution -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title mb-3">
+                    <i class="bi bi-calendar me-2"></i>
+                    Age Distribution
+                </h5>
+                <div class="chart-container" style="height: 200px;">
+                    <canvas id="ageChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Completion Rates -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title mb-3">
+                    <i class="bi bi-flag me-2"></i>
+                    Study Completion Rates
+                </h5>
+                <div class="chart-container" style="height: 200px;">
+                    <canvas id="completionChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Data Tables -->
+<div class="row mt-4">
+    <!-- Top Studies -->
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title mb-3">
+                    <i class="bi bi-trophy me-2"></i>
+                    Top Studies by Enrollment
+                </h5>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Study</th>
+                                <th>Code</th>
+                                <th>Total</th>
+                                <th>Active</th>
+                                <th>Completed</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for study in top_studies %}
+                            <tr>
+                                <td>{{ study.name|truncatechars:25 }}</td>
+                                <td><code>{{ study.code }}</code></td>
+                                <td>{{ study.participant_count }}</td>
+                                <td>{{ study.active_count }}</td>
+                                <td>{{ study.completed_count }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent SUSARs -->
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title mb-3">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    Recent SUSAR Reports
+                </h5>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>SUSAR ID</th>
+                                <th>Participant</th>
+                                <th>Severity</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for susar in recent_susars %}
+                            <tr>
+                                <td><code>{{ susar.susar_id }}</code></td>
+                                <td>{{ susar.participant.get_full_name|truncatechars:15 }}</td>
+                                <td>
+                                    <span class="badge 
+                                        {% if susar.severity == 'mild' %}badge-info
+                                        {% elif susar.severity == 'moderate' %}badge-warning
+                                        {% elif susar.severity == 'severe' %}badge-danger
+                                        {% else %}badge-dark{% endif %}">
+                                        {{ susar.get_severity_display }}
+                                    </span>
+                                </td>
+                                <td>{{ susar.onset_date|date:"M d" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Export Options -->
+<div class="card mt-4">
+    <div class="card-body">
+        <h5 class="card-title mb-0">
+            <i class="bi bi-download me-2"></i>
+            Export Reports
+        </h5>
+        <p class="text-muted mb-3" style="font-size: 0.8125rem;">Download detailed reports for analysis</p>
+        
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-outline-primary btn-sm" onclick="exportChartData()">
+                <i class="bi bi-file-earmark-spreadsheet"></i>
+                Export Chart Data
+            </button>
+            <button type="button" class="btn btn-outline-primary btn-sm" onclick="exportParticipants()">
+                <i class="bi bi-people"></i>
+                Export Participants
+            </button>
+            <button type="button" class="btn btn-outline-primary btn-sm" onclick="exportSUSARs()">
+                <i class="bi bi-clipboard-pulse"></i>
+                Export SUSARs
+            </button>
+            <button type="button" class="btn btn-outline-primary btn-sm" onclick="printDashboard()">
+                <i class="bi bi-printer"></i>
+                Print Dashboard
+            </button>
+        </div>
+    </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+
+<script>
+// Parse JSON data from Django context
+const dailyEnrollment = JSON.parse('{{ daily_enrollment|escapejs }}');
+const monthlyEnrollment = JSON.parse('{{ monthly_enrollment|escapejs }}');
+const statusDistribution = JSON.parse('{{ status_distribution|escapejs }}');
+const studyDistribution = JSON.parse('{{ study_distribution|escapejs }}');
+const genderDistribution = JSON.parse('{{ gender_distribution|escapejs }}');
+const ageDistribution = JSON.parse('{{ age_distribution|escapejs }}');
+const susarSeverity = JSON.parse('{{ susar_severity_distribution|escapejs }}');
+const studyCompletion = JSON.parse('{{ study_completion|escapejs }}');
+
+// Chart instances
+let enrollmentChart, statusChart, studyChart, susarChart, genderChart, ageChart, completionChart;
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize all charts
+    initEnrollmentChart();
+    initStatusChart();
+    initStudyChart();
+    initSUSARChart();
+    initGenderChart();
+    initAgeChart();
+    initCompletionChart();
+    
+    // Initialize tooltips
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltipTriggerList.forEach(tooltipTriggerEl => {
+        new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+
+function showChart(type, element) {
+    // Update active tab
+    document.querySelectorAll('.chart-tab').forEach(tab => tab.classList.remove('active'));
+    element.classList.add('active');
+    
+    // Update chart data
+    if (enrollmentChart) {
+        enrollmentChart.destroy();
+    }
+    
+    if (type === 'daily') {
+        initEnrollmentChart('daily');
+    } else {
+        initEnrollmentChart('monthly');
+    }
+}
+
+function initEnrollmentChart(type = 'daily') {
+    const ctx = document.getElementById('enrollmentChart').getContext('2d');
+    const isDaily = type === 'daily';
+    
+    const data = isDaily ? dailyEnrollment : monthlyEnrollment;
+    const labels = data.map(item => isDaily ? item.date : item.month);
+    const values = data.map(item => item.count);
+    
+    enrollmentChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: isDaily ? 'Daily Enrollment' : 'Monthly Enrollment',
+                data: values,
+                borderColor: '#667eea',
+                backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#667eea',
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
+                pointRadius: 3,
+                pointHoverRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    },
+                    ticks: {
+                        stepSize: 1
+                    }
+                },
+                x: {
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    },
+                    ticks: {
+                        maxRotation: 45
+                    }
+                }
+            }
+        }
+    });
+}
+
+function initStatusChart() {
+    const ctx = document.getElementById('statusChart').getContext('2d');
+    
+    const labels = statusDistribution.map(item => {
+        const statusMap = {
+            'active': 'Active',
+            'completed': 'Completed',
+            'screening': 'Screening',
+            'lost': 'Lost',
+            'withdrawn': 'Withdrawn'
+        };
+        return statusMap[item.status] || item.status;
+    });
+    
+    const data = statusDistribution.map(item => item.count);
+    const colors = ['#28c76f', '#00a7ff', '#ffab00', '#dc3545', '#6c757d'];
+    
+    statusChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: colors,
+                borderColor: 'white',
+                borderWidth: 2,
+                spacing: 3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '65%',
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.raw || 0;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = Math.round((value / total) * 100);
+                            return `${label}: ${value} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+    
+    // Generate legend
+    const legend = document.getElementById('status-legend');
+    let legendHTML = '<div class="d-flex flex-wrap gap-2">';
+    labels.forEach((label, index) => {
+        legendHTML += `
+            <div class="d-flex align-items-center me-3">
+                <span class="badge me-2" style="background-color: ${colors[index]}; width: 12px; height: 12px; border-radius: 2px;"></span>
+                <span style="font-size: 0.75rem;">${label}: ${data[index]}</span>
+            </div>
+        `;
+    });
+    legendHTML += '</div>';
+    legend.innerHTML = legendHTML;
+}
+
+function initStudyChart() {
+    const ctx = document.getElementById('studyChart').getContext('2d');
+    
+    const labels = studyDistribution.slice(0, 8).map(item => item.code);
+    const data = studyDistribution.slice(0, 8).map(item => item.total);
+    
+    studyChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Participants',
+                data: data,
+                backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                borderColor: '#667eea',
+                borderWidth: 1,
+                borderRadius: 4,
+                borderSkipped: false
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    },
+                    ticks: {
+                        stepSize: 1
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+}
+
+function initSUSARChart() {
+    const ctx = document.getElementById('susarChart').getContext('2d');
+    
+    const labels = susarSeverity.map(item => {
+        const severityMap = {
+            'mild': 'Mild',
+            'moderate': 'Moderate',
+            'severe': 'Severe',
+            'life_threatening': 'Life Threatening',
+            'fatal': 'Fatal'
+        };
+        return severityMap[item.severity] || item.severity;
+    });
+    
+    const data = susarSeverity.map(item => item.count);
+    
+    susarChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: [
+                    'rgba(0, 167, 255, 0.8)',    // Mild
+                    'rgba(255, 171, 0, 0.8)',    // Moderate
+                    'rgba(255, 71, 87, 0.8)',    // Severe
+                    'rgba(108, 117, 125, 0.8)',  // Life Threatening
+                    'rgba(33, 37, 41, 0.8)'      // Fatal
+                ],
+                borderColor: 'white',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        font: {
+                            size: 10
+                        },
+                        padding: 15
+                    }
+                }
+            }
+        }
+    });
+}
+
+function initGenderChart() {
+    const ctx = document.getElementById('genderChart').getContext('2d');
+    
+    const labels = genderDistribution.map(item => {
+        const genderMap = {
+            'M': 'Male',
+            'F': 'Female',
+            'O': 'Other',
+            'U': 'Not Specified'
+        };
+        return genderMap[item.gender] || item.gender;
+    });
+    
+    const data = genderDistribution.map(item => item.count);
+    
+    genderChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: ['#667eea', '#ff4757', '#00d25b', '#ffab00'],
+                borderColor: 'white',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '70%',
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        font: {
+                            size: 9
+                        },
+                        boxWidth: 10
+                    }
+                }
+            }
+        }
+    });
+}
+
+function initAgeChart() {
+    const ctx = document.getElementById('ageChart').getContext('2d');
+    
+    const labels = ageDistribution.map(item => item.label);
+    const data = ageDistribution.map(item => item.count);
+    
+    ageChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Participants',
+                data: data,
+                backgroundColor: 'rgba(0, 210, 91, 0.8)',
+                borderColor: '#00d25b',
+                borderWidth: 1,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+}
+
+function initCompletionChart() {
+    const ctx = document.getElementById('completionChart').getContext('2d');
+    
+    const labels = studyCompletion.slice(0, 5).map(item => item.code);
+    const data = studyCompletion.slice(0, 5).map(item => item.completion_rate);
+    
+    completionChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Completion Rate %',
+                data: data,
+                borderColor: '#764ba2',
+                backgroundColor: 'rgba(118, 75, 162, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return value + '%';
+                        }
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Export functions
+function exportChartData() {
+    const data = {
+        enrollment: dailyEnrollment,
+        status: statusDistribution,
+        studies: studyDistribution,
+        gender: genderDistribution,
+        age: ageDistribution,
+        susar: susarSeverity,
+        completion: studyCompletion
+    };
+    
+    const dataStr = JSON.stringify(data, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `clintrack-analytics-${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function exportParticipants() {
+    alert('Exporting participant data... This would trigger a CSV download in production.');
+    // In production, this would make an API call to generate and download CSV
+}
+
+function exportSUSARs() {
+    alert('Exporting SUSAR data... This would trigger a CSV download in production.');
+    // In production, this would make an API call to generate and download CSV
+}
+
+function printDashboard() {
+    window.print();
+}
+</script>
+
+<!-- Bootstrap Icons -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
 {% endblock %}

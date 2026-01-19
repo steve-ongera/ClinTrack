@@ -1018,14 +1018,304 @@ def audit_logs(request):
 # ============================================
 # REPORTS VIEWS
 # ============================================
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.utils import timezone
+from django.db.models import Q, Count, Avg, F, ExpressionWrapper, DurationField
+from django.db.models.functions import TruncMonth
+from datetime import timedelta
+import json
 
 @login_required
 def reports_index(request):
-    """Reports dashboard"""
+    """Enhanced Reports dashboard with atomic analysis graphs"""
     if request.user.role not in ['admin', 'coordinator']:
         messages.error(request, 'You do not have permission to view reports.')
         return redirect('dashboard')
     
-    context = {}
+    # Get date filters from request
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    study_id = request.GET.get('study')
+    
+    # Set default date range (last 6 months)
+    if not start_date:
+        start_date = (timezone.now() - timedelta(days=180)).strftime('%Y-%m-%d')
+    if not end_date:
+        end_date = timezone.now().strftime('%Y-%m-%d')
+    
+    # Convert to datetime objects
+    start_datetime = timezone.datetime.strptime(start_date, '%Y-%m-%d')
+    end_datetime = timezone.datetime.strptime(end_date, '%Y-%m-%d') + timedelta(days=1)
+    
+    # Base querysets with filters
+    participants_qs = Participant.objects.filter(
+        created_at__gte=start_datetime,
+        created_at__lte=end_datetime
+    )
+    
+    susars_qs = SUSAR.objects.filter(
+        created_at__gte=start_datetime,
+        created_at__lte=end_datetime
+    )
+    
+    # Filter by study if specified
+    if study_id:
+        participants_qs = participants_qs.filter(study_id=study_id)
+        susars_qs = susars_qs.filter(participant__study_id=study_id)
+    
+    # 1. PARTICIPANT ENROLLMENT TRENDS
+    # Daily enrollment
+    daily_enrollment = []
+    for i in range((end_datetime - start_datetime).days):
+        date = start_datetime + timedelta(days=i)
+        count = Participant.objects.filter(enrollment_date=date.date()).count()
+        daily_enrollment.append({
+            'date': date.strftime('%Y-%m-%d'),
+            'count': count
+        })
+    
+    # Monthly enrollment
+    monthly_enrollment = Participant.objects.filter(
+        enrollment_date__gte=start_datetime.date(),
+        enrollment_date__lte=end_datetime.date()
+    ).annotate(
+        month=TruncMonth('enrollment_date')
+    ).values('month').annotate(
+        count=Count('id')
+    ).order_by('month')
+    
+    # 2. PARTICIPANT STATUS DISTRIBUTION
+    status_distribution = Participant.objects.values('status').annotate(
+        count=Count('id')
+    ).order_by('-count')
+    
+    # 3. STUDY-WISE PARTICIPANT DISTRIBUTION
+    study_distribution = Study.objects.annotate(
+        participant_count=Count('participants'),
+        active_count=Count('participants', filter=Q(participants__status='active')),
+        completed_count=Count('participants', filter=Q(participants__status='completed'))
+    ).order_by('-participant_count')
+    
+    # 4. GENDER DISTRIBUTION
+    gender_distribution = Participant.objects.values('gender').annotate(
+        count=Count('id')
+    )
+    
+    # 5. AGE DISTRIBUTION
+    age_distribution = []
+    age_ranges = [
+        ('<18', Q(date_of_birth__gte=timezone.now() - timedelta(days=18*365))),
+        ('18-30', Q(date_of_birth__lt=timezone.now() - timedelta(days=18*365)) & 
+                  Q(date_of_birth__gte=timezone.now() - timedelta(days=30*365))),
+        ('31-45', Q(date_of_birth__lt=timezone.now() - timedelta(days=30*365)) & 
+                  Q(date_of_birth__gte=timezone.now() - timedelta(days=45*365))),
+        ('46-60', Q(date_of_birth__lt=timezone.now() - timedelta(days=45*365)) & 
+                  Q(date_of_birth__gte=timezone.now() - timedelta(days=60*365))),
+        ('>60', Q(date_of_birth__lt=timezone.now() - timedelta(days=60*365)))
+    ]
+    
+    for label, query in age_ranges:
+        count = Participant.objects.filter(query).count()
+        age_distribution.append({'label': label, 'count': count})
+    
+    # 6. SUSAR ANALYSIS
+    susar_severity_distribution = SUSAR.objects.values('severity').annotate(
+        count=Count('id')
+    ).order_by('-count')
+    
+    susar_outcome_distribution = SUSAR.objects.values('outcome').annotate(
+        count=Count('id')
+    ).order_by('-count')
+    
+    # Monthly SUSAR trend
+    monthly_susar_trend = SUSAR.objects.filter(
+        created_at__gte=start_datetime,
+        created_at__lte=end_datetime
+    ).annotate(
+        month=TruncMonth('created_at')
+    ).values('month').annotate(
+        count=Count('id')
+    ).order_by('month')
+    
+    # 7. ATTENDANCE ANALYSIS
+    staff_attendance = StaffAttendance.objects.filter(
+        login_time__gte=start_datetime,
+        login_time__lte=end_datetime
+    ).values('staff__username').annotate(
+        login_count=Count('id'),
+        avg_duration=Avg(F('logout_time') - F('login_time'))
+    ).order_by('-login_count')[:10]
+    
+    # 8. STUDY COMPLETION RATES
+    study_completion = []
+    for study in Study.objects.filter(is_active=True):
+        total = study.participants.count()
+        completed = study.participants.filter(status='completed').count()
+        if total > 0:
+            completion_rate = (completed / total) * 100
+            study_completion.append({
+                'study': study.name,
+                'code': study.code,
+                'total': total,
+                'completed': completed,
+                'completion_rate': round(completion_rate, 1)
+            })
+    
+    # 9. LOST TO FOLLOW-UP ANALYSIS
+    # Calculate days since enrollment for lost participants
+    lost_analysis = Participant.objects.filter(status='lost').values(
+        'study__name'
+    ).annotate(
+        count=Count('id')
+    ).order_by('-count')
+    
+    # Calculate average enrollment days separately for each study
+    for item in lost_analysis:
+        study_name = item['study__name']
+        lost_participants = Participant.objects.filter(
+            status='lost',
+            study__name=study_name
+        )
+        
+        # Calculate average days since enrollment
+        total_days = 0
+        participant_count = 0
+        for participant in lost_participants:
+            if participant.enrollment_date:
+                days_diff = (timezone.now().date() - participant.enrollment_date).days
+                total_days += days_diff
+                participant_count += 1
+        
+        if participant_count > 0:
+            item['avg_enrollment_days'] = round(total_days / participant_count, 1)
+        else:
+            item['avg_enrollment_days'] = 0
+    
+    # 10. AUDIT LOG SUMMARY
+    audit_summary = AuditLog.objects.filter(
+        timestamp__gte=start_datetime,
+        timestamp__lte=end_datetime
+    ).values('action').annotate(
+        count=Count('id')
+    ).order_by('-count')
+    
+    # Prepare data for charts
+    context = {
+        # Filter parameters
+        'start_date': start_date,
+        'end_date': end_date,
+        'study_id': study_id,
+        'studies': Study.objects.all(),
+        
+        # Chart data
+        'daily_enrollment': json.dumps(daily_enrollment),
+        'monthly_enrollment': json.dumps(list(monthly_enrollment), default=str),
+        'status_distribution': json.dumps(list(status_distribution)),
+        'study_distribution': json.dumps([
+            {
+                'name': study.name,
+                'code': study.code,
+                'total': study.participant_count,
+                'active': study.active_count,
+                'completed': study.completed_count
+            } for study in study_distribution
+        ]),
+        'gender_distribution': json.dumps(list(gender_distribution)),
+        'age_distribution': json.dumps(age_distribution),
+        'susar_severity_distribution': json.dumps(list(susar_severity_distribution)),
+        'susar_outcome_distribution': json.dumps(list(susar_outcome_distribution)),
+        'monthly_susar_trend': json.dumps(list(monthly_susar_trend), default=str),
+        'staff_attendance': json.dumps([
+            {
+                'staff': item['staff__username'],
+                'login_count': item['login_count'],
+                'avg_duration': item['avg_duration'].total_seconds() / 3600 if item['avg_duration'] else 0
+            } for item in staff_attendance
+        ]),
+        'study_completion': json.dumps(study_completion),
+        'lost_analysis': json.dumps(list(lost_analysis), default=str),
+        'audit_summary': json.dumps(list(audit_summary)),
+        
+        # Summary statistics
+        'total_participants': participants_qs.count(),
+        'total_susars': susars_qs.count(),
+        'avg_participants_per_study': round(participants_qs.count() / max(Study.objects.count(), 1), 1),
+        'participant_growth_rate': calculate_growth_rate(participants_qs, 'enrollment_date'),
+        'susar_resolution_rate': calculate_susar_resolution_rate(susars_qs),
+        'avg_study_duration': calculate_avg_study_duration(),
+        'follow_up_compliance': calculate_follow_up_compliance(susars_qs),
+        
+        # Data for tables
+        'top_studies': study_distribution[:5],
+        'recent_susars': SUSAR.objects.order_by('-onset_date')[:10],
+        'recent_participants': Participant.objects.order_by('-created_at')[:10],
+        'staff_activity': staff_attendance,
+    }
+    
     return render(request, 'reports/reports_index.html', context)
 
+
+# Helper functions for calculations
+def calculate_growth_rate(queryset, date_field):
+    """Calculate month-over-month growth rate"""
+    current_month = timezone.now().month
+    previous_month = current_month - 1 if current_month > 1 else 12
+    
+    current_count = queryset.filter(
+        **{f'{date_field}__month': current_month}
+    ).count()
+    
+    previous_count = queryset.filter(
+        **{f'{date_field}__month': previous_month}
+    ).count()
+    
+    if previous_count > 0:
+        return round(((current_count - previous_count) / previous_count) * 100, 1)
+    return 0.0
+
+def calculate_susar_resolution_rate(susars_qs):
+    """Calculate SUSAR resolution rate"""
+    resolved = susars_qs.filter(
+        Q(outcome='recovered') | Q(outcome='recovered_sequelae')
+    ).count()
+    
+    total = susars_qs.count()
+    
+    if total > 0:
+        return round((resolved / total) * 100, 1)
+    return 0.0
+
+def calculate_avg_study_duration():
+    """Calculate average study duration in days"""
+    from django.db.models import Avg
+    from django.db.models.functions import Cast
+    from django.db.models import IntegerField
+    
+    studies = Study.objects.filter(start_date__isnull=False, end_date__isnull=False)
+    
+    total_days = 0
+    count = 0
+    
+    for study in studies:
+        duration = (study.end_date - study.start_date).days
+        total_days += duration
+        count += 1
+    
+    if count > 0:
+        return round(total_days / count, 1)
+    return 0.0
+
+def calculate_follow_up_compliance(susars_qs):
+    """Calculate follow-up compliance rate"""
+    with_follow_up = susars_qs.filter(
+        follow_up_required=True,
+        follow_up_notes__isnull=False
+    ).exclude(follow_up_notes='').count()
+    
+    total_follow_up = susars_qs.filter(follow_up_required=True).count()
+    
+    if total_follow_up > 0:
+        return round((with_follow_up / total_follow_up) * 100, 1)
+    return 0.0
