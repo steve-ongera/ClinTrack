@@ -1,0 +1,218 @@
+<!-- ============================================ -->
+<!-- PARTICIPANT FORM - participants/participant_form.html -->
+<!-- ============================================ -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if participant %}Edit{% else %}Add{% endif %} Participant - ClinTrack{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h3 class="page-title">{% if participant %}Edit Participant{% else %}Add New Participant{% endif %}</h3>
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'participant_list' %}">Participants</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{% if participant %}Edit{% else %}Add{% endif %}</li>
+    </ol>
+  </nav>
+</div>
+
+<div class="row">
+  <div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+      <div class="card-body">
+        <h4 class="card-title">Participant Information</h4>
+        
+        <form method="post" class="forms-sample">
+          {% csrf_token %}
+          
+          {% if form.non_field_errors %}
+          <div class="alert alert-danger">
+            {{ form.non_field_errors }}
+          </div>
+          {% endif %}
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="{{ form.participant_id.id_for_label }}">Participant ID *</label>
+                {{ form.participant_id }}
+                {% if form.participant_id.errors %}
+                <small class="text-danger">{{ form.participant_id.errors.0 }}</small>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="{{ form.study.id_for_label }}">Study *</label>
+                {{ form.study }}
+                {% if form.study.errors %}
+                <small class="text-danger">{{ form.study.errors.0 }}</small>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <h5 class="mt-4 mb-3">Personal Information</h5>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="{{ form.first_name.id_for_label }}">First Name *</label>
+                {{ form.first_name }}
+                {% if form.first_name.errors %}
+                <small class="text-danger">{{ form.first_name.errors.0 }}</small>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="{{ form.last_name.id_for_label }}">Last Name *</label>
+                {{ form.last_name }}
+                {% if form.last_name.errors %}
+                <small class="text-danger">{{ form.last_name.errors.0 }}</small>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="{{ form.date_of_birth.id_for_label }}">Date of Birth</label>
+                {{ form.date_of_birth }}
+                {% if form.date_of_birth.errors %}
+                <small class="text-danger">{{ form.date_of_birth.errors.0 }}</small>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="{{ form.gender.id_for_label }}">Gender</label>
+                {{ form.gender }}
+                {% if form.gender.errors %}
+                <small class="text-danger">{{ form.gender.errors.0 }}</small>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <h5 class="mt-4 mb-3">Contact Information</h5>
+          <div class="row">
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="{{ form.primary_phone.id_for_label }}">Primary Phone *</label>
+                {{ form.primary_phone }}
+                {% if form.primary_phone.errors %}
+                <small class="text-danger">{{ form.primary_phone.errors.0 }}</small>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="{{ form.secondary_phone.id_for_label }}">Secondary Phone</label>
+                {{ form.secondary_phone }}
+                {% if form.secondary_phone.errors %}
+                <small class="text-danger">{{ form.secondary_phone.errors.0 }}</small>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="{{ form.email.id_for_label }}">Email</label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                <small class="text-danger">{{ form.email.errors.0 }}</small>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <h5 class="mt-4 mb-3">Location Information</h5>
+          <div class="row">
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="{{ form.location.id_for_label }}">Location *</label>
+                {{ form.location }}
+                {% if form.location.errors %}
+                <small class="text-danger">{{ form.location.errors.0 }}</small>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="{{ form.sub_location.id_for_label }}">Sub-location</label>
+                {{ form.sub_location }}
+                {% if form.sub_location.errors %}
+                <small class="text-danger">{{ form.sub_location.errors.0 }}</small>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="{{ form.county.id_for_label }}">County</label>
+                {{ form.county }}
+                {% if form.county.errors %}
+                <small class="text-danger">{{ form.county.errors.0 }}</small>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="{{ form.nearest_landmark.id_for_label }}">Nearest Landmark / Directions</label>
+            {{ form.nearest_landmark }}
+            {% if form.nearest_landmark.errors %}
+            <small class="text-danger">{{ form.nearest_landmark.errors.0 }}</small>
+            {% endif %}
+          </div>
+
+          <h5 class="mt-4 mb-3">Study Status</h5>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="{{ form.status.id_for_label }}">Status</label>
+                {{ form.status }}
+                {% if form.status.errors %}
+                <small class="text-danger">{{ form.status.errors.0 }}</small>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="{{ form.enrollment_date.id_for_label }}">Enrollment Date</label>
+                {{ form.enrollment_date }}
+                {% if form.enrollment_date.errors %}
+                <small class="text-danger">{{ form.enrollment_date.errors.0 }}</small>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="{{ form.notes.id_for_label }}">Additional Notes</label>
+            {{ form.notes }}
+            {% if form.notes.errors %}
+            <small class="text-danger">{{ form.notes.errors.0 }}</small>
+            {% endif %}
+          </div>
+
+          <button type="submit" class="btn btn-primary me-2">
+            <i class="mdi mdi-content-save"></i> {% if participant %}Update{% else %}Save{% endif %} Participant
+          </button>
+          <a href="{% if participant %}{% url 'participant_detail' participant.id %}{% else %}{% url 'participant_list' %}{% endif %}" class="btn btn-light">Cancel</a>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

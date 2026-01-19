@@ -1,0 +1,195 @@
+
+<!-- ============================================ -->
+<!-- PARTICIPANT DETAIL - participants/participant_detail.html -->
+<!-- ============================================ -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ participant.participant_id }} - ClinTrack{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h3 class="page-title">Participant Details</h3>
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'participant_list' %}">Participants</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{ participant.participant_id }}</li>
+    </ol>
+  </nav>
+</div>
+
+<div class="row">
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h4 class="card-title mb-0">{{ participant.get_full_name }}</h4>
+          <div>
+            {% if user.role == 'admin' or user.role == 'coordinator' %}
+            <a href="{% url 'participant_update' participant.id %}" class="btn btn-warning btn-sm">
+              <i class="mdi mdi-pencil"></i> Edit
+            </a>
+            {% endif %}
+            {% if user.role == 'admin' %}
+            <a href="{% url 'participant_delete' participant.id %}" class="btn btn-danger btn-sm">
+              <i class="mdi mdi-delete"></i> Delete
+            </a>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <h6 class="text-muted">Personal Information</h6>
+            <table class="table table-borderless">
+              <tr>
+                <td><strong>Participant ID:</strong></td>
+                <td>{{ participant.participant_id }}</td>
+              </tr>
+              <tr>
+                <td><strong>Full Name:</strong></td>
+                <td>{{ participant.get_full_name }}</td>
+              </tr>
+              <tr>
+                <td><strong>Date of Birth:</strong></td>
+                <td>{{ participant.date_of_birth|date:"Y-m-d"|default:"-" }}</td>
+              </tr>
+              <tr>
+                <td><strong>Gender:</strong></td>
+                <td>{{ participant.get_gender_display }}</td>
+              </tr>
+            </table>
+          </div>
+
+          <div class="col-md-6">
+            <h6 class="text-muted">Contact Information</h6>
+            <table class="table table-borderless">
+              <tr>
+                <td><strong>Primary Phone:</strong></td>
+                <td>{{ participant.primary_phone }}</td>
+              </tr>
+              <tr>
+                <td><strong>Secondary Phone:</strong></td>
+                <td>{{ participant.secondary_phone|default:"-" }}</td>
+              </tr>
+              <tr>
+                <td><strong>Email:</strong></td>
+                <td>{{ participant.email|default:"-" }}</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+
+        <hr>
+
+        <div class="row">
+          <div class="col-md-6">
+            <h6 class="text-muted">Location Information</h6>
+            <table class="table table-borderless">
+              <tr>
+                <td><strong>Location:</strong></td>
+                <td>{{ participant.location }}</td>
+              </tr>
+              <tr>
+                <td><strong>Sub-location:</strong></td>
+                <td>{{ participant.sub_location|default:"-" }}</td>
+              </tr>
+              <tr>
+                <td><strong>County:</strong></td>
+                <td>{{ participant.county|default:"-" }}</td>
+              </tr>
+              <tr>
+                <td><strong>Nearest Landmark:</strong></td>
+                <td>{{ participant.nearest_landmark|default:"-" }}</td>
+              </tr>
+            </table>
+          </div>
+
+          <div class="col-md-6">
+            <h6 class="text-muted">Study Information</h6>
+            <table class="table table-borderless">
+              <tr>
+                <td><strong>Study:</strong></td>
+                <td><a href="{% url 'study_detail' participant.study.id %}">{{ participant.study.name }}</a></td>
+              </tr>
+              <tr>
+                <td><strong>Study Code:</strong></td>
+                <td>{{ participant.study.code }}</td>
+              </tr>
+              <tr>
+                <td><strong>Status:</strong></td>
+                <td>
+                  {% if participant.status == 'active' %}
+                  <span class="badge badge-success">Active</span>
+                  {% elif participant.status == 'screening' %}
+                  <span class="badge badge-warning">Screening</span>
+                  {% elif participant.status == 'completed' %}
+                  <span class="badge badge-info">Completed</span>
+                  {% elif participant.status == 'withdrawn' %}
+                  <span class="badge badge-secondary">Withdrawn</span>
+                  {% elif participant.status == 'lost' %}
+                  <span class="badge badge-danger">Lost</span>
+                  {% endif %}
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Enrollment Date:</strong></td>
+                <td>{{ participant.enrollment_date|date:"Y-m-d"|default:"-" }}</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+
+        {% if participant.notes %}
+        <hr>
+        <h6 class="text-muted">Notes</h6>
+        <p>{{ participant.notes }}</p>
+        {% endif %}
+
+        <hr>
+        <div class="row">
+          <div class="col-md-6">
+            <small class="text-muted">Created by: {{ participant.created_by.username|default:"System" }}</small>
+          </div>
+          <div class="col-md-6 text-end">
+            <small class="text-muted">Last updated: {{ participant.updated_at|date:"Y-m-d H:i" }}</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-body">
+        <h4 class="card-title">SUSAR Reports ({{ susars.count }})</h4>
+        {% if susars %}
+        <ul class="list-unstyled">
+          {% for susar in susars %}
+          <li class="mb-3 border-bottom pb-2">
+            <a href="{% url 'susars_detail' susar.id %}"><strong>{{ susar.susar_id }}</strong></a>
+            <br>
+            <small class="text-muted">{{ susar.get_severity_display }}</small>
+            <br>
+            <small>{{ susar.onset_date|date:"Y-m-d" }}</small>
+            {% if susar.follow_up_required %}
+            <span class="badge badge-warning badge-sm">Follow-up Required</span>
+            {% endif %}
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-muted">No SUSAR reports</p>
+        {% endif %}
+        
+        {% if user.role != 'viewer' %}
+        <a href="{% url 'susars_create' %}" class="btn btn-primary btn-sm w-100">
+          <i class="mdi mdi-plus"></i> Report New SUSAR
+        </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,147 @@
+<!-- ============================================ -->
+<!-- PARTICIPANT LIST - participants/participant_list.html -->
+<!-- ============================================ -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Participants - ClinTrack{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h3 class="page-title">Participants</h3>
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Participants</li>
+    </ol>
+  </nav>
+</div>
+
+<div class="row">
+  <div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4 class="card-title mb-0">All Participants ({{ page_obj.paginator.count }})</h4>
+          {% if user.role == 'admin' or user.role == 'coordinator' %}
+          <a href="{% url 'participant_create' %}" class="btn btn-primary btn-sm">
+            <i class="mdi mdi-plus"></i> Add Participant
+          </a>
+          {% endif %}
+        </div>
+
+        <!-- Filter Form -->
+        <form method="get" class="row g-3 mb-4">
+          <div class="col-md-4">
+            <input type="text" name="search" class="form-control" placeholder="Search by ID, Name, Phone" value="{{ search }}">
+          </div>
+          <div class="col-md-3">
+            <select name="study" class="form-control">
+              <option value="">All Studies</option>
+              {% for study in studies %}
+              <option value="{{ study.id }}" {% if study_filter == study.id|stringformat:"s" %}selected{% endif %}>{{ study.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-3">
+            <select name="status" class="form-control">
+              <option value="">All Statuses</option>
+              {% for value, label in status_choices %}
+              <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100">Filter</button>
+          </div>
+        </form>
+
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Participant ID</th>
+                <th>Name</th>
+                <th>Study</th>
+                <th>Phone</th>
+                <th>Location</th>
+                <th>Status</th>
+                <th>Enrollment Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for participant in page_obj %}
+              <tr>
+                <td><a href="{% url 'participant_detail' participant.id %}">{{ participant.participant_id }}</a></td>
+                <td>{{ participant.get_full_name }}</td>
+                <td>{{ participant.study.code }}</td>
+                <td>{{ participant.primary_phone }}</td>
+                <td>{{ participant.location }}</td>
+                <td>
+                  {% if participant.status == 'active' %}
+                  <span class="badge badge-success">Active</span>
+                  {% elif participant.status == 'screening' %}
+                  <span class="badge badge-warning">Screening</span>
+                  {% elif participant.status == 'completed' %}
+                  <span class="badge badge-info">Completed</span>
+                  {% elif participant.status == 'withdrawn' %}
+                  <span class="badge badge-secondary">Withdrawn</span>
+                  {% elif participant.status == 'lost' %}
+                  <span class="badge badge-danger">Lost</span>
+                  {% endif %}
+                </td>
+                <td>{{ participant.enrollment_date|date:"Y-m-d"|default:"-" }}</td>
+                <td>
+                  <a href="{% url 'participant_detail' participant.id %}" class="btn btn-sm btn-info" title="View">
+                    <i class="mdi mdi-eye"></i>
+                  </a>
+                  {% if user.role == 'admin' or user.role == 'coordinator' %}
+                  <a href="{% url 'participant_update' participant.id %}" class="btn btn-sm btn-warning" title="Edit">
+                    <i class="mdi mdi-pencil"></i>
+                  </a>
+                  {% endif %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="8" class="text-center">No participants found</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <nav aria-label="Page navigation" class="mt-4">
+          <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+              <a class="page-link" href="?page=1&search={{ search }}&study={{ study_filter }}&status={{ status_filter }}">First</a>
+            </li>
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.previous_page_number }}&search={{ search }}&study={{ study_filter }}&status={{ status_filter }}">Previous</a>
+            </li>
+            {% endif %}
+
+            <li class="page-item active">
+              <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+            </li>
+
+            {% if page_obj.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.next_page_number }}&search={{ search }}&study={{ study_filter }}&status={{ status_filter }}">Next</a>
+            </li>
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}&search={{ search }}&study={{ study_filter }}&status={{ status_filter }}">Last</a>
+            </li>
+            {% endif %}
+          </ul>
+        </nav>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
