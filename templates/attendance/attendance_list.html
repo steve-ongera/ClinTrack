@@ -4,194 +4,1244 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Staff Attendance - ClinTrack{% endblock %}
+{% block title %}Staff Attendance Analytics - ClinTrack{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Apple-like typography */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Smaller font sizes */
+h3 { font-size: 1.125rem; }
+h4 { font-size: 1rem; }
+h5 { font-size: 0.875rem; }
+p, td, li, th, label { font-size: 0.8125rem; }
+small { font-size: 0.75rem; }
+
+/* Clean breadcrumb */
+.breadcrumb {
+    background: transparent;
+    padding: 0;
+    margin-bottom: 0;
+    font-size: 0.75rem;
+}
+
+.breadcrumb-item {
+    color: #6c757d;
+}
+
+.breadcrumb-item a {
+    color: #667eea;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.breadcrumb-item.active {
+    color: #495057;
+    font-weight: 500;
+}
+
+/* Page header */
+.page-header {
+    padding: 1rem 0;
+    margin-bottom: 1.5rem;
+}
+
+.page-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #2a2a2a;
+    margin-bottom: 0.25rem;
+}
+
+/* Card design */
+.card {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+}
+
+.card-body {
+    padding: 1.25rem;
+}
+
+/* Card header */
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.875rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.card-header h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #2a2a2a;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Stats grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1.25rem;
+    border: 1px solid #f0f0f0;
+    transition: transform 0.2s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.stat-value {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #2a2a2a;
+    margin-bottom: 0.25rem;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.stat-change {
+    font-size: 0.6875rem;
+    padding: 0.125rem 0.375rem;
+    border-radius: 3px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-top: 0.5rem;
+}
+
+.stat-change.positive {
+    background: rgba(40, 199, 111, 0.1);
+    color: #28c76f;
+}
+
+.stat-change.negative {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+}
+
+/* Chart containers */
+.chart-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+}
+
+.small-chart {
+    height: 250px;
+}
+
+/* Chart tabs */
+.chart-tabs {
+    display: flex;
+    border-bottom: 1px solid #f0f0f0;
+    margin-bottom: 1rem;
+}
+
+.chart-tab {
+    padding: 0.5rem 1rem;
+    font-size: 0.8125rem;
+    color: #6c757d;
+    background: none;
+    border: none;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.chart-tab:hover {
+    color: #495057;
+}
+
+.chart-tab.active {
+    color: #667eea;
+    border-bottom-color: #667eea;
+    font-weight: 500;
+}
+
+/* Filter bar */
+.filter-bar {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid #f0f0f0;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.filter-input {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8125rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    min-width: 150px;
+}
+
+.filter-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+}
+
+/* User info in table */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.user-info i {
+    font-size: 1.25rem;
+    color: #667eea;
+}
+
+.user-name {
+    font-weight: 500;
+    color: #2a2a2a;
+    font-size: 0.8125rem;
+}
+
+.user-username {
+    font-size: 0.6875rem;
+    color: #6c757d;
+}
+
+/* Table styling */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 6px;
+    border: 1px solid #f0f0f0;
+}
+
+.table {
+    margin-bottom: 0;
+    font-size: 0.75rem;
+    color: #495057;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.table thead th {
+    border: none;
+    background: #f8f9fa;
+    font-weight: 600;
+    color: #6c757d;
+    padding: 0.75rem 1rem;
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.table tbody td {
+    padding: 0.75rem 1rem;
+    vertical-align: middle;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.table tbody tr:hover {
+    background-color: rgba(102, 126, 234, 0.03);
+}
+
+/* Badge styling */
+.badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-weight: 500;
+    font-size: 0.6875rem;
+    letter-spacing: 0.3px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.badge-success {
+    background: rgba(40, 199, 111, 0.1);
+    color: #28c76f;
+    border: 1px solid rgba(40, 199, 111, 0.2);
+}
+
+.badge-secondary {
+    background: rgba(108, 117, 125, 0.1);
+    color: #6c757d;
+    border: 1px solid rgba(108, 117, 125, 0.2);
+}
+
+.badge-info {
+    background: rgba(0, 167, 255, 0.1);
+    color: #00a7ff;
+    border: 1px solid rgba(0, 167, 255, 0.2);
+}
+
+/* Duration badges */
+.duration-badge {
+    font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+    font-size: 0.75rem;
+    background: #f8f9fa;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    color: #495057;
+}
+
+/* Status indicators */
+.status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.status-indicator.active::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #28c76f;
+    display: inline-block;
+    animation: pulse 2s infinite;
+}
+
+.status-indicator.completed::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #6c757d;
+    display: inline-block;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+/* Button styling */
+.btn {
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.btn-sm {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.6875rem;
+}
+
+.btn-outline-primary {
+    background: transparent;
+    color: #667eea;
+    border: 1px solid #667eea;
+}
+
+.btn-outline-primary:hover {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+}
+
+.btn-outline-secondary {
+    background: transparent;
+    color: #6c757d;
+    border: 1px solid #e0e0e0;
+}
+
+.btn-outline-secondary:hover {
+    background: #f8f9fa;
+    color: #495057;
+}
+
+/* Pagination */
+.pagination-wrapper {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #f0f0f0;
+}
+
+.pagination {
+    margin-bottom: 0;
+}
+
+.page-link {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.75rem;
+    border: 1px solid #e0e0e0;
+    color: #667eea;
+}
+
+.page-item.active .page-link {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: #667eea;
+    color: white;
+}
+
+/* Empty state */
+.empty-state {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: #6c757d;
+}
+
+.empty-state i {
+    font-size: 2.5rem;
+    color: #e0e0e0;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.empty-state h5 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    font-size: 0.75rem;
+    margin-bottom: 1.5rem;
+    max-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .chart-container {
+        height: 250px;
+    }
+    
+    .filter-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .filter-input {
+        width: 100%;
+    }
+    
+    .table thead th,
+    .table tbody td {
+        padding: 0.5rem;
+        font-size: 0.6875rem;
+    }
+    
+    /* Hide less important columns on mobile */
+    .table td:nth-child(2), /* Role */
+    .table th:nth-child(2),
+    .table td:nth-child(6), /* Location */
+    .table th:nth-child(6),
+    .table td:nth-child(7), /* IP Address */
+    .table th:nth-child(7) {
+        display: none;
+    }
+}
+
+@media (max-width: 576px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .empty-state {
+        padding: 1.5rem 1rem;
+    }
+}
+
+/* Focus states */
+.form-control:focus,
+.btn:focus,
+.filter-input:focus {
+    outline: 2px solid rgba(102, 126, 234, 0.5);
+    outline-offset: 2px;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .card {
+        background: #2d2d2d;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+    }
+    
+    .page-title,
+    .card-header h4,
+    .user-name,
+    .stat-value {
+        color: #ffffff;
+    }
+    
+    .card-header {
+        border-bottom-color: #404040;
+    }
+    
+    .stat-card {
+        background: #3d3d3d;
+        border-color: #404040;
+    }
+    
+    .stat-label {
+        color: #b0b0b0;
+    }
+    
+    .table {
+        color: #e0e0e0;
+        border-color: #404040;
+    }
+    
+    .table thead th {
+        background: #3d3d3d;
+        color: #b0b0b0;
+    }
+    
+    .table tbody td {
+        border-bottom-color: #404040;
+    }
+    
+    .table tbody tr:hover {
+        background-color: rgba(102, 126, 234, 0.1);
+    }
+    
+    .filter-bar {
+        background: #3d3d3d;
+        border-color: #404040;
+    }
+    
+    .filter-input {
+        background: #4d4d4d;
+        border-color: #505050;
+        color: #e0e0e0;
+    }
+    
+    .empty-state i {
+        color: #505050;
+    }
+    
+    .empty-state h5 {
+        color: #e0e0e0;
+    }
+    
+    .duration-badge {
+        background: #3d3d3d;
+        color: #e0e0e0;
+    }
+}
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="content-wrapper">
   <div class="page-header">
-    <h3 class="page-title">Staff Attendance</h3>
+    <h3 class="page-title">Staff Attendance Analytics</h3>
     <nav aria-label="breadcrumb">
       <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
-        <li class="breadcrumb-item active">Attendance</li>
+        <li class="breadcrumb-item active">Attendance Analytics</li>
       </ol>
     </nav>
   </div>
 
-  <div class="row">
-    <div class="col-12">
-      <!-- Statistics Cards -->
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-value">24</div>
-          <div class="stat-label">
-            <i class="bi bi-calendar-check"></i>
-            Total Logins Today
-          </div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-value">8</div>
-          <div class="stat-label">
-            <i class="bi bi-person-check"></i>
-            Currently Logged In
-          </div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-value">6.5 hrs</div>
-          <div class="stat-label">
-            <i class="bi bi-clock"></i>
-            Avg Session Duration
-          </div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-value">98%</div>
-          <div class="stat-label">
-            <i class="bi bi-graph-up"></i>
-            Attendance Rate
-          </div>
-        </div>
+  <!-- Filter Bar -->
+  <div class="filter-bar">
+    <form method="get" class="filter-group">
+      <div>
+        <label style="font-size: 0.75rem; color: #6c757d; margin-bottom: 0.25rem; display: block;">Start Date</label>
+        <input type="date" name="start_date" class="filter-input" value="{{ start_date|default:'' }}">
       </div>
+      
+      <div>
+        <label style="font-size: 0.75rem; color: #6c757d; margin-bottom: 0.25rem; display: block;">End Date</label>
+        <input type="date" name="end_date" class="filter-input" value="{{ end_date|default:'' }}">
+      </div>
+      
+      <div>
+        <label style="font-size: 0.75rem; color: #6c757d; margin-bottom: 0.25rem; display: block;">Staff Role</label>
+        <select name="role" class="filter-input">
+          <option value="">All Roles</option>
+          <option value="admin" {% if request.GET.role == 'admin' %}selected{% endif %}>Administrator</option>
+          <option value="coordinator" {% if request.GET.role == 'coordinator' %}selected{% endif %}>Coordinator</option>
+          <option value="staff" {% if request.GET.role == 'staff' %}selected{% endif %}>Research Staff</option>
+          <option value="viewer" {% if request.GET.role == 'viewer' %}selected{% endif %}>Viewer</option>
+        </select>
+      </div>
+      
+      <div>
+        <label style="font-size: 0.75rem; color: #6c757d; margin-bottom: 0.25rem; display: block;">Status</label>
+        <select name="status" class="filter-input">
+          <option value="">All Status</option>
+          <option value="active" {% if request.GET.status == 'active' %}selected{% endif %}>Active</option>
+          <option value="completed" {% if request.GET.status == 'completed' %}selected{% endif %}>Completed</option>
+        </select>
+      </div>
+      
+      <div style="margin-top: 1.75rem;">
+        <button type="submit" class="btn btn-primary btn-sm">
+          <i class="bi bi-funnel"></i>
+          Apply Filters
+        </button>
+        <a href="{% url 'attendance_list' %}" class="btn btn-secondary btn-sm">
+          <i class="bi bi-x-circle"></i>
+          Clear
+        </a>
+      </div>
+    </form>
+  </div>
 
-      <!-- Attendance Table -->
+  <!-- Statistics Cards -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-value">{{ stats.total_logins|default:"0" }}</div>
+      <div class="stat-label">
+        <i class="bi bi-calendar-check"></i>
+        Total Logins
+      </div>
+      <div class="stat-change {% if stats.login_growth >= 0 %}positive{% else %}negative{% endif %}">
+        <i class="bi bi-arrow-{% if stats.login_growth >= 0 %}up{% else %}down{% endif %}"></i>
+        {{ stats.login_growth|default:"0" }}%
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-value">{{ stats.active_sessions|default:"0" }}</div>
+      <div class="stat-label">
+        <i class="bi bi-person-check"></i>
+        Currently Active
+      </div>
+      <small class="text-muted" style="font-size: 0.6875rem;">
+        {{ stats.active_staff|default:"0" }} staff members
+      </small>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-value">{{ stats.avg_duration|default:"0" }}</div>
+      <div class="stat-label">
+        <i class="bi bi-clock"></i>
+        Avg Session Duration
+      </div>
+      <small class="text-muted" style="font-size: 0.6875rem;">
+        {{ stats.longest_session|default:"0" }} max today
+      </small>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-value">{{ stats.attendance_rate|default:"0" }}%</div>
+      <div class="stat-label">
+        <i class="bi bi-graph-up"></i>
+        Attendance Rate
+      </div>
+      <div class="stat-change positive">
+        <i class="bi bi-check-circle"></i>
+        {{ stats.on_time_rate|default:"0" }}% on time
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Section -->
+  <div class="row">
+    <!-- Daily Attendance Trend -->
+    <div class="col-lg-8">
       <div class="card">
         <div class="card-body">
-          <div class="card-header">
-            <h4>
-              <i class="bi bi-list-ul"></i>
-              Attendance Records
-            </h4>
-            <div class="card-actions">
-              <button class="btn btn-sm btn-outline-primary">
-                <i class="bi bi-funnel"></i>
-                Filter
-              </button>
-              <button class="btn btn-sm btn-outline-secondary">
-                <i class="bi bi-download"></i>
-                Export
-              </button>
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="card-title mb-0">
+              <i class="bi bi-graph-up me-2"></i>
+              Daily Attendance Trends
+            </h5>
+            <div class="chart-tabs">
+              <button class="chart-tab active" onclick="showAttendanceChart('daily', this)">Daily</button>
+              <button class="chart-tab" onclick="showAttendanceChart('weekly', this)">Weekly</button>
+              <button class="chart-tab" onclick="showAttendanceChart('monthly', this)">Monthly</button>
             </div>
           </div>
-
-          {% if page_obj %}
-          <div class="table-responsive">
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>Staff Member</th>
-                  <th>Role</th>
-                  <th>Login Time</th>
-                  <th>Logout Time</th>
-                  <th>Duration</th>
-                  <th>Location</th>
-                  <th>IP Address</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for attendance in page_obj %}
-                <tr>
-                  <td>
-                    <div class="user-info">
-                      <i class="bi bi-person-circle"></i>
-                      <div>
-                        <div class="user-name">{{ attendance.staff.get_full_name|default:attendance.staff.username }}</div>
-                        <div class="user-username">@{{ attendance.staff.username }}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <span class="badge badge-{{ attendance.staff.role }}">
-                      {{ attendance.staff.get_role_display }}
-                    </span>
-                  </td>
-                  <td>{{ attendance.login_time|date:"M d, Y H:i" }}</td>
-                  <td>
-                    {% if attendance.logout_time %}
-                      {{ attendance.logout_time|date:"M d, Y H:i" }}
-                    {% else %}
-                      <span class="text-muted">-</span>
-                    {% endif %}
-                  </td>
-                  <td>
-                    {% if attendance.duration %}
-                      {{ attendance.duration }}
-                    {% else %}
-                      <span class="badge badge-success">Active</span>
-                    {% endif %}
-                  </td>
-                  <td>{{ attendance.location|default:"-" }}</td>
-                  <td>
-                    <code>{{ attendance.ip_address|default:"-" }}</code>
-                  </td>
-                  <td>
-                    {% if attendance.logout_time %}
-                      <span class="badge badge-secondary">
-                        <i class="bi bi-check-circle"></i>
-                        Completed
-                      </span>
-                    {% else %}
-                      <span class="badge badge-success">
-                        <i class="bi bi-circle-fill"></i>
-                        Active
-                      </span>
-                    {% endif %}
-                  </td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
+          <div class="chart-container">
+            <canvas id="attendanceTrendChart"></canvas>
           </div>
-
-          <!-- Pagination -->
-          {% if page_obj.has_other_pages %}
-          <div class="pagination-wrapper">
-            <nav aria-label="Page navigation">
-              <ul class="pagination">
-                {% if page_obj.has_previous %}
-                <li class="page-item">
-                  <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
-                </li>
-                {% endif %}
-
-                {% for num in page_obj.paginator.page_range %}
-                  {% if page_obj.number == num %}
-                  <li class="page-item active">
-                    <span class="page-link">{{ num }}</span>
-                  </li>
-                  {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                  <li class="page-item">
-                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-                  </li>
-                  {% endif %}
-                {% endfor %}
-
-                {% if page_obj.has_next %}
-                <li class="page-item">
-                  <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
-                </li>
-                {% endif %}
-              </ul>
-            </nav>
-          </div>
-          {% endif %}
-
-          {% else %}
-          <div class="empty-state">
-            <i class="bi bi-calendar-x"></i>
-            <h5>No Attendance Records</h5>
-            <p>No attendance records found.</p>
-          </div>
-          {% endif %}
         </div>
       </div>
+    </div>
+    
+    <!-- Role Distribution -->
+    <div class="col-lg-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title mb-3">
+            <i class="bi bi-pie-chart me-2"></i>
+            Attendance by Role
+          </h5>
+          <div class="chart-container small-chart">
+            <canvas id="roleDistributionChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mt-4">
+    <!-- Session Duration Analysis -->
+    <div class="col-lg-6">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title mb-3">
+            <i class="bi bi-clock-history me-2"></i>
+            Session Duration Analysis
+          </h5>
+          <div class="chart-container small-chart">
+            <canvas id="durationChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Peak Hours Analysis -->
+    <div class="col-lg-6">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title mb-3">
+            <i class="bi bi-activity me-2"></i>
+            Peak Activity Hours
+          </h5>
+          <div class="chart-container small-chart">
+            <canvas id="peakHoursChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Attendance Table -->
+  <div class="card">
+    <div class="card-body">
+      <div class="card-header">
+        <h4>
+          <i class="bi bi-list-ul"></i>
+          Detailed Attendance Records
+          <span class="badge bg-light text-dark ms-2" style="font-size: 0.75rem;">
+            {{ page_obj.paginator.count|default:"0" }}
+          </span>
+        </h4>
+        <div class="card-actions">
+          <button class="btn btn-sm btn-outline-primary" onclick="toggleFilters()">
+            <i class="bi bi-funnel"></i>
+            Advanced Filters
+          </button>
+          <button class="btn btn-sm btn-outline-secondary" onclick="exportAttendanceData()">
+            <i class="bi bi-download"></i>
+            Export Data
+          </button>
+        </div>
+      </div>
+
+      {% if page_obj %}
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Staff Member</th>
+              <th>Role</th>
+              <th>Login Time</th>
+              <th>Logout Time</th>
+              <th>Duration</th>
+              <th>Location</th>
+              <th>IP Address</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for attendance in page_obj %}
+            <tr>
+              <td>
+                <div class="user-info">
+                  <i class="bi bi-person-circle"></i>
+                  <div>
+                    <div class="user-name">{{ attendance.staff.get_full_name|default:attendance.staff.username }}</div>
+                    <div class="user-username">@{{ attendance.staff.username }}</div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span class="badge badge-{{ attendance.staff.role }}">
+                  {{ attendance.staff.get_role_display }}
+                </span>
+              </td>
+              <td>
+                <div>{{ attendance.login_time|date:"M d, Y" }}</div>
+                <small class="text-muted" style="font-size: 0.6875rem;">
+                  {{ attendance.login_time|time:"H:i" }}
+                </small>
+              </td>
+              <td>
+                {% if attendance.logout_time %}
+                <div>{{ attendance.logout_time|date:"M d, Y" }}</div>
+                <small class="text-muted" style="font-size: 0.6875rem;">
+                  {{ attendance.logout_time|time:"H:i" }}
+                </small>
+                {% else %}
+                <span class="text-muted">-</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if attendance.duration %}
+                <div class="duration-badge">
+                  {{ attendance.duration|default:"-" }}
+                </div>
+                {% else %}
+                <span class="badge badge-success">
+                  <i class="bi bi-clock"></i>
+                  Active
+                </span>
+                {% endif %}
+              </td>
+              <td>
+                {% if attendance.location %}
+                <span style="font-size: 0.75rem;">{{ attendance.location|truncatechars:15 }}</span>
+                {% else %}
+                <span class="text-muted">-</span>
+                {% endif %}
+              </td>
+              <td>
+                <code style="font-size: 0.6875rem;">{{ attendance.ip_address|default:"-" }}</code>
+              </td>
+              <td>
+                {% if attendance.logout_time %}
+                <span class="status-indicator completed">
+                  <i class="bi bi-check-circle"></i>
+                  Completed
+                </span>
+                {% else %}
+                <span class="status-indicator active">
+                  <i class="bi bi-circle-fill"></i>
+                  Active
+                </span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      {% if page_obj.has_other_pages %}
+      <div class="pagination-wrapper">
+        <div class="d-flex justify-content-between align-items-center">
+          <small class="text-muted">
+            Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} records
+          </small>
+          <nav aria-label="Page navigation">
+            <ul class="pagination mb-0">
+              {% if page_obj.has_previous %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                  Previous
+                </a>
+              </li>
+              {% endif %}
+
+              {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <li class="page-item active">
+                  <span class="page-link">{{ num }}</span>
+                </li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li class="page-item">
+                  <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                    {{ num }}
+                  </a>
+                </li>
+                {% endif %}
+              {% endfor %}
+
+              {% if page_obj.has_next %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                  Next
+                </a>
+              </li>
+              {% endif %}
+            </ul>
+          </nav>
+        </div>
+      </div>
+      {% endif %}
+
+      {% else %}
+      <div class="empty-state">
+        <i class="bi bi-calendar-x"></i>
+        <h5>No Attendance Records Found</h5>
+        <p>No attendance records match your current filters.</p>
+        <button class="btn btn-primary btn-sm" onclick="clearFilters()">
+          <i class="bi bi-x-circle"></i>
+          Clear Filters
+        </button>
+      </div>
+      {% endif %}
     </div>
   </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+
+<script>
+// Chart instances
+let attendanceTrendChart, roleDistributionChart, durationChart, peakHoursChart;
+
+// Sample data (replace with actual data from Django context)
+const attendanceData = {
+    daily: {
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        data: [24, 28, 26, 30, 29, 15, 12]
+    },
+    weekly: {
+        labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+        data: [150, 165, 158, 172]
+    },
+    monthly: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+        data: [650, 720, 680, 750, 780, 820]
+    }
+};
+
+const roleDistribution = [
+    { role: 'Admin', count: 5, color: '#dc3545' },
+    { role: 'Coordinator', count: 8, color: '#ffab00' },
+    { role: 'Research Staff', count: 15, color: '#00a7ff' },
+    { role: 'Viewer', count: 3, color: '#6c757d' }
+];
+
+const sessionDurations = [
+    { range: '<1h', count: 3 },
+    { range: '1-3h', count: 8 },
+    { range: '3-6h', count: 12 },
+    { range: '6-8h', count: 18 },
+    { range: '>8h', count: 9 }
+];
+
+const peakHours = [
+    { hour: '6-8 AM', activity: 5 },
+    { hour: '8-10 AM', activity: 18 },
+    { hour: '10-12 PM', activity: 25 },
+    { hour: '12-2 PM', activity: 20 },
+    { hour: '2-4 PM', activity: 22 },
+    { hour: '4-6 PM', activity: 19 },
+    { hour: '6-8 PM', activity: 12 },
+    { hour: '8-10 PM', activity: 8 }
+];
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize all charts
+    initAttendanceTrendChart('daily');
+    initRoleDistributionChart();
+    initDurationChart();
+    initPeakHoursChart();
+    
+    // Initialize tooltips
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltipTriggerList.forEach(tooltipTriggerEl => {
+        new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+
+function showAttendanceChart(type, element) {
+    // Update active tab
+    document.querySelectorAll('.chart-tab').forEach(tab => tab.classList.remove('active'));
+    element.classList.add('active');
+    
+    // Update chart data
+    if (attendanceTrendChart) {
+        attendanceTrendChart.destroy();
+    }
+    initAttendanceTrendChart(type);
+}
+
+function initAttendanceTrendChart(type = 'daily') {
+    const ctx = document.getElementById('attendanceTrendChart').getContext('2d');
+    const data = attendanceData[type];
+    
+    attendanceTrendChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.labels,
+            datasets: [{
+                label: 'Login Count',
+                data: data.data,
+                borderColor: '#667eea',
+                backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#667eea',
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Number of Logins',
+                        font: {
+                            size: 11
+                        }
+                    }
+                },
+                x: {
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                }
+            }
+        }
+    });
+}
+
+function initRoleDistributionChart() {
+    const ctx = document.getElementById('roleDistributionChart').getContext('2d');
+    
+    roleDistributionChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: roleDistribution.map(item => item.role),
+            datasets: [{
+                data: roleDistribution.map(item => item.count),
+                backgroundColor: roleDistribution.map(item => item.color),
+                borderColor: 'white',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '65%',
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        font: {
+                            size: 9
+                        },
+                        boxWidth: 10,
+                        padding: 15
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.raw || 0;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = Math.round((value / total) * 100);
+                            return `${label}: ${value} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function initDurationChart() {
+    const ctx = document.getElementById('durationChart').getContext('2d');
+    
+    durationChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: sessionDurations.map(item => item.range),
+            datasets: [{
+                label: 'Session Count',
+                data: sessionDurations.map(item => item.count),
+                backgroundColor: 'rgba(0, 210, 91, 0.8)',
+                borderColor: '#00d25b',
+                borderWidth: 1,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    },
+                    ticks: {
+                        stepSize: 2
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+}
+
+function initPeakHoursChart() {
+    const ctx = document.getElementById('peakHoursChart').getContext('2d');
+    
+    peakHoursChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: peakHours.map(item => item.hour),
+            datasets: [{
+                label: 'Activity Level',
+                data: peakHours.map(item => item.activity),
+                backgroundColor: 'rgba(255, 171, 0, 0.8)',
+                borderColor: '#ffab00',
+                borderWidth: 1,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Active Sessions',
+                        font: {
+                            size: 11
+                        }
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        maxRotation: 45
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Utility functions
+function toggleFilters() {
+    alert('Advanced filter panel would open here.');
+    // In production, this would show/hide an advanced filter panel
+}
+
+function exportAttendanceData() {
+    const data = {
+        filters: {
+            start_date: document.querySelector('input[name="start_date"]').value,
+            end_date: document.querySelector('input[name="end_date"]').value,
+            role: document.querySelector('select[name="role"]').value,
+            status: document.querySelector('select[name="status"]').value
+        },
+        stats: {
+            total_logins: "{{ stats.total_logins|default:'0' }}",
+            avg_duration: "{{ stats.avg_duration|default:'0' }}",
+            attendance_rate: "{{ stats.attendance_rate|default:'0' }}%"
+        },
+        timestamp: new Date().toISOString()
+    };
+    
+    const dataStr = JSON.stringify(data, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `attendance-data-${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function clearFilters() {
+    window.location.href = "{% url 'attendance_list' %}";
+}
+</script>
+
+<!-- Bootstrap Icons -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
 {% endblock %}
