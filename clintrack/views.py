@@ -13,6 +13,13 @@ from datetime import timedelta, datetime
 from django.http import JsonResponse
 from .models import User, Study, Participant, SUSAR, StaffAttendance, AuditLog
 from django.contrib.auth import get_user_model
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.db.models import Count, Q, Avg
+from django.db.models.functions import TruncMonth, TruncWeek, TruncDay
+from django.utils import timezone
+from datetime import timedelta
+import json
 
 User = get_user_model()
 
@@ -118,38 +125,127 @@ def admin_dashboard(request):
     end_date = timezone.now()
     start_date = end_date - timedelta(days=365)
     last_30_days = end_date - timedelta(days=30)
+    last_7_days = end_date - timedelta(days=7)
     
     # === KEY METRICS ===
     total_participants = Participant.objects.count()
     active_participants = Participant.objects.filter(status='active').count()
-    total_studies = Study.objects.filter(is_active=True).count()
+    completed_participants = Participant.objects.filter(status='completed').count()
+    screening_participants = Participant.objects.filter(status='screening').count()
+    lost_participants = Participant.objects.filter(status='lost').count()
+    withdrawn_participants = Participant.objects.filter(status='withdrawn').count()
+    
+    active_studies = Study.objects.filter(is_active=True).count()
+    total_studies = Study.objects.count()
+    
     total_susars = SUSAR.objects.count()
+    pending_susars = SUSAR.objects.filter(follow_up_required=True).count()
     critical_susars = SUSAR.objects.filter(
         severity__in=['severe', 'life_threatening', 'fatal']
     ).count()
     
-    # Recent additions (last 30 days)
-    recent_participants = Participant.objects.filter(
-        created_at__gte=last_30_days
-    ).count()
-    recent_susars = SUSAR.objects.filter(
+    # Monthly participants (last 30 days)
+    monthly_participants = Participant.objects.filter(
         created_at__gte=last_30_days
     ).count()
     
-    # === PARTICIPANT STATUS BREAKDOWN ===
+    # Calculate growth percentage
+    previous_month = last_30_days - timedelta(days=30)
+    previous_month_count = Participant.objects.filter(
+        created_at__gte=previous_month,
+        created_at__lt=last_30_days
+    ).count()
+    
+    if previous_month_count > 0:
+        monthly_growth = round(((monthly_participants - previous_month_count) / previous_month_count) * 100, 1)
+    else:
+        monthly_growth = 100 if monthly_participants > 0 else 0
+    
+    # === PARTICIPANT STATUS BREAKDOWN (for doughnut chart) ===
     status_breakdown = Participant.objects.values('status').annotate(
         count=Count('id')
     ).order_by('-count')
     
-    # === STUDY BREAKDOWN ===
-    study_breakdown = Study.objects.annotate(
-        participant_count=Count('participants'),
-        active_count=Count('participants', filter=Q(participants__status='active')),
-        susar_count=Count('participants__susars')
-    ).order_by('-participant_count')
+    status_data = {
+        'labels': [item['status'].title() for item in status_breakdown],
+        'data': [item['count'] for item in status_breakdown],
+        'colors': ['#00d25b', '#ffab00', '#fc424a', '#8e32e9', '#6c757d']
+    }
     
-    # === ENROLLMENT TRENDS (Last 12 months) ===
-    enrollment_trends = Participant.objects.filter(
+    # === STUDY DISTRIBUTION (for doughnut chart) ===
+    study_distribution = Study.objects.annotate(
+        participant_count=Count('participants')
+    ).order_by('-participant_count')[:5]
+    
+    study_data = {
+        'labels': [study.code for study in study_distribution],
+        'data': [study.participant_count for study in study_distribution],
+        'colors': ['#00d25b', '#ffab00', '#fc424a', '#8e32e9', '#00d0ff']
+    }
+    
+    # === GENDER DISTRIBUTION (for doughnut chart) ===
+    gender_breakdown = Participant.objects.values('gender').annotate(
+        count=Count('id')
+    )
+    
+    gender_map = {'M': 'Male', 'F': 'Female', 'O': 'Other', 'U': 'Not Specified'}
+    gender_data = {
+        'labels': [gender_map.get(item['gender'], item['gender']) for item in gender_breakdown],
+        'data': [item['count'] for item in gender_breakdown],
+        'colors': ['#00d25b', '#fc424a', '#ffab00', '#8e32e9']
+    }
+    
+    # === ENROLLMENT TRENDS - Last 30 days (for line chart) ===
+    enrollment_daily = Participant.objects.filter(
+        enrollment_date__gte=last_30_days.date()
+    ).annotate(
+        day=TruncDay('enrollment_date')
+    ).values('day').annotate(
+        count=Count('id')
+    ).order_by('day')
+    
+    # Fill in missing days with 0
+    enrollment_trend_labels = []
+    enrollment_trend_data = []
+    current_date = last_30_days.date()
+    enrollment_dict = {item['day']: item['count'] for item in enrollment_daily}
+    
+    while current_date <= end_date.date():
+        enrollment_trend_labels.append(current_date.strftime('%b %d'))
+        enrollment_trend_data.append(enrollment_dict.get(current_date, 0))
+        current_date += timedelta(days=1)
+    
+    enrollment_trend = {
+        'labels': enrollment_trend_labels,
+        'data': enrollment_trend_data
+    }
+    
+    # === SUSAR TRENDS - Last 30 days (for bar chart) ===
+    susar_daily = SUSAR.objects.filter(
+        onset_date__gte=last_30_days
+    ).annotate(
+        day=TruncDay('onset_date')
+    ).values('day').annotate(
+        count=Count('id')
+    ).order_by('day')
+    
+    susar_trend_labels = []
+    susar_trend_data = []
+    current_date = last_30_days.date()
+    susar_dict = {item['day'].date(): item['count'] for item in susar_daily}
+    
+    while current_date <= end_date.date():
+        susar_trend_labels.append(current_date.strftime('%b %d'))
+        susar_trend_data.append(susar_dict.get(current_date, 0))
+        current_date += timedelta(days=1)
+    
+    susar_trend = {
+        'labels': susar_trend_labels,
+        'data': susar_trend_data
+    }
+    
+    # === ENROLLMENT BY MONTH - Last 12 months (for main chart) ===
+    enrollment_monthly = Participant.objects.filter(
         enrollment_date__gte=start_date.date()
     ).annotate(
         month=TruncMonth('enrollment_date')
@@ -157,67 +253,80 @@ def admin_dashboard(request):
         count=Count('id')
     ).order_by('month')
     
-    # === SUSAR TRENDS (Last 12 months) ===
-    susar_trends = SUSAR.objects.filter(
-        onset_date__gte=start_date
-    ).annotate(
-        month=TruncMonth('onset_date')
-    ).values('month').annotate(
-        count=Count('id')
-    ).order_by('month')
+    monthly_labels = []
+    monthly_data = []
+    current_month = start_date.date().replace(day=1)
+    enrollment_month_dict = {item['month'].date(): item['count'] for item in enrollment_monthly}
     
-    # === SUSAR SEVERITY BREAKDOWN ===
-    susar_severity = SUSAR.objects.values('severity').annotate(
-        count=Count('id')
-    ).order_by('-count')
+    for _ in range(12):
+        monthly_labels.append(current_month.strftime('%b %Y'))
+        monthly_data.append(enrollment_month_dict.get(current_month, 0))
+        # Move to next month
+        if current_month.month == 12:
+            current_month = current_month.replace(year=current_month.year + 1, month=1)
+        else:
+            current_month = current_month.replace(month=current_month.month + 1)
     
-    # === GENDER DISTRIBUTION ===
-    gender_distribution = Participant.objects.values('gender').annotate(
-        count=Count('id')
-    )
+    enrollment_monthly_trend = {
+        'labels': monthly_labels,
+        'data': monthly_data
+    }
+    
+    # === RECENT PARTICIPANTS ===
+    recent_participants = Participant.objects.select_related(
+        'study', 'created_by'
+    ).order_by('-created_at')[:7]
+    
+    # === UPCOMING FOLLOW-UPS (Mock data - you can create a FollowUp model) ===
+    upcoming_followups = []  # Placeholder - implement based on your follow-up system
     
     # === TOP LOCATIONS ===
     top_locations = Participant.objects.values('location').annotate(
         count=Count('id')
-    ).order_by('-count')[:10]
+    ).order_by('-count')[:5]
     
-    # === STAFF ACTIVITY (Last 7 days) ===
-    last_7_days = end_date - timedelta(days=7)
+    # === STAFF ACTIVITY ===
     staff_activity = User.objects.filter(
         attendances__login_time__gte=last_7_days
     ).annotate(
         login_count=Count('attendances')
-    ).order_by('-login_count')[:10]
-    
-    # === RECENT ACTIVITIES ===
-    recent_audit_logs = AuditLog.objects.select_related('user').order_by('-timestamp')[:10]
-    recent_participants_list = Participant.objects.select_related('study', 'created_by').order_by('-created_at')[:5]
-    recent_susars_list = SUSAR.objects.select_related('participant', 'reported_by').order_by('-created_at')[:5]
+    ).order_by('-login_count')[:5]
     
     context = {
+        'today': timezone.now().date(),
         'user_role': 'Administrator',
+        
+        # Key Metrics
         'total_participants': total_participants,
         'active_participants': active_participants,
+        'completed_participants': completed_participants,
+        'screening_participants': screening_participants,
+        'lost_participants': lost_participants,
+        'withdrawn_participants': withdrawn_participants,
+        'active_studies': active_studies,
         'total_studies': total_studies,
         'total_susars': total_susars,
+        'pending_susars': pending_susars,
         'critical_susars': critical_susars,
+        'monthly_participants': monthly_participants,
+        'monthly_growth': monthly_growth,
+        
+        # Chart Data (as JSON for JavaScript)
+        'status_data': json.dumps(status_data),
+        'study_data': json.dumps(study_data),
+        'gender_data': json.dumps(gender_data),
+        'enrollment_trend': json.dumps(enrollment_trend),
+        'susar_trend': json.dumps(susar_trend),
+        'enrollment_monthly_trend': json.dumps(enrollment_monthly_trend),
+        
+        # Lists
         'recent_participants': recent_participants,
-        'recent_susars': recent_susars,
-        'status_breakdown': status_breakdown,
-        'study_breakdown': study_breakdown,
-        'enrollment_trends': list(enrollment_trends),
-        'susar_trends': list(susar_trends),
-        'susar_severity': susar_severity,
-        'gender_distribution': gender_distribution,
+        'upcoming_followups': upcoming_followups,
         'top_locations': top_locations,
         'staff_activity': staff_activity,
-        'recent_audit_logs': recent_audit_logs,
-        'recent_participants_list': recent_participants_list,
-        'recent_susars_list': recent_susars_list,
     }
     
     return render(request, 'dashboards/admin_dashboard.html', context)
-
 
 @login_required
 def coordinator_dashboard(request):

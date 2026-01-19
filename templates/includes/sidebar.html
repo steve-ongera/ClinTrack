@@ -1,0 +1,172 @@
+{% load static %}
+<nav class="sidebar sidebar-offcanvas" id="sidebar">
+  <ul class="nav">
+    <li class="nav-item nav-profile border-bottom">
+      <a href="#" class="nav-link flex-column">
+        <div class="nav-profile-image">
+          <img src="{% static 'assets/images/faces/face1.jpg' %}" alt="profile" />
+        </div>
+        <div class="nav-profile-text d-flex ms-0 mb-3 flex-column">
+          <span class="font-weight-semibold mb-1 mt-2 text-center">{{ user.get_full_name|default:user.username }}</span>
+          <span class="text-secondary icon-sm text-center">{{ user.get_role_display }}</span>
+        </div>
+      </a>
+    </li>
+    <li class="nav-item pt-3">
+      <a class="nav-link d-block" href="{% url 'dashboard' %}">
+        <img class="sidebar-brand-logo" src="{% static 'assets/images/logo.svg' %}" alt="" />
+        <img class="sidebar-brand-logomini" src="{% static 'assets/images/logo-mini.svg' %}" alt="" />
+        <div class="small font-weight-light pt-1">ClinTrack System</div>
+      </a>
+      <form class="d-flex align-items-center" action="#">
+        <div class="input-group">
+          <div class="input-group-prepend">
+            <i class="input-group-text border-0 mdi mdi-magnify"></i>
+          </div>
+          <input type="text" class="form-control border-0" placeholder="Search" />
+        </div>
+      </form>
+    </li>
+    <li class="pt-2 pb-1">
+      <span class="nav-item-head">Main Menu</span>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'dashboard' %}">
+        <i class="mdi mdi-compass-outline menu-icon"></i>
+        <span class="menu-title">Dashboard</span>
+      </a>
+    </li>
+
+    <!-- Admin & Coordinator Menu -->
+    {% if user.role == 'admin' or user.role == 'coordinator' %}
+    <li class="nav-item">
+      <a class="nav-link" data-bs-toggle="collapse" href="#participants-menu" aria-expanded="false" aria-controls="participants-menu">
+        <i class="mdi mdi-account-multiple menu-icon"></i>
+        <span class="menu-title">Participants</span>
+        <i class="menu-arrow"></i>
+      </a>
+      <div class="collapse" id="participants-menu">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'participants:list' %}">All Participants</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'participants:create' %}">Add Participant</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'participants:search' %}">Search Participant</a>
+          </li>
+        </ul>
+      </div>
+    </li>
+    {% endif %}
+
+    <!-- All Roles can view participants (read-only for viewers) -->
+    {% if user.role == 'staff' or user.role == 'viewer' %}
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'participants:list' %}">
+        <i class="mdi mdi-account-multiple menu-icon"></i>
+        <span class="menu-title">Participants</span>
+      </a>
+    </li>
+    {% endif %}
+
+    <!-- Studies Menu - Admin & Coordinator -->
+    {% if user.role == 'admin' or user.role == 'coordinator' %}
+    <li class="nav-item">
+      <a class="nav-link" data-bs-toggle="collapse" href="#studies-menu" aria-expanded="false" aria-controls="studies-menu">
+        <i class="mdi mdi-flask menu-icon"></i>
+        <span class="menu-title">Studies</span>
+        <i class="menu-arrow"></i>
+      </a>
+      <div class="collapse" id="studies-menu">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'studies:list' %}">All Studies</a>
+          </li>
+          {% if user.role == 'admin' %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'studies:create' %}">Create Study</a>
+          </li>
+          {% endif %}
+        </ul>
+      </div>
+    </li>
+    {% endif %}
+
+    <!-- SUSAR Reporting - All roles -->
+    <li class="nav-item">
+      <a class="nav-link" data-bs-toggle="collapse" href="#susar-menu" aria-expanded="false" aria-controls="susar-menu">
+        <i class="mdi mdi-alert-circle-outline menu-icon"></i>
+        <span class="menu-title">SUSAR Reports</span>
+        <i class="menu-arrow"></i>
+      </a>
+      <div class="collapse" id="susar-menu">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'susars:list' %}">All Reports</a>
+          </li>
+          {% if user.role != 'viewer' %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'susars:create' %}">Report SUSAR</a>
+          </li>
+          {% endif %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'susars:pending' %}">Pending Follow-up</a>
+          </li>
+        </ul>
+      </div>
+    </li>
+
+    <!-- Staff Management - Admin Only -->
+    {% if user.role == 'admin' %}
+    <li class="nav-item">
+      <a class="nav-link" data-bs-toggle="collapse" href="#staff-menu" aria-expanded="false" aria-controls="staff-menu">
+        <i class="mdi mdi-account-badge menu-icon"></i>
+        <span class="menu-title">Staff Management</span>
+        <i class="menu-arrow"></i>
+      </a>
+      <div class="collapse" id="staff-menu">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'users:list' %}">All Staff</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'users:create' %}">Add Staff</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'attendance:list' %}">Attendance Log</a>
+          </li>
+        </ul>
+      </div>
+    </li>
+    {% endif %}
+
+    <!-- Reports - Admin & Coordinator -->
+    {% if user.role == 'admin' or user.role == 'coordinator' %}
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'reports:index' %}">
+        <i class="mdi mdi-chart-bar menu-icon"></i>
+        <span class="menu-title">Reports</span>
+      </a>
+    </li>
+    {% endif %}
+
+    <!-- Audit Logs - Admin Only -->
+    {% if user.role == 'admin' %}
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'audit:logs' %}">
+        <i class="mdi mdi-history menu-icon"></i>
+        <span class="menu-title">Audit Logs</span>
+      </a>
+    </li>
+    {% endif %}
+
+    <li class="nav-item pt-3">
+      <a class="nav-link" href="#">
+        <i class="mdi mdi-file-document-box menu-icon"></i>
+        <span class="menu-title">Documentation</span>
+      </a>
+    </li>
+  </ul>
+</nav>

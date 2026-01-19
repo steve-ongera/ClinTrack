@@ -1,581 +1,700 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Admin Dashboard - ClinTrack{% endblock %}
+{% block title %}Dashboard - ClinTrack{% endblock %}
 
 {% block extra_css %}
 <style>
-    .dashboard-container {
-        padding: 24px;
-        background-color: #f7fafc;
-        min-height: 100vh;
-    }
-    
-    .dashboard-header {
-        margin-bottom: 32px;
-    }
-    
-    .dashboard-title {
-        font-size: 32px;
-        font-weight: 700;
-        color: #2d3748;
-        margin-bottom: 8px;
-    }
-    
-    .dashboard-subtitle {
-        color: #718096;
-        font-size: 16px;
-    }
-    
-    /* Stats Cards */
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 20px;
-        margin-bottom: 32px;
-    }
-    
-    .stat-card {
-        background: white;
-        border-radius: 12px;
-        padding: 24px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        transition: transform 0.2s, box-shadow 0.2s;
-    }
-    
-    .stat-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-    }
-    
-    .stat-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 16px;
-    }
-    
-    .stat-icon {
-        width: 48px;
-        height: 48px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 24px;
-    }
-    
-    .stat-icon.primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-    }
-    
-    .stat-icon.success {
-        background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-        color: white;
-    }
-    
-    .stat-icon.warning {
-        background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
-        color: white;
-    }
-    
-    .stat-icon.danger {
-        background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
-        color: white;
-    }
-    
-    .stat-value {
-        font-size: 36px;
-        font-weight: 700;
-        color: #2d3748;
-        margin-bottom: 4px;
-    }
-    
-    .stat-label {
-        color: #718096;
-        font-size: 14px;
-        font-weight: 500;
-    }
-    
-    .stat-change {
-        display: inline-block;
-        padding: 4px 8px;
-        border-radius: 6px;
-        font-size: 12px;
-        font-weight: 600;
-        margin-top: 8px;
-    }
-    
-    .stat-change.positive {
-        background: #c6f6d5;
-        color: #276749;
-    }
-    
-    .stat-change.negative {
-        background: #fed7d7;
-        color: #c53030;
-    }
-    
-    /* Charts Section */
-    .charts-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-        gap: 24px;
-        margin-bottom: 32px;
-    }
-    
-    .chart-card {
-        background: white;
-        border-radius: 12px;
-        padding: 24px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    }
-    
-    .chart-header {
-        margin-bottom: 20px;
-    }
-    
-    .chart-title {
-        font-size: 18px;
-        font-weight: 600;
-        color: #2d3748;
-    }
-    
-    .chart-container {
-        height: 300px;
-    }
-    
-    /* Tables */
-    .table-card {
-        background: white;
-        border-radius: 12px;
-        padding: 24px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        margin-bottom: 24px;
-    }
-    
-    .table-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-    }
-    
-    .table-title {
-        font-size: 18px;
-        font-weight: 600;
-        color: #2d3748;
-    }
-    
-    .btn {
-        padding: 8px 16px;
-        border-radius: 6px;
-        font-size: 14px;
-        font-weight: 500;
-        cursor: pointer;
-        border: none;
-        transition: all 0.2s;
-    }
-    
-    .btn-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-    }
-    
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-    }
-    
-    .data-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-    
-    .data-table th {
-        background: #f7fafc;
-        padding: 12px;
-        text-align: left;
-        font-weight: 600;
-        color: #4a5568;
-        font-size: 14px;
-        border-bottom: 2px solid #e2e8f0;
-    }
-    
-    .data-table td {
-        padding: 12px;
-        border-bottom: 1px solid #e2e8f0;
-        color: #2d3748;
-        font-size: 14px;
-    }
-    
-    .data-table tr:hover {
-        background: #f7fafc;
-    }
-    
-    .badge {
-        display: inline-block;
-        padding: 4px 12px;
-        border-radius: 12px;
-        font-size: 12px;
-        font-weight: 600;
-    }
-    
-    .badge-success {
-        background: #c6f6d5;
-        color: #276749;
-    }
-    
-    .badge-warning {
-        background: #feebc8;
-        color: #c05621;
-    }
-    
-    .badge-danger {
-        background: #fed7d7;
-        color: #c53030;
-    }
-    
-    .badge-info {
-        background: #bee3f8;
-        color: #2c5282;
-    }
-    
-    .badge-secondary {
-        background: #e2e8f0;
-        color: #4a5568;
-    }
+.chart-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+}
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="dashboard-container">
-    <!-- Header -->
-    <div class="dashboard-header">
-        <h1 class="dashboard-title">👨‍💼 Administrator Dashboard</h1>
-        <p class="dashboard-subtitle">Welcome back, {{ user.first_name|default:user.username }}! Here's your system overview.</p>
+<div class="page-header flex-wrap">
+  <div class="header-left">
+    {% if user.role == 'admin' or user.role == 'coordinator' %}
+    <button class="btn btn-primary mb-2 mb-md-0 me-2" onclick="location.href='{% url 'participants:create' %}'">Add New Participant</button>
+    <button class="btn btn-outline-primary bg-white mb-2 mb-md-0" onclick="location.href='{% url 'reports:export' %}'">Export Reports</button>
+    {% else %}
+    <button class="btn btn-outline-primary bg-white mb-2 mb-md-0 me-2" onclick="location.href='{% url 'participants:list' %}'">View Participants</button>
+    {% endif %}
+  </div>
+  <div class="header-right d-flex flex-wrap mt-2 mt-sm-0">
+    <div class="d-flex align-items-center">
+      <a href="{% url 'dashboard' %}">
+        <p class="m-0 pe-3">Dashboard</p>
+      </a>
+      <a class="ps-3 me-4" href="#">
+        <p class="m-0">{{ today|date:"Y-m-d" }}</p>
+      </a>
     </div>
-    
-    <!-- Key Metrics -->
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-header">
-                <div>
-                    <div class="stat-value">{{ total_participants }}</div>
-                    <div class="stat-label">Total Participants</div>
-                    <span class="stat-change positive">+{{ recent_participants }} this month</span>
+    {% if user.role != 'viewer' %}
+    <button type="button" class="btn btn-primary mt-2 mt-sm-0 btn-icon-text" onclick="location.href='{% url 'susars:create' %}'">
+      <i class="mdi mdi-plus-circle"></i> Report SUSAR
+    </button>
+    {% endif %}
+  </div>
+</div>
+
+<!-- first row starts here -->
+<div class="row">
+  <div class="col-xl-9 stretch-card grid-margin">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex justify-content-between flex-wrap">
+          <div>
+            <div class="card-title mb-0">Participant Enrollment Trends</div>
+            <h3 class="font-weight-bold mb-0">{{ total_participants }}</h3>
+          </div>
+          <div>
+            <div class="d-flex flex-wrap pt-2 justify-content-between sales-header-right">
+              <div class="d-flex me-5">
+                <button type="button" class="btn btn-social-icon btn-outline-sales">
+                  <i class="mdi mdi-account-multiple"></i>
+                </button>
+                <div class="ps-2">
+                  <h4 class="mb-0 font-weight-semibold head-count">{{ active_participants }}</h4>
+                  <span class="font-10 font-weight-semibold text-muted">ACTIVE</span>
                 </div>
-                <div class="stat-icon primary">👥</div>
-            </div>
-        </div>
-        
-        <div class="stat-card">
-            <div class="stat-header">
-                <div>
-                    <div class="stat-value">{{ active_participants }}</div>
-                    <div class="stat-label">Active Participants</div>
-                    <span class="stat-change positive">{{ active_participants|floatformat:0 }}% active rate</span>
+              </div>
+              <div class="d-flex me-3 mt-2 mt-sm-0">
+                <button type="button" class="btn btn-social-icon btn-outline-sales profit">
+                  <i class="mdi mdi-check-circle text-info"></i>
+                </button>
+                <div class="ps-2">
+                  <h4 class="mb-0 font-weight-semibold head-count">{{ completed_participants }}</h4>
+                  <span class="font-10 font-weight-semibold text-muted">COMPLETED</span>
                 </div>
-                <div class="stat-icon success">✅</div>
+              </div>
             </div>
+          </div>
         </div>
-        
-        <div class="stat-card">
-            <div class="stat-header">
-                <div>
-                    <div class="stat-value">{{ total_susars }}</div>
-                    <div class="stat-label">Total SUSARs</div>
-                    <span class="stat-change {% if critical_susars > 0 %}negative{% else %}positive{% endif %}">{{ critical_susars }} critical</span>
-                </div>
-                <div class="stat-icon warning">⚠️</div>
-            </div>
+        <p class="text-muted font-13 mt-2 mt-sm-0">Monthly enrollment tracking. <a class="text-muted font-13" href="{% url 'reports:index' %}"><u>View detailed reports</u></a></p>
+        <div class="chart-container">
+          <canvas id="enrollmentChart"></canvas>
         </div>
-        
-        <div class="stat-card">
-            <div class="stat-header">
-                <div>
-                    <div class="stat-value">{{ total_studies }}</div>
-                    <div class="stat-label">Active Studies</div>
-                    <span class="stat-change positive">All operational</span>
-                </div>
-                <div class="stat-icon danger">📚</div>
-            </div>
-        </div>
+      </div>
     </div>
-    
-    <!-- Charts -->
-    <div class="charts-grid">
-        <!-- Enrollment Trends -->
-        <div class="chart-card">
-            <div class="chart-header">
-                <h3 class="chart-title">📈 Enrollment Trends (12 Months)</h3>
-            </div>
-            <div class="chart-container">
-                <canvas id="enrollmentChart"></canvas>
-            </div>
+  </div>
+  <div class="col-xl-3 stretch-card grid-margin">
+    <div class="card card-img">
+      <div class="card-body d-flex align-items-center">
+        <div class="text-white">
+          <h1 class="font-20 font-weight-semibold mb-0">ClinTrack</h1>
+          <h1 class="font-20 font-weight-semibold">System</h1>
+          <p>Clinical Research Management</p>
+          <p class="font-10 font-weight-semibold">{{ user_role }} Dashboard</p>
+          <button class="btn bg-white font-12" onclick="location.href='{% url 'participants:list' %}'">View Participants</button>
         </div>
-        
-        <!-- SUSAR Trends -->
-        <div class="chart-card">
-            <div class="chart-header">
-                <h3 class="chart-title">⚠️ SUSAR Trends (12 Months)</h3>
-            </div>
-            <div class="chart-container">
-                <canvas id="susarChart"></canvas>
-            </div>
-        </div>
-        
-        <!-- Status Distribution -->
-        <div class="chart-card">
-            <div class="chart-header">
-                <h3 class="chart-title">📊 Participant Status Distribution</h3>
-            </div>
-            <div class="chart-container">
-                <canvas id="statusChart"></canvas>
-            </div>
-        </div>
-        
-        <!-- SUSAR Severity -->
-        <div class="chart-card">
-            <div class="chart-header">
-                <h3 class="chart-title">🎯 SUSAR Severity Breakdown</h3>
-            </div>
-            <div class="chart-container">
-                <canvas id="severityChart"></canvas>
-            </div>
-        </div>
+      </div>
     </div>
-    
-    <!-- Study Breakdown Table -->
-    <div class="table-card">
-        <div class="table-header">
-            <h3 class="table-title">📚 Study Overview</h3>
+  </div>
+</div>
+
+<!-- chart row starts here -->
+<div class="row">
+  <div class="col-sm-6 stretch-card grid-margin">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex justify-content-between">
+          <div class="card-title">Participants <small class="d-block text-muted">Last 30 Days</small></div>
+          <div class="d-flex text-muted font-20">
+            <i class="mdi mdi-printer mouse-pointer" onclick="window.print()"></i>
+            <i class="mdi mdi-help-circle-outline ms-2 mouse-pointer"></i>
+          </div>
         </div>
-        <table class="data-table">
+        <h3 class="font-weight-bold mb-0">{{ monthly_participants }} <span class="text-success h5">{{ monthly_growth }}%<i class="mdi mdi-arrow-up"></i></span></h3>
+        <span class="text-muted font-13">Daily enrollment rate</span>
+        <div class="line-chart-wrapper">
+          <canvas id="linechart" height="80"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 stretch-card grid-margin">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex justify-content-between">
+          <div class="card-title">SUSAR Reports <small class="d-block text-muted">Last 30 Days</small></div>
+          <div class="d-flex text-muted font-20">
+            <i class="mdi mdi-printer mouse-pointer" onclick="window.print()"></i>
+            <i class="mdi mdi-help-circle-outline ms-2 mouse-pointer"></i>
+          </div>
+        </div>
+        <h3 class="font-weight-bold mb-0">{{ total_susars }} <span class="text-warning h5">{{ pending_susars }} Pending</span></h3>
+        <span class="text-muted font-13">Total adverse events</span>
+        <div class="bar-chart-wrapper">
+          <canvas id="barchart" height="80"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- image card row starts here -->
+<div class="row">
+  <div class="col-sm-4 stretch-card grid-margin">
+    <div class="card">
+      <div class="card-body p-0">
+        <img class="img-fluid w-100" src="{% static 'assets/images/dashboard/img_1.jpg' %}" alt="" />
+      </div>
+      <div class="card-body px-3 text-dark">
+        <div class="d-flex justify-content-between">
+          <p class="text-muted font-13 mb-0">ACTIVE STUDIES</p>
+          <i class="mdi mdi-flask-outline"></i>
+        </div>
+        <h5 class="font-weight-semibold">{{ active_studies }} Active Research Studies</h5>
+        <div class="d-flex justify-content-between font-weight-semibold">
+          <p class="mb-0"><i class="mdi mdi-star star-color pe-1"></i>In Progress</p>
+          <p class="mb-0"><a href="{% url 'studies:list' %}">View All</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-4 stretch-card grid-margin">
+    <div class="card">
+      <div class="card-body p-0">
+        <img class="img-fluid w-100" src="{% static 'assets/images/dashboard/img_2.jpg' %}" alt="" />
+      </div>
+      <div class="card-body px-3 text-dark">
+        <div class="d-flex justify-content-between">
+          <p class="text-muted font-13 mb-0">PARTICIPANT STATUS</p>
+          <i class="mdi mdi-account-check"></i>
+        </div>
+        <h5 class="font-weight-semibold">Screening & Enrollment</h5>
+        <div class="d-flex justify-content-between font-weight-semibold">
+          <p class="mb-0"><i class="mdi mdi-star star-color pe-1"></i>{{ screening_participants }} Screening</p>
+          <p class="mb-0"><a href="{% url 'participants:list' %}">View</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-4 stretch-card grid-margin">
+    <div class="card">
+      <div class="card-body p-0">
+        <img class="img-fluid w-100" src="{% static 'assets/images/dashboard/img_3.jpg' %}" alt="" />
+      </div>
+      <div class="card-body px-3 text-dark">
+        <div class="d-flex justify-content-between">
+          <p class="text-muted font-13 mb-0">COMPLIANCE</p>
+          <i class="mdi mdi-shield-check"></i>
+        </div>
+        <h5 class="font-weight-semibold">Data Quality & Reporting</h5>
+        <div class="d-flex justify-content-between font-weight-semibold">
+          <p class="mb-0"><i class="mdi mdi-star star-color pe-1"></i>Excellent</p>
+          {% if user.role == 'admin' %}
+          <p class="mb-0"><a href="{% url 'audit:logs' %}">Audit Trail</a></p>
+          {% else %}
+          <p class="mb-0">Monitored</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- table row starts here -->
+<div class="row">
+  <div class="col-xl-4 grid-margin">
+    <div class="card card-stat stretch-card mb-3">
+      <div class="card-body">
+        <div class="d-flex justify-content-between">
+          <div class="text-white">
+            <h3 class="font-weight-bold mb-0">{{ total_participants }}</h3>
+            <h6>Total Participants</h6>
+            <div class="badge badge-success">Active System</div>
+          </div>
+          <div class="flot-bar-wrapper">
+            <div id="column-chart" class="flot-chart"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card stretch-card mb-3">
+      <div class="card-body d-flex flex-wrap justify-content-between">
+        <div>
+          <h4 class="font-weight-semibold mb-1 text-black">Active Participants</h4>
+          <h6 class="text-muted">Currently in Studies</h6>
+        </div>
+        <h3 class="text-success font-weight-bold">{{ active_participants }}</h3>
+      </div>
+    </div>
+    <div class="card stretch-card mb-3">
+      <div class="card-body d-flex flex-wrap justify-content-between">
+        <div>
+          <h4 class="font-weight-semibold mb-1 text-black">Completed Studies</h4>
+          <h6 class="text-muted">Successfully Completed</h6>
+        </div>
+        <h3 class="text-success font-weight-bold">{{ completed_participants }}</h3>
+      </div>
+    </div>
+    <div class="card mt-3">
+      <div class="card-body d-flex flex-wrap justify-content-between">
+        <div>
+          <h4 class="font-weight-semibold mb-1 text-black">Lost to Follow-up</h4>
+          <h6 class="text-muted">Requires attention</h6>
+        </div>
+        <h3 class="text-danger font-weight-bold">{{ lost_participants }}</h3>
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-8 stretch-card grid-margin">
+    <div class="card">
+      <div class="card-body pb-0">
+        <h4 class="card-title mb-0">Recent Participants</h4>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table custom-table text-dark">
             <thead>
-                <tr>
-                    <th>Study Name</th>
-                    <th>Code</th>
-                    <th>Total Participants</th>
-                    <th>Active</th>
-                    <th>SUSARs</th>
-                    <th>Status</th>
-                </tr>
+              <tr>
+                <th>Participant ID</th>
+                <th>Name</th>
+                <th>Study</th>
+                <th>Status</th>
+                <th>Enrollment Date</th>
+              </tr>
             </thead>
             <tbody>
-                {% for study in study_breakdown %}
-                <tr>
-                    <td><strong>{{ study.name }}</strong></td>
-                    <td><span class="badge badge-info">{{ study.code }}</span></td>
-                    <td>{{ study.participant_count }}</td>
-                    <td>{{ study.active_count }}</td>
-                    <td>{{ study.susar_count }}</td>
-                    <td>
-                        {% if study.is_active %}
-                            <span class="badge badge-success">Active</span>
-                        {% else %}
-                            <span class="badge badge-secondary">Inactive</span>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
+              {% for participant in recent_participants %}
+              <tr>
+                <td><a href="{% url 'participants:detail' participant.id %}">{{ participant.participant_id }}</a></td>
+                <td>{{ participant.get_full_name }}</td>
+                <td>{{ participant.study.code }}</td>
+                <td>
+                  {% if participant.status == 'active' %}
+                  <span class="badge badge-success">Active</span>
+                  {% elif participant.status == 'screening' %}
+                  <span class="badge badge-warning">Screening</span>
+                  {% elif participant.status == 'completed' %}
+                  <span class="badge badge-info">Completed</span>
+                  {% elif participant.status == 'lost' %}
+                  <span class="badge badge-danger">Lost</span>
+                  {% else %}
+                  <span class="badge badge-secondary">{{ participant.get_status_display }}</span>
+                  {% endif %}
+                </td>
+                <td>{{ participant.enrollment_date|date:"Y-m-d"|default:"-" }}</td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="5" class="text-center">No participants found</td>
+              </tr>
+              {% endfor %}
             </tbody>
-        </table>
-    </div>
-    
-    <!-- Recent Participants -->
-    <div class="table-card">
-        <div class="table-header">
-            <h3 class="table-title">🆕 Recent Participants</h3>
-            <button class="btn btn-primary">View All</button>
+          </table>
         </div>
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Participant ID</th>
-                    <th>Name</th>
-                    <th>Study</th>
-                    <th>Status</th>
-                    <th>Location</th>
-                    <th>Added</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for participant in recent_participants_list %}
-                <tr>
-                    <td><strong>{{ participant.participant_id }}</strong></td>
-                    <td>{{ participant.first_name }} {{ participant.last_name }}</td>
-                    <td><span class="badge badge-info">{{ participant.study.code }}</span></td>
-                    <td>
-                        {% if participant.status == 'active' %}
-                            <span class="badge badge-success">Active</span>
-                        {% elif participant.status == 'screening' %}
-                            <span class="badge badge-warning">Screening</span>
-                        {% elif participant.status == 'completed' %}
-                            <span class="badge badge-info">Completed</span>
-                        {% else %}
-                            <span class="badge badge-secondary">{{ participant.status|title }}</span>
-                        {% endif %}
-                    </td>
-                    <td>{{ participant.location }}</td>
-                    <td>{{ participant.created_at|date:"M d, Y" }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <a class="text-black font-13 d-block pt-2 pb-2 pb-lg-0 font-weight-bold ps-4" href="{% url 'participants:list' %}">Show more</a>
+      </div>
     </div>
-    
-    <!-- Recent SUSARs -->
-    <div class="table-card">
-        <div class="table-header">
-            <h3 class="table-title">⚠️ Recent SUSARs</h3>
-            <button class="btn btn-primary">View All</button>
+  </div>
+</div>
+
+<!-- doughnut chart row starts -->
+<div class="row">
+  <div class="col-sm-12 stretch-card grid-margin">
+    <div class="card">
+      <div class="row">
+        <div class="col-md-4">
+          <div class="card border-0">
+            <div class="card-body">
+              <div class="card-title">Participant Status Distribution</div>
+              <div class="d-flex flex-wrap">
+                <div class="doughnut-wrapper w-50">
+                  <canvas id="statusChart" width="100" height="100"></canvas>
+                </div>
+                <div id="status-legend" class="pl-lg-3 rounded-legend align-self-center flex-grow legend-vertical legend-bottom-left"></div>
+              </div>
+            </div>
+          </div>
         </div>
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>SUSAR ID</th>
-                    <th>Participant</th>
-                    <th>Severity</th>
-                    <th>Outcome</th>
-                    <th>Onset Date</th>
-                    <th>Reported</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for susar in recent_susars_list %}
-                <tr>
-                    <td><strong>{{ susar.susar_id }}</strong></td>
-                    <td>{{ susar.participant.participant_id }}</td>
-                    <td>
-                        {% if susar.severity == 'severe' or susar.severity == 'life_threatening' or susar.severity == 'fatal' %}
-                            <span class="badge badge-danger">{{ susar.get_severity_display }}</span>
-                        {% elif susar.severity == 'moderate' %}
-                            <span class="badge badge-warning">{{ susar.get_severity_display }}</span>
-                        {% else %}
-                            <span class="badge badge-success">{{ susar.get_severity_display }}</span>
-                        {% endif %}
-                    </td>
-                    <td>{{ susar.get_outcome_display }}</td>
-                    <td>{{ susar.onset_date|date:"M d, Y" }}</td>
-                    <td>
-                        {% if susar.reported_to_irb %}
-                            <span class="badge badge-success">IRB ✓</span>
-                        {% else %}
-                            <span class="badge badge-warning">Pending</span>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="col-md-4">
+          <div class="card border-0">
+            <div class="card-body">
+              <div class="card-title">Study Distribution</div>
+              <div class="d-flex flex-wrap">
+                <div class="doughnut-wrapper w-50">
+                  <canvas id="studyChart" width="100" height="100"></canvas>
+                </div>
+                <div id="study-legend" class="pl-lg-3 rounded-legend align-self-center flex-grow legend-vertical legend-bottom-left"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card border-0">
+            <div class="card-body">
+              <div class="card-title">Gender Distribution</div>
+              <div class="d-flex flex-wrap">
+                <div class="doughnut-wrapper w-50">
+                  <canvas id="genderChart" width="100" height="100"></canvas>
+                </div>
+                <div id="gender-legend" class="pl-lg-3 rounded-legend align-self-center flex-grow legend-vertical legend-bottom-left"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
+</div>
+
+<!-- last row starts here -->
+<div class="row">
+  <div class="col-sm-6 col-xl-4 stretch-card grid-margin">
+    <div class="card">
+      <div class="card-body">
+        <div class="card-title mb-2">Upcoming Follow-ups ({{ upcoming_followups|length }})</div>
+        <h3 class="mb-3">{{ today|date:"d F Y" }}</h3>
+        {% for followup in upcoming_followups %}
+        <div class="d-flex border-bottom {% if not forloop.last %}py-3{% else %}pt-3{% endif %}">
+          <div class="form-check">
+            <label class="form-check-label">
+              <input type="checkbox" class="form-check-input" /></label>
+          </div>
+          <div class="ps-2">
+            <span class="font-12 text-muted">{{ followup.date|date:"D, M d, g.ia" }}</span>
+            <p class="m-0 text-black">{{ followup.participant.participant_id }} - {{ followup.description }}</p>
+          </div>
+        </div>
+        {% empty %}
+        <div class="d-flex pt-3">
+          <p class="text-muted">No upcoming follow-ups scheduled</p>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-4 stretch-card grid-margin">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex border-bottom mb-4 pb-2">
+          <div class="hexagon">
+            <div class="hex-mid hexagon-warning">
+              <i class="mdi mdi-account-multiple"></i>
+            </div>
+          </div>
+          <div class="ps-4">
+            <h4 class="font-weight-bold text-warning mb-0">{{ total_participants }}</h4>
+            <h6 class="text-muted">Total Participants</h6>
+          </div>
+        </div>
+        <div class="d-flex border-bottom mb-4 pb-2">
+          <div class="hexagon">
+            <div class="hex-mid hexagon-danger">
+              <i class="mdi mdi-alert-circle"></i>
+            </div>
+          </div>
+          <div class="ps-4">
+            <h4 class="font-weight-bold text-danger mb-0">{{ total_susars }}</h4>
+            <h6 class="text-muted">SUSAR Reports</h6>
+          </div>
+        </div>
+        <div class="d-flex border-bottom mb-4 pb-2">
+          <div class="hexagon">
+            <div class="hex-mid hexagon-success">
+              <i class="mdi mdi-flask"></i>
+            </div>
+          </div>
+          <div class="ps-4">
+            <h4 class="font-weight-bold text-success mb-0">{{ active_studies }}</h4>
+            <h6 class="text-muted">Active Studies</h6>
+          </div>
+        </div>
+        <div class="d-flex border-bottom mb-4 pb-2">
+          <div class="hexagon">
+            <div class="hex-mid hexagon-info">
+              <i class="mdi mdi-account-check"></i>
+            </div>
+          </div>
+          <div class="ps-4">
+            <h4 class="font-weight-bold text-info mb-0">{{ active_participants }}</h4>
+            <h6 class="text-muted">Active Now</h6>
+          </div>
+        </div>
+        <div class="d-flex">
+          <div class="hexagon">
+            <div class="hex-mid hexagon-primary">
+              <i class="mdi mdi-check-circle"></i>
+            </div>
+          </div>
+          <div class="ps-4">
+            <h4 class="font-weight-bold text-primary mb-0">{{ completed_participants }}</h4>
+            <h6 class="text-muted mb-0">Completed</h6>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-4 stretch-card grid-margin">
+    <div class="card color-card-wrapper">
+      <div class="card-body">
+        <img class="img-fluid card-top-img w-100" src="{% static 'assets/images/dashboard/img_5.jpg' %}" alt="" />
+        <div class="d-flex flex-wrap justify-content-around color-card-outer">
+          <div class="col-6 p-0 mb-4">
+            <div class="color-card primary m-auto">
+              <i class="mdi mdi-account-check"></i>
+              <p class="font-weight-semibold mb-0">Active</p>
+              <span class="small">{{ active_participants }} Participants</span>
+            </div>
+          </div>
+          <div class="col-6 p-0 mb-4">
+            <div class="color-card bg-success m-auto">
+              <i class="mdi mdi-check-all"></i>
+              <p class="font-weight-semibold mb-0">Completed</p>
+              <span class="small">{{ completed_participants }} Studies</span>
+            </div>
+          </div>
+          <div class="col-6 p-0">
+            <div class="color-card bg-info m-auto">
+              <i class="mdi mdi-account-search"></i>
+              <p class="font-weight-semibold mb-0">Screening</p>
+              <span class="small">{{ screening_participants }} New</span>
+            </div>
+          </div>
+          <div class="col-6 p-0">
+            <div class="color-card bg-danger m-auto">
+              <i class="mdi mdi-alert"></i>
+              <p class="font-weight-semibold mb-0">Follow-up</p>
+              <span class="small">{{ pending_susars }} Pending</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-    // Chart.js Configuration
-    const chartColors = {
-        primary: '#667eea',
-        success: '#48bb78',
-        warning: '#ed8936',
-        danger: '#f56565',
-        info: '#4299e1',
-    };
-    
-    // Enrollment Trends Chart
-    const enrollmentCtx = document.getElementById('enrollmentChart').getContext('2d');
-    new Chart(enrollmentCtx, {
+// Parse JSON data from Django context
+const enrollmentData = {{ enrollment_monthly_trend|safe }};
+const enrollmentTrend = {{ enrollment_trend|safe }};
+const susarTrend = {{ susar_trend|safe }};
+const statusData = {{ status_data|safe }};
+const studyData = {{ study_data|safe }};
+const genderData = {{ gender_data|safe }};
+
+// Main Enrollment Chart (Line Chart)
+if (document.getElementById('enrollmentChart')) {
+    const ctx = document.getElementById('enrollmentChart').getContext('2d');
+    new Chart(ctx, {
         type: 'line',
         data: {
-            labels: [{% for item in enrollment_trends %}'{{ item.month|date:"M Y" }}'{% if not forloop.last %},{% endif %}{% endfor %}],
+            labels: enrollmentData.labels,
             datasets: [{
-                label: 'Enrollments',
-                data: [{% for item in enrollment_trends %}{{ item.count }}{% if not forloop.last %},{% endif %}{% endfor %}],
-                borderColor: chartColors.primary,
-                backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                tension: 0.4,
-                fill: true
+                label: 'Monthly Enrollments',
+                data: enrollmentData.data,
+                borderColor: '#00d25b',
+                backgroundColor: 'rgba(0, 210, 91, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: { display: false }
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
             }
         }
     });
-    
-    // SUSAR Trends Chart
-    const susarCtx = document.getElementById('susarChart').getContext('2d');
-    new Chart(susarCtx, {
+}
+
+// Daily Enrollment Line Chart
+if (document.getElementById('linechart')) {
+    const ctx = document.getElementById('linechart').getContext('2d');
+    new Chart(ctx, {
         type: 'line',
         data: {
-            labels: [{% for item in susar_trends %}'{{ item.month|date:"M Y" }}'{% if not forloop.last %},{% endif %}{% endfor %}],
+            labels: enrollmentTrend.labels.slice(-15), // Last 15 days
             datasets: [{
-                label: 'SUSARs',
-                data: [{% for item in susar_trends %}{{ item.count }}{% if not forloop.last %},{% endif %}{% endfor %}],
-                borderColor: chartColors.warning,
-                backgroundColor: 'rgba(237, 137, 54, 0.1)',
-                tension: 0.4,
-                fill: true
+                label: 'Daily Participants',
+                data: enrollmentTrend.data.slice(-15),
+                borderColor: '#00d25b',
+                backgroundColor: 'rgba(0, 210, 91, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.3
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: { display: false }
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                },
+                x: {
+                    display: false
+                }
             }
         }
     });
-    
-    // Status Distribution Chart
-    const statusCtx = document.getElementById('statusChart').getContext('2d');
-    new Chart(statusCtx, {
-        type: 'doughnut',
-        data: {
-            labels: [{% for item in status_breakdown %}'{{ item.status|title }}'{% if not forloop.last %},{% endif %}{% endfor %}],
-            datasets: [{
-                data: [{% for item in status_breakdown %}{{ item.count }}{% if not forloop.last %},{% endif %}{% endfor %}],
-                backgroundColor: [
-                    chartColors.success,
-                    chartColors.info,
-                    chartColors.warning,
-                    chartColors.danger,
-                    chartColors.primary
-                ]
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false
-        }
-    });
-    
-    // SUSAR Severity Chart
-    const severityCtx = document.getElementById('severityChart').getContext('2d');
-    new Chart(severityCtx, {
+}
+
+// SUSAR Bar Chart
+if (document.getElementById('barchart')) {
+    const ctx = document.getElementById('barchart').getContext('2d');
+    new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: [{% for item in susar_severity %}'{{ item.severity|title }}'{% if not forloop.last %},{% endif %}{% endfor %}],
+            labels: susarTrend.labels.slice(-15), // Last 15 days
             datasets: [{
-                label: 'Count',
-                data: [{% for item in susar_severity %}{{ item.count }}{% if not forloop.last %},{% endif %}{% endfor %}],
-                backgroundColor: [chartColors.success, chartColors.warning, chartColors.danger]
+                label: 'Daily SUSARs',
+                data: susarTrend.data.slice(-15),
+                backgroundColor: '#ffab00',
+                borderColor: '#ffab00',
+                borderWidth: 1
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: { display: false }
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                },
+                x: {
+                    display: false
+                }
             }
         }
     });
+}
+
+// Status Doughnut Chart
+if (document.getElementById('statusChart')) {
+    const ctx = document.getElementById('statusChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: statusData.labels,
+            datasets: [{
+                data: statusData.data,
+                backgroundColor: statusData.colors,
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+    
+    // Generate legend
+    const legend = document.getElementById('status-legend');
+    let legendHTML = '<ul class="legend-horizontal">';
+    statusData.labels.forEach((label, index) => {
+        legendHTML += `<li><span style="background-color: ${statusData.colors[index]}"></span>${label}: ${statusData.data[index]}</li>`;
+    });
+    legendHTML += '</ul>';
+    legend.innerHTML = legendHTML;
+}
+
+// Study Distribution Doughnut Chart
+if (document.getElementById('studyChart')) {
+    const ctx = document.getElementById('studyChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: studyData.labels,
+            datasets: [{
+                data: studyData.data,
+                backgroundColor: studyData.colors,
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+    
+    // Generate legend
+    const legend = document.getElementById('study-legend');
+    let legendHTML = '<ul class="legend-horizontal">';
+    studyData.labels.forEach((label, index) => {
+        legendHTML += `<li><span style="background-color: ${studyData.colors[index]}"></span>${label}: ${studyData.data[index]}</li>`;
+    });
+    legendHTML += '</ul>';
+    legend.innerHTML = legendHTML;
+}
+
+// Gender Distribution Doughnut Chart
+if (document.getElementById('genderChart')) {
+    const ctx = document.getElementById('genderChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: genderData.labels,
+            datasets: [{
+                data: genderData.data,
+                backgroundColor: genderData.colors,
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+    
+    // Generate legend
+    const legend = document.getElementById('gender-legend');
+    let legendHTML = '<ul class="legend-horizontal">';
+    genderData.labels.forEach((label, index) => {
+        legendHTML += `<li><span style="background-color: ${genderData.colors[index]}"></span>${label}: ${genderData.data[index]}</li>`;
+    });
+    legendHTML += '</ul>';
+    legend.innerHTML = legendHTML;
+}
 </script>
 {% endblock %}
