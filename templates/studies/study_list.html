@@ -6,6 +6,497 @@
 
 {% block title %}Studies - ClinTrack{% endblock %}
 
+{% block extra_css %}
+<style>
+/* Apple-like typography */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Clean breadcrumb */
+.breadcrumb {
+    background: transparent;
+    padding: 0;
+    margin-bottom: 0;
+    font-size: 0.8125rem;
+}
+
+.breadcrumb-item {
+    color: #6c757d;
+}
+
+.breadcrumb-item a {
+    color: #667eea;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.breadcrumb-item.active {
+    color: #495057;
+    font-weight: 500;
+}
+
+/* Page header */
+.page-header {
+    padding: 1rem 0;
+    margin-bottom: 1.5rem;
+}
+
+.page-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #2a2a2a;
+    margin-bottom: 0.25rem;
+}
+
+/* Card design */
+.card {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+/* Header with action buttons */
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.card-header h4 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #2a2a2a;
+    margin: 0;
+}
+
+/* Button styling */
+.btn {
+    border-radius: 6px;
+    padding: 0.625rem 1.25rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.btn-sm {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    border-radius: 4px;
+    min-width: 60px;
+}
+
+.btn-info {
+    background: rgba(0, 167, 255, 0.1);
+    color: #00a7ff;
+    border: 1px solid rgba(0, 167, 255, 0.2);
+}
+
+.btn-info:hover {
+    background: rgba(0, 167, 255, 0.2);
+    transform: translateY(-1px);
+}
+
+.btn-warning {
+    background: rgba(255, 171, 0, 0.1);
+    color: #ffab00;
+    border: 1px solid rgba(255, 171, 0, 0.2);
+}
+
+.btn-warning:hover {
+    background: rgba(255, 171, 0, 0.2);
+    transform: translateY(-1px);
+}
+
+/* Table styling */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 6px;
+    border: 1px solid #f0f0f0;
+}
+
+.table {
+    margin-bottom: 0;
+    font-size: 0.8125rem;
+    color: #495057;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.table thead th {
+    border: none;
+    background: #f8f9fa;
+    font-weight: 600;
+    color: #6c757d;
+    padding: 0.875rem 1rem;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.table thead th:first-child {
+    border-radius: 6px 0 0 0;
+}
+
+.table thead th:last-child {
+    border-radius: 0 6px 0 0;
+}
+
+.table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.table tbody tr:hover {
+    background-color: rgba(102, 126, 234, 0.03);
+}
+
+/* Study code styling */
+.study-code {
+    font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #667eea;
+    letter-spacing: -0.25px;
+}
+
+/* Study name styling */
+.study-name {
+    font-weight: 500;
+    color: #2a2a2a;
+    margin-bottom: 0.25rem;
+}
+
+.study-description {
+    font-size: 0.75rem;
+    color: #6c757d;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Date styling */
+.date-cell {
+    font-size: 0.75rem;
+    color: #495057;
+}
+
+.date-label {
+    display: block;
+    font-size: 0.6875rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: 0.125rem;
+}
+
+/* Participant count */
+.participant-count {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    color: #2a2a2a;
+}
+
+.participant-count i {
+    color: #00d25b;
+    font-size: 1rem;
+}
+
+/* Badge styling */
+.badge {
+    padding: 0.35rem 0.65rem;
+    border-radius: 4px;
+    font-weight: 500;
+    font-size: 0.6875rem;
+    letter-spacing: 0.3px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.badge-success {
+    background: rgba(40, 199, 111, 0.1);
+    color: #28c76f;
+    border: 1px solid rgba(40, 199, 111, 0.2);
+}
+
+.badge-secondary {
+    background: rgba(108, 117, 125, 0.1);
+    color: #6c757d;
+    border: 1px solid rgba(108, 117, 125, 0.2);
+}
+
+/* Progress bar for participant enrollment */
+.enrollment-progress {
+    width: 100px;
+    height: 4px;
+    background: #e9ecef;
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 0.25rem;
+}
+
+.enrollment-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #00d25b 0%, #00b248 100%);
+    border-radius: 2px;
+}
+
+/* Action buttons */
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: nowrap;
+}
+
+/* Empty state */
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #6c757d;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    color: #e0e0e0;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.empty-state h5 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    font-size: 0.875rem;
+    margin-bottom: 1.5rem;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Stats summary */
+.stats-summary {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.stat-card {
+    background: #f8f9fa;
+    border-radius: 6px;
+    padding: 1rem;
+    min-width: 120px;
+    flex: 1;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #2a2a2a;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1.25rem;
+    }
+    
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .stats-summary {
+        gap: 1rem;
+    }
+    
+    .stat-card {
+        min-width: calc(50% - 0.5rem);
+    }
+    
+    .table thead th,
+    .table tbody td {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.75rem;
+    }
+    
+    .btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.75rem;
+    }
+    
+    .page-title {
+        font-size: 1.125rem;
+    }
+    
+    /* Hide less important columns on mobile */
+    .table td:nth-child(3), /* Start Date */
+    .table th:nth-child(3),
+    .table td:nth-child(4), /* End Date */
+    .table th:nth-child(4) {
+        display: none;
+    }
+}
+
+@media (max-width: 576px) {
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .table td:nth-child(5), /* Participants */
+    .table th:nth-child(5) {
+        display: none;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    
+    .btn-sm {
+        min-width: 0;
+        justify-content: center;
+    }
+    
+    .empty-state {
+        padding: 2rem 1rem;
+    }
+}
+
+/* Focus states for accessibility */
+.form-control:focus,
+.btn:focus {
+    outline: 2px solid rgba(102, 126, 234, 0.5);
+    outline-offset: 2px;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .card {
+        background: #2d2d2d;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+    }
+    
+    .page-title,
+    .card-header h4,
+    .study-name,
+    .stat-value {
+        color: #ffffff;
+    }
+    
+    .card-header {
+        border-bottom-color: #404040;
+    }
+    
+    .study-code {
+        color: #8a9cff;
+    }
+    
+    .study-description {
+        color: #b0b0b0;
+    }
+    
+    .table {
+        color: #e0e0e0;
+        border-color: #404040;
+    }
+    
+    .table thead th {
+        background: #3d3d3d;
+        color: #b0b0b0;
+    }
+    
+    .table tbody td {
+        border-bottom-color: #404040;
+    }
+    
+    .table tbody tr:hover {
+        background-color: rgba(102, 126, 234, 0.1);
+    }
+    
+    .stat-card {
+        background: #3d3d3d;
+    }
+    
+    .stat-label {
+        color: #b0b0b0;
+    }
+    
+    .date-cell {
+        color: #e0e0e0;
+    }
+    
+    .date-label {
+        color: #b0b0b0;
+    }
+    
+    .empty-state i {
+        color: #505050;
+    }
+    
+    .empty-state h5 {
+        color: #e0e0e0;
+    }
+    
+    .enrollment-progress {
+        background: #404040;
+    }
+}
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="content-wrapper">
   <div class="page-header">
@@ -20,12 +511,35 @@
 
   <div class="row">
     <div class="col-lg-12">
+      <!-- Stats Summary -->
+      <div class="stats-summary">
+        <div class="stat-card">
+          <div class="stat-value">{{ total_studies }}</div>
+          <div class="stat-label">Total Studies</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">{{ active_studies }}</div>
+          <div class="stat-label">Active Studies</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">{{ total_participants }}</div>
+          <div class="stat-label">Total Participants</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">{{ avg_participants_per_study|floatformat:1 }}</div>
+          <div class="stat-label">Avg per Study</div>
+        </div>
+      </div>
+
       <div class="card">
         <div class="card-body">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4 class="card-title">All Studies</h4>
+          <div class="card-header">
+            <h4>All Studies</h4>
             {% if user.role == 'admin' %}
-            <a href="{% url 'study_create' %}" class="btn btn-primary">Create Study</a>
+            <a href="{% url 'study_create' %}" class="btn btn-primary">
+              <i class="mdi mdi-plus-circle"></i>
+              Create Study
+            </a>
             {% endif %}
           </div>
 
@@ -33,10 +547,9 @@
             <table class="table table-hover">
               <thead>
                 <tr>
-                  <th>Code</th>
-                  <th>Name</th>
-                  <th>Start Date</th>
-                  <th>End Date</th>
+                  <th>Study Code</th>
+                  <th>Study Details</th>
+                  <th>Timeline</th>
                   <th>Participants</th>
                   <th>Status</th>
                   <th>Actions</th>
@@ -45,37 +558,139 @@
               <tbody>
                 {% for study in studies %}
                 <tr>
-                  <td>{{ study.code }}</td>
-                  <td>{{ study.name }}</td>
-                  <td>{{ study.start_date|default:"Not set" }}</td>
-                  <td>{{ study.end_date|default:"Not set" }}</td>
-                  <td>{{ study.participant_count }}</td>
+                  <!-- Study Code -->
                   <td>
-                    {% if study.is_active %}
-                    <span class="badge badge-success">Active</span>
-                    {% else %}
-                    <span class="badge badge-secondary">Inactive</span>
+                    <div class="study-code">{{ study.code }}</div>
+                  </td>
+                  
+                  <!-- Study Details -->
+                  <td>
+                    <div class="study-name">{{ study.name }}</div>
+                    {% if study.description %}
+                    <div class="study-description">{{ study.description|truncatechars:80 }}</div>
                     {% endif %}
                   </td>
+                  
+                  <!-- Timeline -->
                   <td>
-                    <a href="{% url 'study_detail' study.pk %}" class="btn btn-sm btn-info">View</a>
-                    {% if user.role == 'admin' %}
-                    <a href="{% url 'study_update' study.pk %}" class="btn btn-sm btn-warning">Edit</a>
+                    <div class="date-cell">
+                      <span class="date-label">Start</span>
+                      {{ study.start_date|date:"M d, Y"|default:"Not set" }}
+                    </div>
+                    <div class="date-cell">
+                      <span class="date-label">End</span>
+                      {{ study.end_date|date:"M d, Y"|default:"Not set" }}
+                    </div>
+                  </td>
+                  
+                  <!-- Participants -->
+                  <td>
+                    <div class="participant-count">
+                      <i class="mdi mdi-account-multiple"></i>
+                      {{ study.participant_count }}
+                    </div>
+                    {% if study.target_enrollment %}
+                    <div class="enrollment-progress">
+                      <div class="enrollment-progress-bar" 
+                           style="width: {% widthratio study.participant_count study.target_enrollment 100 %}%">
+                      </div>
+                    </div>
+                    <small class="text-muted" style="font-size: 0.6875rem;">
+                      of {{ study.target_enrollment }} target
+                    </small>
                     {% endif %}
+                  </td>
+                  
+                  <!-- Status -->
+                  <td>
+                    {% if study.is_active %}
+                    <span class="badge badge-success">
+                      <i class="mdi mdi-check-circle"></i>
+                      Active
+                    </span>
+                    {% else %}
+                    <span class="badge badge-secondary">
+                      <i class="mdi mdi-pause-circle"></i>
+                      Inactive
+                    </span>
+                    {% endif %}
+                  </td>
+                  
+                  <!-- Actions -->
+                  <td>
+                    <div class="action-buttons">
+                      <a href="{% url 'study_detail' study.pk %}" class="btn btn-sm btn-info" title="View Details">
+                        <i class="mdi mdi-eye"></i>
+                        <span class="d-none d-md-inline">View</span>
+                      </a>
+                      {% if user.role == 'admin' %}
+                      <a href="{% url 'study_update' study.pk %}" class="btn btn-sm btn-warning" title="Edit Study">
+                        <i class="mdi mdi-pencil"></i>
+                        <span class="d-none d-md-inline">Edit</span>
+                      </a>
+                      {% endif %}
+                    </div>
                   </td>
                 </tr>
                 {% empty %}
                 <tr>
-                  <td colspan="7" class="text-center">No studies found.</td>
+                  <td colspan="6" class="text-center py-4">
+                    <div class="empty-state">
+                      <i class="mdi mdi-flask-outline"></i>
+                      <h5>No Studies Found</h5>
+                      <p>No studies have been created yet. Start by creating your first study.</p>
+                      {% if user.role == 'admin' %}
+                      <a href="{% url 'study_create' %}" class="btn btn-primary">
+                        <i class="mdi mdi-plus-circle"></i>
+                        Create First Study
+                      </a>
+                      {% endif %}
+                    </div>
+                  </td>
                 </tr>
                 {% endfor %}
               </tbody>
             </table>
           </div>
+          
+          <!-- Pagination (if needed) -->
+          {% if is_paginated %}
+          <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+            <small class="text-muted">
+              Showing {{ studies.start_index }} to {{ studies.end_index }} of {{ studies.paginator.count }} studies
+            </small>
+            <nav>
+              <ul class="pagination mb-0">
+                {% if studies.has_previous %}
+                <li class="page-item">
+                  <a class="page-link" href="?page={{ studies.previous_page_number }}">Previous</a>
+                </li>
+                {% endif %}
+                
+                {% for num in studies.paginator.page_range %}
+                  {% if studies.number == num %}
+                  <li class="page-item active">
+                    <span class="page-link">{{ num }}</span>
+                  </li>
+                  {% elif num > studies.number|add:'-3' and num < studies.number|add:'3' %}
+                  <li class="page-item">
+                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                  </li>
+                  {% endif %}
+                {% endfor %}
+                
+                {% if studies.has_next %}
+                <li class="page-item">
+                  <a class="page-link" href="?page={{ studies.next_page_number }}">Next</a>
+                </li>
+                {% endif %}
+              </ul>
+            </nav>
+          </div>
+          {% endif %}
         </div>
       </div>
     </div>
   </div>
 </div>
 {% endblock %}
-
