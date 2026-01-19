@@ -1,0 +1,272 @@
+<!-- ========================================== -->
+<!-- users/users_settings.html -->
+<!-- ========================================== -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Account Settings - ClinTrack{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+  <div class="page-header">
+    <h3 class="page-title">Account Settings</h3>
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'users_profile' %}">Profile</a></li>
+        <li class="breadcrumb-item active">Settings</li>
+      </ol>
+    </nav>
+  </div>
+
+  <div class="row">
+    <div class="col-md-3">
+      <!-- Settings Navigation -->
+      <div class="card">
+        <div class="card-body">
+          <div class="settings-nav">
+            <a href="#profile" class="settings-nav-item active">
+              <i class="bi bi-person"></i>
+              Profile Information
+            </a>
+            <a href="#security" class="settings-nav-item">
+              <i class="bi bi-shield-lock"></i>
+              Security
+            </a>
+            <a href="#notifications" class="settings-nav-item">
+              <i class="bi bi-bell"></i>
+              Notifications
+            </a>
+            <a href="#preferences" class="settings-nav-item">
+              <i class="bi bi-sliders"></i>
+              Preferences
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-9">
+      <!-- Profile Information -->
+      <div class="card" id="profile">
+        <div class="card-body">
+          <div class="card-header">
+            <h4>
+              <i class="bi bi-person"></i>
+              Profile Information
+            </h4>
+          </div>
+
+          <form method="post">
+            {% csrf_token %}
+            
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>First Name</label>
+                  <input type="text" class="form-control" name="first_name" value="{{ user.first_name }}">
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Last Name</label>
+                  <input type="text" class="form-control" name="last_name" value="{{ user.last_name }}">
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Email Address</label>
+              <input type="email" class="form-control" name="email" value="{{ user.email }}">
+            </div>
+
+            <div class="form-group">
+              <label>Phone Number</label>
+              <input type="tel" class="form-control" name="phone_number" value="{{ user.phone_number }}">
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">
+                <i class="bi bi-check-circle"></i>
+                Save Changes
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Security Settings -->
+      <div class="card" id="security">
+        <div class="card-body">
+          <div class="card-header">
+            <h4>
+              <i class="bi bi-shield-lock"></i>
+              Security Settings
+            </h4>
+          </div>
+
+          <form method="post">
+            {% csrf_token %}
+            
+            <div class="form-group">
+              <label>Current Password</label>
+              <input type="password" class="form-control" name="current_password">
+            </div>
+
+            <div class="form-group">
+              <label>New Password</label>
+              <input type="password" class="form-control" name="new_password">
+            </div>
+
+            <div class="form-group">
+              <label>Confirm New Password</label>
+              <input type="password" class="form-control" name="confirm_password">
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">
+                <i class="bi bi-key"></i>
+                Update Password
+              </button>
+            </div>
+          </form>
+
+          <div class="security-info">
+            <h5>Two-Factor Authentication</h5>
+            <p>Add an extra layer of security to your account.</p>
+            <button class="btn btn-outline-primary">
+              <i class="bi bi-shield-check"></i>
+              Enable 2FA
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notification Preferences -->
+      <div class="card" id="notifications">
+        <div class="card-body">
+          <div class="card-header">
+            <h4>
+              <i class="bi bi-bell"></i>
+              Notification Preferences
+            </h4>
+          </div>
+
+          <form method="post">
+            {% csrf_token %}
+            
+            <div class="form-group">
+              <h5>Email Notifications</h5>
+              
+              <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="notify_susar">
+                <label class="form-check-label" for="notify_susar">
+                  New SUSAR Reports
+                </label>
+              </div>
+
+              <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="notify_enrollment">
+                <label class="form-check-label" for="notify_enrollment">
+                  New Participant Enrollments
+                </label>
+              </div>
+
+              <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="notify_updates">
+                <label class="form-check-label" for="notify_updates">
+                  Study Updates
+                </label>
+              </div>
+
+              <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="notify_reports">
+                <label class="form-check-label" for="notify_reports">
+                  Weekly Reports
+                </label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <h5>System Notifications</h5>
+              
+              <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="notify_login">
+                <label class="form-check-label" for="notify_login">
+                  Login Alerts
+                </label>
+              </div>
+
+              <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="notify_security">
+                <label class="form-check-label" for="notify_security">
+                  Security Alerts
+                </label>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">
+                <i class="bi bi-check-circle"></i>
+                Save Preferences
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- User Preferences -->
+      <div class="card" id="preferences">
+        <div class="card-body">
+          <div class="card-header">
+            <h4>
+              <i class="bi bi-sliders"></i>
+              User Preferences
+            </h4>
+          </div>
+
+          <form method="post">
+            {% csrf_token %}
+            
+            <div class="form-group">
+              <label>Language</label>
+              <select class="form-control" name="language">
+                <option value="en">English</option>
+                <option value="sw">Swahili</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Timezone</label>
+              <select class="form-control" name="timezone">
+                <option value="Africa/Nairobi">East Africa Time (EAT)</option>
+                <option value="UTC">UTC</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Date Format</label>
+              <select class="form-control" name="date_format">
+                <option value="mdy">MM/DD/YYYY</option>
+                <option value="dmy">DD/MM/YYYY</option>
+                <option value="ymd">YYYY-MM-DD</option>
+              </select>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">
+                <i class="bi bi-check-circle"></i>
+                Save Preferences
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+{% endblock %}

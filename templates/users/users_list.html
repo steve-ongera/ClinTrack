@@ -1,0 +1,105 @@
+<!-- ========================================== -->
+<!-- users/users_list.html -->
+<!-- ========================================== -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Staff Management - ClinTrack{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+  <div class="page-header">
+    <h3 class="page-title">Staff Management</h3>
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+        <li class="breadcrumb-item active">Staff</li>
+      </ol>
+    </nav>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+          <div class="card-header">
+            <h4>
+              <i class="bi bi-people"></i>
+              All Staff Members ({{ users|length }})
+            </h4>
+            <a href="{% url 'users_create' %}" class="btn btn-primary">
+              <i class="bi bi-person-plus"></i>
+              Add New Staff
+            </a>
+          </div>
+
+          {% if users %}
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Username</th>
+                  <th>Full Name</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Phone</th>
+                  <th>Status</th>
+                  <th>Created</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for user in users %}
+                <tr>
+                  <td>
+                    <strong>{{ user.username }}</strong>
+                  </td>
+                  <td>{{ user.get_full_name|default:"-" }}</td>
+                  <td>{{ user.email|default:"-" }}</td>
+                  <td>
+                    
+                      {{ user.get_role_display }}
+                    
+                  </td>
+                  <td>{{ user.phone_number|default:"-" }}</td>
+                  <td>
+                    {% if user.is_active %}
+                    <span class="badge badge-success">
+                      <i class="bi bi-check-circle"></i>
+                      Active
+                    </span>
+                    {% else %}
+                    <span class="badge badge-secondary">
+                      <i class="bi bi-x-circle"></i>
+                      Inactive
+                    </span>
+                    {% endif %}
+                  </td>
+                  <td>{{ user.created_at|date:"M d, Y" }}</td>
+                  <td>
+                    <a href="{% url 'users_profile' %}?user={{ user.id }}" class="btn btn-sm btn-info">
+                      <i class="bi bi-eye"></i>
+                    </a>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <div class="empty-state">
+            <i class="bi bi-person-x"></i>
+            <h5>No Staff Members</h5>
+            <p>No staff members found.</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+{% endblock %}
