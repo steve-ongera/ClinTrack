@@ -6,6 +6,369 @@
 
 {% block title %}{% if participant %}Edit{% else %}Add{% endif %} Participant - ClinTrack{% endblock %}
 
+{% block extra_css %}
+<style>
+/* Apple-like typography */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Clean breadcrumb */
+.breadcrumb {
+    background: transparent;
+    padding: 0;
+    margin-bottom: 0;
+    font-size: 0.8125rem;
+}
+
+.breadcrumb-item {
+    color: #6c757d;
+}
+
+.breadcrumb-item a {
+    color: #667eea;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.breadcrumb-item.active {
+    color: #495057;
+    font-weight: 500;
+}
+
+/* Page header */
+.page-header {
+    padding: 1rem 0;
+    margin-bottom: 1.5rem;
+}
+
+.page-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #2a2a2a;
+    margin-bottom: 0.25rem;
+}
+
+/* Card design */
+.card {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.card-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #2a2a2a;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+/* Form styling */
+.forms-sample {
+    font-size: 0.875rem;
+}
+
+/* Form headings */
+h5 {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: #2a2a2a;
+    margin: 1.5rem 0 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+/* Form groups */
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #495057;
+    font-size: 0.8125rem;
+}
+
+.form-group label[for]:after {
+    content: " *";
+    color: #dc3545;
+    visibility: hidden;
+}
+
+.form-group label.required:after {
+    visibility: visible;
+}
+
+/* Input fields */
+.form-control {
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 0.625rem 0.875rem;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    transition: all 0.2s ease;
+    width: 100%;
+}
+
+.form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    outline: none;
+}
+
+.form-control:disabled {
+    background-color: #f8f9fa;
+    color: #6c757d;
+}
+
+/* Textarea */
+textarea.form-control {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* Select dropdown */
+select.form-control {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236c757d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 16px 12px;
+    padding-right: 2.5rem;
+}
+
+/* Date input */
+input[type="date"].form-control {
+    padding-right: 0.875rem;
+}
+
+/* Error states */
+.form-control.is-invalid {
+    border-color: #dc3545;
+    background-image: none;
+}
+
+.form-control.is-invalid:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+}
+
+.text-danger {
+    color: #dc3545 !important;
+    font-size: 0.75rem;
+    margin-top: 0.375rem;
+    display: block;
+}
+
+/* Alert styling */
+.alert {
+    border-radius: 6px;
+    border: none;
+    padding: 0.875rem 1rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.8125rem;
+}
+
+.alert-danger {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+}
+
+/* Button styling */
+.btn {
+    border-radius: 6px;
+    padding: 0.625rem 1.25rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.btn-light {
+    background: #f8f9fa;
+    color: #495057;
+    border: 1px solid #e0e0e0;
+}
+
+.btn-light:hover {
+    background: #e9ecef;
+    color: #495057;
+}
+
+/* Section spacing */
+.row {
+    margin-bottom: 0.5rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1.25rem;
+    }
+    
+    .card-title {
+        font-size: 1rem;
+        margin-bottom: 1.25rem;
+    }
+    
+    h5 {
+        font-size: 0.875rem;
+        margin: 1.25rem 0 0.875rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    
+    .btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.75rem;
+    }
+    
+    .page-title {
+        font-size: 1.125rem;
+    }
+}
+
+/* Small mobile */
+@media (max-width: 576px) {
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .row {
+        margin-left: -0.5rem;
+        margin-right: -0.5rem;
+    }
+    
+    .col-md-4, .col-md-6 {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+    
+    .btn-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Focus states for accessibility */
+.form-control:focus,
+.btn:focus {
+    outline: 2px solid rgba(102, 126, 234, 0.5);
+    outline-offset: 2px;
+}
+
+/* Placeholder styling */
+::placeholder {
+    color: #adb5bd;
+    opacity: 1;
+}
+
+:-ms-input-placeholder {
+    color: #adb5bd;
+}
+
+::-ms-input-placeholder {
+    color: #adb5bd;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .card {
+        background: #2d2d2d;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+    }
+    
+    .page-title,
+    .card-title,
+    h5 {
+        color: #ffffff;
+    }
+    
+    .form-group label {
+        color: #e0e0e0;
+    }
+    
+    .form-control {
+        background-color: #3d3d3d;
+        border-color: #404040;
+        color: #e0e0e0;
+    }
+    
+    .form-control:focus {
+        background-color: #3d3d3d;
+        border-color: #667eea;
+    }
+    
+    .form-control:disabled {
+        background-color: #404040;
+        color: #b0b0b0;
+    }
+    
+    .btn-light {
+        background: #404040;
+        color: #e0e0e0;
+        border-color: #505050;
+    }
+    
+    .btn-light:hover {
+        background: #505050;
+        color: #ffffff;
+    }
+    
+    .card-title {
+        border-bottom-color: #404040;
+    }
+    
+    h5 {
+        border-bottom-color: #404040;
+    }
+    
+    ::placeholder {
+        color: #8a8a8a;
+    }
+}
+</style>
+
+<!-- Add datepicker for better UX -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+{% endblock %}
+
 {% block content %}
 <div class="page-header">
   <h3 class="page-title">{% if participant %}Edit Participant{% else %}Add New Participant{% endif %}</h3>
@@ -22,13 +385,17 @@
   <div class="col-lg-12 grid-margin stretch-card">
     <div class="card">
       <div class="card-body">
-        <h4 class="card-title">Participant Information</h4>
+        <h4 class="card-title">
+          <i class="mdi mdi-account-circle me-2" style="color: #667eea;"></i>
+          Participant Information
+        </h4>
         
-        <form method="post" class="forms-sample">
+        <form method="post" class="forms-sample" id="participantForm" novalidate>
           {% csrf_token %}
           
           {% if form.non_field_errors %}
-          <div class="alert alert-danger">
+          <div class="alert alert-danger" role="alert">
+            <i class="mdi mdi-alert-circle me-2"></i>
             {{ form.non_field_errors }}
           </div>
           {% endif %}
@@ -36,8 +403,9 @@
           <div class="row">
             <div class="col-md-6">
               <div class="form-group">
-                <label for="{{ form.participant_id.id_for_label }}">Participant ID *</label>
+                <label for="{{ form.participant_id.id_for_label }}" class="required">Participant ID</label>
                 {{ form.participant_id }}
+                <small class="form-text text-muted">Unique identifier for the participant</small>
                 {% if form.participant_id.errors %}
                 <small class="text-danger">{{ form.participant_id.errors.0 }}</small>
                 {% endif %}
@@ -46,7 +414,7 @@
 
             <div class="col-md-6">
               <div class="form-group">
-                <label for="{{ form.study.id_for_label }}">Study *</label>
+                <label for="{{ form.study.id_for_label }}" class="required">Study</label>
                 {{ form.study }}
                 {% if form.study.errors %}
                 <small class="text-danger">{{ form.study.errors.0 }}</small>
@@ -55,11 +423,14 @@
             </div>
           </div>
 
-          <h5 class="mt-4 mb-3">Personal Information</h5>
+          <h5>
+            <i class="mdi mdi-account-details me-2" style="color: #ffab00;"></i>
+            Personal Information
+          </h5>
           <div class="row">
             <div class="col-md-6">
               <div class="form-group">
-                <label for="{{ form.first_name.id_for_label }}">First Name *</label>
+                <label for="{{ form.first_name.id_for_label }}" class="required">First Name</label>
                 {{ form.first_name }}
                 {% if form.first_name.errors %}
                 <small class="text-danger">{{ form.first_name.errors.0 }}</small>
@@ -69,7 +440,7 @@
 
             <div class="col-md-6">
               <div class="form-group">
-                <label for="{{ form.last_name.id_for_label }}">Last Name *</label>
+                <label for="{{ form.last_name.id_for_label }}" class="required">Last Name</label>
                 {{ form.last_name }}
                 {% if form.last_name.errors %}
                 <small class="text-danger">{{ form.last_name.errors.0 }}</small>
@@ -82,7 +453,12 @@
             <div class="col-md-6">
               <div class="form-group">
                 <label for="{{ form.date_of_birth.id_for_label }}">Date of Birth</label>
-                {{ form.date_of_birth }}
+                <div class="input-group">
+                  {{ form.date_of_birth }}
+                  <span class="input-group-text" style="background: transparent; border-left: none;">
+                    <i class="mdi mdi-calendar"></i>
+                  </span>
+                </div>
                 {% if form.date_of_birth.errors %}
                 <small class="text-danger">{{ form.date_of_birth.errors.0 }}</small>
                 {% endif %}
@@ -100,11 +476,14 @@
             </div>
           </div>
 
-          <h5 class="mt-4 mb-3">Contact Information</h5>
+          <h5>
+            <i class="mdi mdi-phone me-2" style="color: #00d25b;"></i>
+            Contact Information
+          </h5>
           <div class="row">
             <div class="col-md-4">
               <div class="form-group">
-                <label for="{{ form.primary_phone.id_for_label }}">Primary Phone *</label>
+                <label for="{{ form.primary_phone.id_for_label }}" class="required">Primary Phone</label>
                 {{ form.primary_phone }}
                 {% if form.primary_phone.errors %}
                 <small class="text-danger">{{ form.primary_phone.errors.0 }}</small>
@@ -116,6 +495,7 @@
               <div class="form-group">
                 <label for="{{ form.secondary_phone.id_for_label }}">Secondary Phone</label>
                 {{ form.secondary_phone }}
+                <small class="form-text text-muted">Optional</small>
                 {% if form.secondary_phone.errors %}
                 <small class="text-danger">{{ form.secondary_phone.errors.0 }}</small>
                 {% endif %}
@@ -124,8 +504,9 @@
 
             <div class="col-md-4">
               <div class="form-group">
-                <label for="{{ form.email.id_for_label }}">Email</label>
+                <label for="{{ form.email.id_for_label }}">Email Address</label>
                 {{ form.email }}
+                <small class="form-text text-muted">Optional</small>
                 {% if form.email.errors %}
                 <small class="text-danger">{{ form.email.errors.0 }}</small>
                 {% endif %}
@@ -133,11 +514,14 @@
             </div>
           </div>
 
-          <h5 class="mt-4 mb-3">Location Information</h5>
+          <h5>
+            <i class="mdi mdi-map-marker me-2" style="color: #00a7ff;"></i>
+            Location Information
+          </h5>
           <div class="row">
             <div class="col-md-4">
               <div class="form-group">
-                <label for="{{ form.location.id_for_label }}">Location *</label>
+                <label for="{{ form.location.id_for_label }}" class="required">Location</label>
                 {{ form.location }}
                 {% if form.location.errors %}
                 <small class="text-danger">{{ form.location.errors.0 }}</small>
@@ -149,6 +533,7 @@
               <div class="form-group">
                 <label for="{{ form.sub_location.id_for_label }}">Sub-location</label>
                 {{ form.sub_location }}
+                <small class="form-text text-muted">Optional</small>
                 {% if form.sub_location.errors %}
                 <small class="text-danger">{{ form.sub_location.errors.0 }}</small>
                 {% endif %}
@@ -159,6 +544,7 @@
               <div class="form-group">
                 <label for="{{ form.county.id_for_label }}">County</label>
                 {{ form.county }}
+                <small class="form-text text-muted">Optional</small>
                 {% if form.county.errors %}
                 <small class="text-danger">{{ form.county.errors.0 }}</small>
                 {% endif %}
@@ -169,12 +555,16 @@
           <div class="form-group">
             <label for="{{ form.nearest_landmark.id_for_label }}">Nearest Landmark / Directions</label>
             {{ form.nearest_landmark }}
+            <small class="form-text text-muted">Helpful for field visits</small>
             {% if form.nearest_landmark.errors %}
             <small class="text-danger">{{ form.nearest_landmark.errors.0 }}</small>
             {% endif %}
           </div>
 
-          <h5 class="mt-4 mb-3">Study Status</h5>
+          <h5>
+            <i class="mdi mdi-clipboard-check me-2" style="color: #764ba2;"></i>
+            Study Status
+          </h5>
           <div class="row">
             <div class="col-md-6">
               <div class="form-group">
@@ -189,7 +579,12 @@
             <div class="col-md-6">
               <div class="form-group">
                 <label for="{{ form.enrollment_date.id_for_label }}">Enrollment Date</label>
-                {{ form.enrollment_date }}
+                <div class="input-group">
+                  {{ form.enrollment_date }}
+                  <span class="input-group-text" style="background: transparent; border-left: none;">
+                    <i class="mdi mdi-calendar"></i>
+                  </span>
+                </div>
                 {% if form.enrollment_date.errors %}
                 <small class="text-danger">{{ form.enrollment_date.errors.0 }}</small>
                 {% endif %}
@@ -200,15 +595,30 @@
           <div class="form-group">
             <label for="{{ form.notes.id_for_label }}">Additional Notes</label>
             {{ form.notes }}
+            <small class="form-text text-muted">Any additional information about the participant</small>
             {% if form.notes.errors %}
             <small class="text-danger">{{ form.notes.errors.0 }}</small>
             {% endif %}
           </div>
 
-          <button type="submit" class="btn btn-primary me-2">
-            <i class="mdi mdi-content-save"></i> {% if participant %}Update{% else %}Save{% endif %} Participant
-          </button>
-          <a href="{% if participant %}{% url 'participant_detail' participant.id %}{% else %}{% url 'participant_list' %}{% endif %}" class="btn btn-light">Cancel</a>
+          <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+            <div>
+              <small class="text-muted">
+                <i class="mdi mdi-information-outline me-1"></i>
+                Fields marked with * are required
+              </small>
+            </div>
+            <div class="btn-group">
+              <button type="submit" class="btn btn-primary">
+                <i class="mdi mdi-content-save"></i>
+                {% if participant %}Update Participant{% else %}Save Participant{% endif %}
+              </button>
+              <a href="{% if participant %}{% url 'participant_detail' participant.id %}{% else %}{% url 'participant_list' %}{% endif %}" class="btn btn-light">
+                <i class="mdi mdi-close"></i>
+                Cancel
+              </a>
+            </div>
+          </div>
         </form>
       </div>
     </div>
@@ -216,3 +626,113 @@
 </div>
 {% endblock %}
 
+{% block extra_js %}
+<!-- Include Flatpickr for date inputs -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize date pickers
+    const dateFields = document.querySelectorAll('input[type="date"], input[id*="date"]');
+    dateFields.forEach(function(field) {
+        flatpickr(field, {
+            dateFormat: "Y-m-d",
+            allowInput: true,
+            disableMobile: "true" // Better mobile experience
+        });
+    });
+    
+    // Form validation
+    const form = document.getElementById('participantForm');
+    const requiredFields = form.querySelectorAll('.required');
+    
+    form.addEventListener('submit', function(event) {
+        let isValid = true;
+        const errorMessages = [];
+        
+        requiredFields.forEach(function(field) {
+            const input = form.querySelector('#' + field.getAttribute('for'));
+            if (input && !input.value.trim()) {
+                isValid = false;
+                input.classList.add('is-invalid');
+                errorMessages.push(field.textContent.replace(' *', '') + ' is required');
+            } else if (input) {
+                input.classList.remove('is-invalid');
+            }
+        });
+        
+        // Phone number validation
+        const phoneInput = document.getElementById('{{ form.primary_phone.id_for_label }}');
+        if (phoneInput && phoneInput.value) {
+            const phoneRegex = /^[\+]?[0-9\-\s\(\)]{10,}$/;
+            if (!phoneRegex.test(phoneInput.value)) {
+                isValid = false;
+                phoneInput.classList.add('is-invalid');
+                errorMessages.push('Please enter a valid phone number');
+            }
+        }
+        
+        if (!isValid) {
+            event.preventDefault();
+            
+            // Show all errors
+            let errorHtml = '<div class="alert alert-danger" role="alert">';
+            errorHtml += '<i class="mdi mdi-alert-circle me-2"></i>';
+            errorHtml += '<strong>Please fix the following errors:</strong><ul class="mb-0 mt-1">';
+            errorMessages.forEach(function(msg) {
+                errorHtml += '<li>' + msg + '</li>';
+            });
+            errorHtml += '</ul></div>';
+            
+            // Remove existing error alerts
+            const existingAlert = form.querySelector('.alert-danger');
+            if (existingAlert) {
+                existingAlert.remove();
+            }
+            
+            // Insert new alert at top of form
+            const firstFormGroup = form.querySelector('.form-group');
+            if (firstFormGroup) {
+                firstFormGroup.insertAdjacentHTML('beforebegin', errorHtml);
+            }
+            
+            // Scroll to first error
+            const firstError = form.querySelector('.is-invalid');
+            if (firstError) {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstError.focus();
+            }
+        }
+    });
+    
+    // Real-time validation
+    requiredFields.forEach(function(field) {
+        const input = form.querySelector('#' + field.getAttribute('for'));
+        if (input) {
+            input.addEventListener('input', function() {
+                if (this.value.trim()) {
+                    this.classList.remove('is-invalid');
+                }
+            });
+            
+            input.addEventListener('blur', function() {
+                if (!this.value.trim()) {
+                    this.classList.add('is-invalid');
+                }
+            });
+        }
+    });
+    
+    // Auto-format phone numbers
+    const phoneFields = form.querySelectorAll('input[type="tel"], input[id*="phone"]');
+    phoneFields.forEach(function(field) {
+        field.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 0) {
+                value = value.match(new RegExp('.{1,4}', 'g')).join(' ');
+            }
+            e.target.value = value;
+        });
+    });
+});
+</script>
+{% endblock %}

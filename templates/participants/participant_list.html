@@ -6,6 +6,412 @@
 
 {% block title %}Participants - ClinTrack{% endblock %}
 
+{% block extra_css %}
+<style>
+/* Professional Apple-like typography */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Clean breadcrumb without background */
+.breadcrumb {
+    background: transparent;
+    padding: 0;
+    margin-bottom: 0;
+    font-size: 0.875rem;
+}
+
+.breadcrumb-item {
+    color: #6c757d;
+}
+
+.breadcrumb-item a {
+    color: #667eea;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.breadcrumb-item a:hover {
+    color: #764ba2;
+}
+
+.breadcrumb-item.active {
+    color: #495057;
+    font-weight: 500;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+    color: #adb5bd;
+    content: "/";
+    padding: 0 0.5rem;
+}
+
+/* Page header styling */
+.page-header {
+    padding: 1.5rem 0;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.page-title {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #2a2a2a;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.01em;
+}
+
+/* Card enhancements */
+.card {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #2a2a2a;
+    letter-spacing: -0.01em;
+}
+
+/* Button styling */
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 6px;
+    padding: 0.5rem 1.25rem;
+    font-weight: 500;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.btn-sm {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.8125rem;
+    border-radius: 4px;
+}
+
+.btn-info, .btn-warning {
+    border: none;
+    border-radius: 4px;
+    transition: transform 0.2s ease;
+}
+
+.btn-info:hover, .btn-warning:hover {
+    transform: translateY(-1px);
+}
+
+/* Filter form styling */
+.form-control {
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+}
+
+.form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.1);
+    outline: none;
+}
+
+/* Table styling */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.table {
+    margin-bottom: 0;
+    font-size: 0.875rem;
+    color: #495057;
+}
+
+.table thead th {
+    border: none;
+    background: #f8f9fa;
+    font-weight: 600;
+    color: #6c757d;
+    padding: 0.875rem 1rem;
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 0.875rem;
+}
+
+.table tbody tr:hover {
+    background-color: rgba(102, 126, 234, 0.03);
+}
+
+.table a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.table a:hover {
+    color: #764ba2;
+}
+
+/* Badge styling */
+.badge {
+    padding: 0.35rem 0.65rem;
+    border-radius: 4px;
+    font-weight: 500;
+    font-size: 0.75rem;
+    letter-spacing: 0.3px;
+}
+
+.badge-success {
+    background: rgba(40, 199, 111, 0.1);
+    color: #28c76f;
+    border: 1px solid rgba(40, 199, 111, 0.2);
+}
+
+.badge-warning {
+    background: rgba(255, 171, 0, 0.1);
+    color: #ffab00;
+    border: 1px solid rgba(255, 171, 0, 0.2);
+}
+
+.badge-info {
+    background: rgba(0, 167, 255, 0.1);
+    color: #00a7ff;
+    border: 1px solid rgba(0, 167, 255, 0.2);
+}
+
+.badge-secondary {
+    background: rgba(108, 117, 125, 0.1);
+    color: #6c757d;
+    border: 1px solid rgba(108, 117, 125, 0.2);
+}
+
+.badge-danger {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+    border: 1px solid rgba(220, 53, 69, 0.2);
+}
+
+/* Pagination styling */
+.pagination {
+    margin: 1.5rem 0 0;
+}
+
+.page-link {
+    border: 1px solid #e0e0e0;
+    color: #667eea;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    margin: 0 0.125rem;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.page-link:hover {
+    background-color: #f8f9fa;
+    border-color: #e0e0e0;
+    color: #764ba2;
+}
+
+.page-item.active .page-link {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: #667eea;
+    color: white;
+}
+
+.page-item.disabled .page-link {
+    color: #adb5bd;
+    background-color: #f8f9fa;
+    border-color: #e0e0e0;
+}
+
+/* Action buttons */
+.table .btn-sm {
+    min-width: 32px;
+    min-height: 32px;
+    padding: 0.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.table .btn-sm i {
+    font-size: 1rem;
+}
+
+/* Responsive table adjustments */
+@media (max-width: 768px) {
+    .page-title {
+        font-size: 1.5rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .table thead th,
+    .table tbody td {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.8125rem;
+    }
+    
+    .badge {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.6875rem;
+    }
+    
+    .btn-sm {
+        padding: 0.2rem 0.5rem;
+        font-size: 0.75rem;
+    }
+    
+    .form-control {
+        font-size: 0.8125rem;
+        padding: 0.4rem 0.6rem;
+    }
+    
+    .breadcrumb {
+        font-size: 0.8125rem;
+    }
+}
+
+/* Extra small devices */
+@media (max-width: 576px) {
+    .page-header {
+        padding: 1rem 0;
+    }
+    
+    .page-title {
+        font-size: 1.25rem;
+    }
+    
+    .card-title {
+        font-size: 1.125rem;
+    }
+    
+    .d-flex.justify-content-between.align-items-center {
+        flex-direction: column;
+        align-items: flex-start !important;
+    }
+    
+    .d-flex.justify-content-between.align-items-center .btn {
+        margin-top: 0.75rem;
+    }
+    
+    .form .row {
+        margin: 0;
+    }
+    
+    .form .col-md-2,
+    .form .col-md-3,
+    .form .col-md-4 {
+        padding: 0.25rem 0;
+    }
+    
+    .table thead th {
+        font-size: 0.75rem;
+        padding: 0.5rem 0.25rem;
+    }
+    
+    .table tbody td {
+        padding: 0.5rem 0.25rem;
+        font-size: 0.75rem;
+    }
+    
+    /* Hide less important columns on small screens */
+    .table td:nth-child(4), /* Phone */
+    .table th:nth-child(4),
+    .table td:nth-child(5), /* Location */
+    .table th:nth-child(5) {
+        display: none;
+    }
+}
+
+/* Print styles */
+@media print {
+    .btn, .breadcrumb, .form {
+        display: none !important;
+    }
+    
+    .card {
+        box-shadow: none !important;
+        border: 1px solid #dee2e6 !important;
+    }
+    
+    .table {
+        font-size: 0.75rem;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    body {
+        background: #1a1a1a;
+        color: #ffffff;
+    }
+    
+    .card {
+        background: #2d2d2d;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+    }
+    
+    .page-title {
+        color: #ffffff;
+    }
+    
+    .table {
+        color: #e0e0e0;
+    }
+    
+    .table thead th {
+        background: #3d3d3d;
+        color: #b0b0b0;
+    }
+    
+    .table tbody td {
+        border-bottom-color: #404040;
+    }
+    
+    .table tbody tr:hover {
+        background-color: rgba(102, 126, 234, 0.1);
+    }
+    
+    .form-control {
+        background: #3d3d3d;
+        border-color: #404040;
+        color: #ffffff;
+    }
+    
+    .form-control:focus {
+        background: #3d3d3d;
+        border-color: #667eea;
+    }
+}
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="page-header">
   <h3 class="page-title">Participants</h3>
@@ -21,7 +427,7 @@
   <div class="col-lg-12 grid-margin stretch-card">
     <div class="card">
       <div class="card-body">
-        <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-4">
           <h4 class="card-title mb-0">All Participants ({{ page_obj.paginator.count }})</h4>
           {% if user.role == 'admin' or user.role == 'coordinator' %}
           <a href="{% url 'participant_create' %}" class="btn btn-primary btn-sm">
@@ -105,7 +511,7 @@
               </tr>
               {% empty %}
               <tr>
-                <td colspan="8" class="text-center">No participants found</td>
+                <td colspan="8" class="text-center py-4 text-muted">No participants found</td>
               </tr>
               {% endfor %}
             </tbody>

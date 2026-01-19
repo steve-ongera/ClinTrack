@@ -5,10 +5,288 @@
 
 {% block extra_css %}
 <style>
+:root {
+    --primary-fade: rgba(0, 210, 91, 0.08);
+    --warning-fade: rgba(255, 171, 0, 0.08);
+    --info-fade: rgba(0, 167, 255, 0.08);
+    --success-fade: rgba(40, 199, 111, 0.08);
+    --danger-fade: rgba(220, 53, 69, 0.08);
+}
+
 .chart-container {
     position: relative;
     height: 300px;
     width: 100%;
+}
+
+/* Card Enhancements */
+.card {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.card-title {
+    color: #2a2a2a;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+
+.page-header a {
+    color: rgba(255, 255, 255, 0.9);
+    text-decoration: none;
+}
+
+.page-header a:hover {
+    color: white;
+}
+
+.header-left .btn {
+    border-radius: 6px;
+    padding: 0.6rem 1.2rem;
+    font-weight: 500;
+}
+
+.header-right .btn {
+    border-radius: 6px;
+    padding: 0.6rem 1.2rem;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.header-right .btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+/* Stat Cards */
+.card-stat {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 8px;
+    border: none;
+}
+
+.card-stat h3 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+.card-stat .badge {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    padding: 0.3rem 0.8rem;
+    font-weight: 500;
+}
+
+/* Gradient Backgrounds */
+.card-img {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 8px;
+    border: none;
+}
+
+.card-img h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.card-img .btn {
+    border-radius: 6px;
+    padding: 0.5rem 1.5rem;
+    font-weight: 500;
+    margin-top: 1rem;
+    transition: all 0.3s ease;
+}
+
+.card-img .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Table Styling */
+.custom-table {
+    margin-bottom: 0;
+}
+
+.custom-table thead th {
+    border: none;
+    background: #f8f9fa;
+    font-weight: 600;
+    color: #495057;
+    padding: 1rem 1.25rem;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.custom-table tbody td {
+    padding: 1rem 1.25rem;
+    vertical-align: middle;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.custom-table tbody tr:hover {
+    background-color: rgba(0, 210, 91, 0.03);
+}
+
+.custom-table a {
+    color: #667eea;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.custom-table a:hover {
+    color: #764ba2;
+}
+
+.badge {
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    font-weight: 500;
+    font-size: 0.75rem;
+}
+
+/* Color Cards */
+.color-card {
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: transform 0.2s ease;
+}
+
+.color-card:hover {
+    transform: translateY(-3px);
+}
+
+.color-card i {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+.color-card p {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.color-card span {
+    font-size: 0.85rem;
+    opacity: 0.9;
+}
+
+/* Hexagon Stats */
+.hexagon {
+    width: 48px;
+    height: 48px;
+    position: relative;
+    background: transparent;
+}
+
+.hex-mid {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.hexagon-warning { background: linear-gradient(135deg, #ffab00 0%, #ff9900 100%); }
+.hexagon-danger { background: linear-gradient(135deg, #ff4757 0%, #ff3838 100%); }
+.hexagon-success { background: linear-gradient(135deg, #00d25b 0%, #00b248 100%); }
+.hexagon-info { background: linear-gradient(135deg, #00a7ff 0%, #0091ea 100%); }
+.hexagon-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+
+/* Doughnut Charts */
+.doughnut-wrapper {
+    position: relative;
+    min-height: 120px;
+}
+
+.rounded-legend {
+    font-size: 0.85rem;
+}
+
+.rounded-legend ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.rounded-legend li {
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+}
+
+.rounded-legend span {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    margin-right: 0.75rem;
+}
+
+/* Follow-ups */
+.form-check-input:checked {
+    background-color: #00d25b;
+    border-color: #00d25b;
+}
+
+.form-check-input:focus {
+    box-shadow: 0 0 0 0.2rem rgba(0, 210, 91, 0.25);
+}
+
+/* Image Cards */
+.card-body img {
+    border-radius: 8px 8px 0 0;
+    height: 180px;
+    object-fit: cover;
+}
+
+.card-body .text-dark a {
+    color: #667eea;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.card-body .text-dark a:hover {
+    color: #764ba2;
+}
+
+.star-color {
+    color: #ffab00;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .header-left, .header-right {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .header-right {
+        margin-top: 1rem;
+    }
 }
 </style>
 {% endblock %}
@@ -491,10 +769,15 @@ if (document.getElementById('enrollmentChart')) {
                 label: 'Monthly Enrollments',
                 data: enrollmentData.data,
                 borderColor: '#00d25b',
-                backgroundColor: 'rgba(0, 210, 91, 0.1)',
-                borderWidth: 2,
+                backgroundColor: 'rgba(0, 210, 91, 0.15)',
+                borderWidth: 3,
                 fill: true,
-                tension: 0.4
+                tension: 0.4,
+                pointBackgroundColor: '#00d25b',
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6
             }]
         },
         options: {
@@ -510,6 +793,14 @@ if (document.getElementById('enrollmentChart')) {
                     beginAtZero: true,
                     ticks: {
                         stepSize: 1
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                },
+                x: {
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
                     }
                 }
             }
@@ -523,12 +814,12 @@ if (document.getElementById('linechart')) {
     new Chart(ctx, {
         type: 'line',
         data: {
-            labels: enrollmentTrend.labels.slice(-15), // Last 15 days
+            labels: enrollmentTrend.labels.slice(-15),
             datasets: [{
                 label: 'Daily Participants',
                 data: enrollmentTrend.data.slice(-15),
-                borderColor: '#00d25b',
-                backgroundColor: 'rgba(0, 210, 91, 0.1)',
+                borderColor: '#667eea',
+                backgroundColor: 'rgba(102, 126, 234, 0.1)',
                 borderWidth: 2,
                 fill: true,
                 tension: 0.3
@@ -547,6 +838,9 @@ if (document.getElementById('linechart')) {
                     beginAtZero: true,
                     ticks: {
                         stepSize: 1
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
                     }
                 },
                 x: {
@@ -563,13 +857,15 @@ if (document.getElementById('barchart')) {
     new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: susarTrend.labels.slice(-15), // Last 15 days
+            labels: susarTrend.labels.slice(-15),
             datasets: [{
                 label: 'Daily SUSARs',
                 data: susarTrend.data.slice(-15),
-                backgroundColor: '#ffab00',
-                borderColor: '#ffab00',
-                borderWidth: 1
+                backgroundColor: 'rgba(255, 171, 0, 0.7)',
+                borderColor: 'rgba(255, 171, 0, 1)',
+                borderWidth: 1,
+                borderRadius: 4,
+                borderSkipped: false
             }]
         },
         options: {
@@ -585,6 +881,9 @@ if (document.getElementById('barchart')) {
                     beginAtZero: true,
                     ticks: {
                         stepSize: 1
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
                     }
                 },
                 x: {
@@ -595,7 +894,7 @@ if (document.getElementById('barchart')) {
     });
 }
 
-// Status Doughnut Chart
+// Status Doughnut Chart with fade colors
 if (document.getElementById('statusChart')) {
     const ctx = document.getElementById('statusChart').getContext('2d');
     new Chart(ctx, {
@@ -604,13 +903,22 @@ if (document.getElementById('statusChart')) {
             labels: statusData.labels,
             datasets: [{
                 data: statusData.data,
-                backgroundColor: statusData.colors,
-                borderWidth: 0
+                backgroundColor: [
+                    'rgba(0, 210, 91, 0.8)',
+                    'rgba(255, 171, 0, 0.8)',
+                    'rgba(0, 167, 255, 0.8)',
+                    'rgba(220, 53, 69, 0.8)',
+                    'rgba(108, 117, 125, 0.8)'
+                ],
+                borderColor: 'white',
+                borderWidth: 2,
+                spacing: 3
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: true,
+            cutout: '65%',
             plugins: {
                 legend: {
                     display: false
@@ -623,13 +931,14 @@ if (document.getElementById('statusChart')) {
     const legend = document.getElementById('status-legend');
     let legendHTML = '<ul class="legend-horizontal">';
     statusData.labels.forEach((label, index) => {
-        legendHTML += `<li><span style="background-color: ${statusData.colors[index]}"></span>${label}: ${statusData.data[index]}</li>`;
+        const colors = ['#00d25b', '#ffab00', '#00a7ff', '#dc3545', '#6c757d'];
+        legendHTML += `<li><span style="background-color: ${colors[index]}"></span>${label}: ${statusData.data[index]}</li>`;
     });
     legendHTML += '</ul>';
     legend.innerHTML = legendHTML;
 }
 
-// Study Distribution Doughnut Chart
+// Study Distribution Doughnut Chart with fade colors
 if (document.getElementById('studyChart')) {
     const ctx = document.getElementById('studyChart').getContext('2d');
     new Chart(ctx, {
@@ -638,13 +947,16 @@ if (document.getElementById('studyChart')) {
             labels: studyData.labels,
             datasets: [{
                 data: studyData.data,
-                backgroundColor: studyData.colors,
-                borderWidth: 0
+                backgroundColor: studyData.colors.map(color => color.replace('1)', '0.8)')),
+                borderColor: 'white',
+                borderWidth: 2,
+                spacing: 3
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: true,
+            cutout: '65%',
             plugins: {
                 legend: {
                     display: false
@@ -663,7 +975,7 @@ if (document.getElementById('studyChart')) {
     legend.innerHTML = legendHTML;
 }
 
-// Gender Distribution Doughnut Chart
+// Gender Distribution Doughnut Chart with fade colors
 if (document.getElementById('genderChart')) {
     const ctx = document.getElementById('genderChart').getContext('2d');
     new Chart(ctx, {
@@ -672,13 +984,20 @@ if (document.getElementById('genderChart')) {
             labels: genderData.labels,
             datasets: [{
                 data: genderData.data,
-                backgroundColor: genderData.colors,
-                borderWidth: 0
+                backgroundColor: [
+                    'rgba(102, 126, 234, 0.8)',
+                    'rgba(255, 171, 0, 0.8)',
+                    'rgba(108, 117, 125, 0.8)'
+                ],
+                borderColor: 'white',
+                borderWidth: 2,
+                spacing: 3
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: true,
+            cutout: '65%',
             plugins: {
                 legend: {
                     display: false
@@ -691,7 +1010,8 @@ if (document.getElementById('genderChart')) {
     const legend = document.getElementById('gender-legend');
     let legendHTML = '<ul class="legend-horizontal">';
     genderData.labels.forEach((label, index) => {
-        legendHTML += `<li><span style="background-color: ${genderData.colors[index]}"></span>${label}: ${genderData.data[index]}</li>`;
+        const colors = ['#667eea', '#ffab00', '#6c757d'];
+        legendHTML += `<li><span style="background-color: ${colors[index]}"></span>${label}: ${genderData.data[index]}</li>`;
     });
     legendHTML += '</ul>';
     legend.innerHTML = legendHTML;

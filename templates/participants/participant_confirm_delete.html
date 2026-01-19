@@ -6,6 +6,338 @@
 
 {% block title %}Delete Participant - ClinTrack{% endblock %}
 
+{% block extra_css %}
+<style>
+/* Apple-like typography */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Clean breadcrumb */
+.breadcrumb {
+    background: transparent;
+    padding: 0;
+    margin-bottom: 0;
+    font-size: 0.8125rem;
+}
+
+.breadcrumb-item {
+    color: #6c757d;
+}
+
+.breadcrumb-item a {
+    color: #667eea;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.breadcrumb-item.active {
+    color: #495057;
+    font-weight: 500;
+}
+
+/* Page header */
+.page-header {
+    padding: 1rem 0;
+    margin-bottom: 1.5rem;
+}
+
+.page-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #2a2a2a;
+    margin-bottom: 0.25rem;
+}
+
+/* Card design */
+.card {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.card-body {
+    padding: 2rem;
+    text-align: center;
+}
+
+/* Warning icon */
+.warning-icon {
+    font-size: 4rem;
+    color: #ff4757;
+    margin-bottom: 1.5rem;
+    display: block;
+}
+
+/* Alert styling */
+.alert {
+    border-radius: 8px;
+    border: none;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.875rem;
+    text-align: left;
+    background: rgba(220, 53, 69, 0.08);
+    border-left: 4px solid #ff4757;
+}
+
+.alert i {
+    color: #ff4757;
+    font-size: 1.25rem;
+    margin-right: 0.75rem;
+    vertical-align: middle;
+}
+
+.alert strong {
+    color: #ff4757;
+    font-weight: 600;
+}
+
+/* Card title */
+.card-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #2a2a2a;
+    margin-bottom: 1.5rem;
+    line-height: 1.4;
+}
+
+/* Participant info box */
+.participant-info {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    text-align: left;
+    border: 1px solid #f0f0f0;
+}
+
+.info-label {
+    color: #6c757d;
+    font-weight: 500;
+    font-size: 0.8125rem;
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.info-value {
+    color: #495057;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 0.75rem;
+}
+
+/* Delete consequences */
+.delete-consequences {
+    background: #fff5f5;
+    border-radius: 8px;
+    padding: 1.25rem;
+    margin: 1.5rem 0;
+    border: 1px solid #ffcccc;
+}
+
+.delete-consequences h6 {
+    color: #dc3545;
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+}
+
+.consequences-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: 0.8125rem;
+    color: #495057;
+}
+
+.consequences-list li {
+    padding: 0.25rem 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+.consequences-list i {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.125rem;
+    flex-shrink: 0;
+}
+
+/* Button styling */
+.btn {
+    border-radius: 6px;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-width: 160px;
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #ff4757 0%, #ff3838 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(255, 71, 87, 0.2);
+}
+
+.btn-danger:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(255, 71, 87, 0.3);
+}
+
+.btn-light {
+    background: #f8f9fa;
+    color: #495057;
+    border: 1px solid #e0e0e0;
+}
+
+.btn-light:hover {
+    background: #e9ecef;
+    color: #495057;
+}
+
+/* Form actions */
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1.5rem;
+    }
+    
+    .warning-icon {
+        font-size: 3rem;
+    }
+    
+    .card-title {
+        font-size: 1rem;
+    }
+    
+    .btn {
+        padding: 0.625rem 1.25rem;
+        font-size: 0.8125rem;
+        min-width: 140px;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .form-actions .btn {
+        width: 100%;
+    }
+    
+    .page-title {
+        font-size: 1.125rem;
+    }
+}
+
+/* Small mobile */
+@media (max-width: 576px) {
+    .card-body {
+        padding: 1.25rem;
+    }
+    
+    .participant-info,
+    .delete-consequences {
+        padding: 1rem;
+    }
+    
+    .alert {
+        padding: 1rem;
+        font-size: 0.8125rem;
+    }
+}
+
+/* Focus states for accessibility */
+.btn:focus {
+    outline: 2px solid rgba(102, 126, 234, 0.5);
+    outline-offset: 2px;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .card {
+        background: #2d2d2d;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+    }
+    
+    .page-title,
+    .card-title {
+        color: #ffffff;
+    }
+    
+    .alert {
+        background: rgba(255, 71, 87, 0.1);
+        border-left-color: #ff4757;
+    }
+    
+    .participant-info {
+        background: #3d3d3d;
+        border-color: #404040;
+    }
+    
+    .info-label {
+        color: #b0b0b0;
+    }
+    
+    .info-value {
+        color: #e0e0e0;
+    }
+    
+    .delete-consequences {
+        background: rgba(255, 71, 87, 0.05);
+        border-color: rgba(255, 71, 87, 0.2);
+    }
+    
+    .btn-light {
+        background: #404040;
+        color: #e0e0e0;
+        border-color: #505050;
+    }
+    
+    .btn-light:hover {
+        background: #505050;
+        color: #ffffff;
+    }
+}
+
+/* Animation for warning */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.warning-icon {
+    animation: pulse 2s infinite;
+}
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="page-header">
   <h3 class="page-title">Delete Participant</h3>
@@ -22,42 +354,174 @@
   <div class="col-lg-8 mx-auto">
     <div class="card">
       <div class="card-body">
-        <div class="alert alert-danger">
-          <i class="mdi mdi-alert"></i> <strong>Warning!</strong> This action cannot be undone.
+        <!-- Warning Icon -->
+        <div class="warning-icon">
+          <i class="mdi mdi-alert-circle-outline"></i>
         </div>
 
-        <h4 class="card-title">Are you sure you want to delete this participant?</h4>
+        <!-- Alert Message -->
+        <div class="alert">
+          <i class="mdi mdi-alert"></i>
+          <strong>Irreversible Action!</strong> Deleting this participant will permanently remove all associated data from the system.
+        </div>
+
+        <h4 class="card-title">
+          Are you absolutely sure you want to delete this participant?
+        </h4>
         
-        <div class="mt-4 mb-4">
-          <table class="table table-borderless">
-            <tr>
-              <td><strong>Participant ID:</strong></td>
-              <td>{{ participant.participant_id }}</td>
-            </tr>
-            <tr>
-              <td><strong>Name:</strong></td>
-              <td>{{ participant.get_full_name }}</td>
-            </tr>
-            <tr>
-              <td><strong>Study:</strong></td>
-              <td>{{ participant.study.name }}</td>
-            </tr>
-            <tr>
-              <td><strong>Status:</strong></td>
-              <td>{{ participant.get_status_display }}</td>
-            </tr>
-          </table>
+        <!-- Participant Information -->
+        <div class="participant-info">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <span class="info-label">Participant ID</span>
+              <div class="info-value">{{ participant.participant_id }}</div>
+            </div>
+            <div class="col-md-6 mb-3">
+              <span class="info-label">Status</span>
+              <div class="info-value">
+                <span class="badge 
+                  {% if participant.status == 'active' %}badge-success
+                  {% elif participant.status == 'screening' %}badge-warning
+                  {% elif participant.status == 'completed' %}badge-info
+                  {% elif participant.status == 'withdrawn' %}badge-secondary
+                  {% elif participant.status == 'lost' %}badge-danger
+                  {% endif %}">
+                  {{ participant.get_status_display }}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <span class="info-label">Full Name</span>
+              <div class="info-value">{{ participant.get_full_name }}</div>
+            </div>
+            <div class="col-md-6 mb-3">
+              <span class="info-label">Date of Birth</span>
+              <div class="info-value">{{ participant.date_of_birth|date:"Y-m-d"|default:"-" }}</div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <span class="info-label">Study</span>
+              <div class="info-value">{{ participant.study.name }}</div>
+            </div>
+            <div class="col-md-6">
+              <span class="info-label">Enrollment Date</span>
+              <div class="info-value">{{ participant.enrollment_date|date:"Y-m-d"|default:"-" }}</div>
+            </div>
+          </div>
         </div>
 
-        <form method="post">
+        <!-- Delete Consequences -->
+        <div class="delete-consequences">
+          <h6>This action will permanently delete:</h6>
+          <ul class="consequences-list">
+            <li>
+              <i class="mdi mdi-close-circle"></i>
+              All participant personal information and contact details
+            </li>
+            <li>
+              <i class="mdi mdi-close-circle"></i>
+              All SUSAR reports associated with this participant
+            </li>
+            <li>
+              <i class="mdi mdi-close-circle"></i>
+              All study visit records and follow-up data
+            </li>
+            <li>
+              <i class="mdi mdi-close-circle"></i>
+              Any uploaded documents or files linked to this participant
+            </li>
+            <li>
+              <i class="mdi mdi-close-circle"></i>
+              All audit trail entries related to this participant
+            </li>
+          </ul>
+        </div>
+
+        <!-- Confirmation Form -->
+        <form method="post" id="deleteForm">
           {% csrf_token %}
-          <button type="submit" class="btn btn-danger me-2">
-            <i class="mdi mdi-delete"></i> Yes, Delete Participant
-          </button>
-          <a href="{% url 'participant_detail' participant.id %}" class="btn btn-light">Cancel</a>
+          
+          <!-- Double confirmation for safety -->
+          <div class="mb-3">
+            <div class="form-check d-inline-block text-start">
+              <input type="checkbox" class="form-check-input" id="confirmDelete" required>
+              <label class="form-check-label" for="confirmDelete" style="font-size: 0.8125rem; color: #495057;">
+                I understand that this action cannot be undone
+              </label>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="form-actions">
+            <button type="submit" class="btn btn-danger" id="deleteButton" disabled>
+              <i class="mdi mdi-delete-forever"></i>
+              Yes, Delete Permanently
+            </button>
+            <a href="{% url 'participant_detail' participant.id %}" class="btn btn-light">
+              <i class="mdi mdi-arrow-left"></i>
+              No, Go Back
+            </a>
+          </div>
         </form>
       </div>
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const confirmCheckbox = document.getElementById('confirmDelete');
+    const deleteButton = document.getElementById('deleteButton');
+    const deleteForm = document.getElementById('deleteForm');
+    
+    // Enable/disable delete button based on checkbox
+    confirmCheckbox.addEventListener('change', function() {
+        deleteButton.disabled = !this.checked;
+    });
+    
+    // Additional confirmation before submitting
+    deleteForm.addEventListener('submit', function(e) {
+        if (!confirmCheckbox.checked) {
+            e.preventDefault();
+            return;
+        }
+        
+        // Final warning with participant info
+        const participantName = "{{ participant.get_full_name|escapejs }}";
+        const participantId = "{{ participant.participant_id|escapejs }}";
+        
+        const finalConfirm = confirm(
+            `FINAL WARNING: You are about to permanently delete:\n\n` +
+            `Participant: ${participantName}\n` +
+            `ID: ${participantId}\n\n` +
+            `This action cannot be undone.\n\n` +
+            `Click OK to confirm deletion.`
+        );
+        
+        if (!finalConfirm) {
+            e.preventDefault();
+        } else {
+            // Show loading state
+            deleteButton.innerHTML = '<i class="mdi mdi-loading mdi-spin"></i> Deleting...';
+            deleteButton.disabled = true;
+        }
+    });
+    
+    // Add some visual feedback
+    deleteButton.addEventListener('mouseover', function() {
+        if (!this.disabled) {
+            this.style.transform = 'scale(1.02)';
+        }
+    });
+    
+    deleteButton.addEventListener('mouseout', function() {
+        this.style.transform = '';
+    });
+});
+</script>
 {% endblock %}

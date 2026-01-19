@@ -1,4 +1,3 @@
-
 <!-- ============================================ -->
 <!-- PARTICIPANT DETAIL - participants/participant_detail.html -->
 <!-- ============================================ -->
@@ -6,6 +5,313 @@
 {% load static %}
 
 {% block title %}{{ participant.participant_id }} - ClinTrack{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Apple-like typography */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Smaller font sizes */
+h4 { font-size: 1.125rem; }
+h6 { font-size: 0.8125rem; }
+p, td, li { font-size: 0.875rem; }
+small { font-size: 0.75rem; }
+
+/* Clean breadcrumb */
+.breadcrumb {
+    background: transparent;
+    padding: 0;
+    margin-bottom: 0;
+    font-size: 0.8125rem;
+}
+
+.breadcrumb-item {
+    color: #6c757d;
+}
+
+.breadcrumb-item a {
+    color: #667eea;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.breadcrumb-item.active {
+    color: #495057;
+    font-weight: 500;
+}
+
+/* Page header */
+.page-header {
+    padding: 1rem 0;
+    margin-bottom: 1.5rem;
+}
+
+.page-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #2a2a2a;
+    margin-bottom: 0.25rem;
+}
+
+/* Card design */
+.card {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+}
+
+.card-body {
+    padding: 1.25rem;
+}
+
+/* Profile header with image */
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.profile-image {
+    width: 64px;
+    height: 64px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #e3e4ea 0%, #dddbe8 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.profile-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-info {
+    flex: 1;
+}
+
+.profile-id {
+    font-size: 0.8125rem;
+    color: #6c757d;
+    margin-bottom: 0.25rem;
+}
+
+.profile-name {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #2a2a2a;
+    margin-bottom: 0.25rem;
+}
+
+.profile-status {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-active { background: rgba(40, 199, 111, 0.1); color: #28c76f; }
+.status-screening { background: rgba(255, 171, 0, 0.1); color: #ffab00; }
+.status-completed { background: rgba(0, 167, 255, 0.1); color: #00a7ff; }
+.status-withdrawn { background: rgba(108, 117, 125, 0.1); color: #6c757d; }
+.status-lost { background: rgba(220, 53, 69, 0.1); color: #dc3545; }
+
+/* Action buttons */
+.btn-sm {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    border-radius: 4px;
+}
+
+.btn-warning {
+    background: linear-gradient(135deg, #ffab00 0%, #ff9900 100%);
+    border: none;
+    color: white;
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #ff4757 0%, #ff3838 100%);
+    border: none;
+    color: white;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    color: white;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Information tables */
+.table-borderless td {
+    padding: 0.4rem 0.25rem;
+    border: none;
+    font-size: 0.8125rem;
+}
+
+.table-borderless tr td:first-child {
+    color: #6c757d;
+    font-weight: 500;
+    width: 45%;
+}
+
+.table-borderless tr td:last-child {
+    color: #495057;
+}
+
+.text-muted {
+    color: #6c757d !important;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.75rem;
+    display: block;
+}
+
+/* Horizontal rule */
+hr {
+    margin: 1.25rem 0;
+    border: none;
+    border-top: 1px solid #f0f0f0;
+}
+
+/* SUSAR list */
+.list-unstyled {
+    margin: 0;
+    padding: 0;
+}
+
+.list-unstyled li {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.list-unstyled li:last-child {
+    border-bottom: none;
+}
+
+.list-unstyled a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.8125rem;
+}
+
+.list-unstyled a:hover {
+    color: #764ba2;
+}
+
+.badge-sm {
+    padding: 0.15rem 0.4rem;
+    font-size: 0.625rem;
+    border-radius: 3px;
+    margin-top: 0.25rem;
+}
+
+/* Notes section */
+.notes-box {
+    background: #f8f9fa;
+    border-radius: 6px;
+    padding: 0.875rem;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: #495057;
+}
+
+/* Footer metadata */
+.metadata {
+    font-size: 0.6875rem;
+    color: #adb5bd;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .profile-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.75rem;
+    }
+    
+    .profile-image {
+        width: 56px;
+        height: 56px;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .page-title {
+        font-size: 1.125rem;
+    }
+    
+    .profile-name {
+        font-size: 1rem;
+    }
+    
+    .btn-group {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center;
+    }
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    .card {
+        background: #2d2d2d;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+    }
+    
+    .page-title,
+    .profile-name {
+        color: #ffffff;
+    }
+    
+    .table-borderless tr td:first-child {
+        color: #b0b0b0;
+    }
+    
+    .table-borderless tr td:last-child {
+        color: #e0e0e0;
+    }
+    
+    .text-muted {
+        color: #b0b0b0 !important;
+    }
+    
+    .notes-box {
+        background: #3d3d3d;
+        color: #e0e0e0;
+    }
+    
+    hr {
+        border-top-color: #404040;
+    }
+    
+    .list-unstyled li {
+        border-bottom-color: #404040;
+    }
+}
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="page-header">
@@ -23,9 +329,19 @@
   <div class="col-lg-8">
     <div class="card">
       <div class="card-body">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-          <h4 class="card-title mb-0">{{ participant.get_full_name }}</h4>
-          <div>
+        <!-- Profile Header with Image -->
+        <div class="profile-header">
+          <div class="profile-image">
+            <img src="{% static 'assets/images/profile.png' %}" alt="Profile" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'64\' height=\'64\' viewBox=\'0 0 64 64\' fill=\'%23fff\'><path d=\'M32 36c-7.732 0-14-6.268-14-14s6.268-14 14-14 14 6.268 14 14-6.268 14-14 14zm0-24c-5.523 0-10 4.477-10 10s4.477 10 10 10 10-4.477 10-10-4.477-10-10-10zm24 36c0 2.209-1.791 4-4 4H12c-2.209 0-4-1.791-4-4 0-8 8-24 24-24s24 16 24 24z\'/></svg>';">
+          </div>
+          <div class="profile-info">
+            <div class="profile-id">{{ participant.participant_id }}</div>
+            <div class="profile-name">{{ participant.get_full_name }}</div>
+            <span class="profile-status status-{{ participant.status }}">
+              {{ participant.get_status_display }}
+            </span>
+          </div>
+          <div class="btn-group">
             {% if user.role == 'admin' or user.role == 'coordinator' %}
             <a href="{% url 'participant_update' participant.id %}" class="btn btn-warning btn-sm">
               <i class="mdi mdi-pencil"></i> Edit
@@ -33,7 +349,7 @@
             {% endif %}
             {% if user.role == 'admin' %}
             <a href="{% url 'participant_delete' participant.id %}" class="btn btn-danger btn-sm">
-              <i class="mdi mdi-delete"></i> Delete
+              <i class="mdi mdi-delete"></i>
             </a>
             {% endif %}
           </div>
@@ -41,40 +357,40 @@
 
         <div class="row">
           <div class="col-md-6">
-            <h6 class="text-muted">Personal Information</h6>
+            <span class="text-muted">Personal Information</span>
             <table class="table table-borderless">
               <tr>
-                <td><strong>Participant ID:</strong></td>
+                <td>Participant ID:</td>
                 <td>{{ participant.participant_id }}</td>
               </tr>
               <tr>
-                <td><strong>Full Name:</strong></td>
+                <td>Full Name:</td>
                 <td>{{ participant.get_full_name }}</td>
               </tr>
               <tr>
-                <td><strong>Date of Birth:</strong></td>
+                <td>Date of Birth:</td>
                 <td>{{ participant.date_of_birth|date:"Y-m-d"|default:"-" }}</td>
               </tr>
               <tr>
-                <td><strong>Gender:</strong></td>
+                <td>Gender:</td>
                 <td>{{ participant.get_gender_display }}</td>
               </tr>
             </table>
           </div>
 
           <div class="col-md-6">
-            <h6 class="text-muted">Contact Information</h6>
+            <span class="text-muted">Contact Information</span>
             <table class="table table-borderless">
               <tr>
-                <td><strong>Primary Phone:</strong></td>
+                <td>Primary Phone:</td>
                 <td>{{ participant.primary_phone }}</td>
               </tr>
               <tr>
-                <td><strong>Secondary Phone:</strong></td>
+                <td>Secondary Phone:</td>
                 <td>{{ participant.secondary_phone|default:"-" }}</td>
               </tr>
               <tr>
-                <td><strong>Email:</strong></td>
+                <td>Email:</td>
                 <td>{{ participant.email|default:"-" }}</td>
               </tr>
             </table>
@@ -85,56 +401,48 @@
 
         <div class="row">
           <div class="col-md-6">
-            <h6 class="text-muted">Location Information</h6>
+            <span class="text-muted">Location Information</span>
             <table class="table table-borderless">
               <tr>
-                <td><strong>Location:</strong></td>
+                <td>Location:</td>
                 <td>{{ participant.location }}</td>
               </tr>
               <tr>
-                <td><strong>Sub-location:</strong></td>
+                <td>Sub-location:</td>
                 <td>{{ participant.sub_location|default:"-" }}</td>
               </tr>
               <tr>
-                <td><strong>County:</strong></td>
+                <td>County:</td>
                 <td>{{ participant.county|default:"-" }}</td>
               </tr>
               <tr>
-                <td><strong>Nearest Landmark:</strong></td>
+                <td>Nearest Landmark:</td>
                 <td>{{ participant.nearest_landmark|default:"-" }}</td>
               </tr>
             </table>
           </div>
 
           <div class="col-md-6">
-            <h6 class="text-muted">Study Information</h6>
+            <span class="text-muted">Study Information</span>
             <table class="table table-borderless">
               <tr>
-                <td><strong>Study:</strong></td>
+                <td>Study:</td>
                 <td><a href="{% url 'study_detail' participant.study.id %}">{{ participant.study.name }}</a></td>
               </tr>
               <tr>
-                <td><strong>Study Code:</strong></td>
+                <td>Study Code:</td>
                 <td>{{ participant.study.code }}</td>
               </tr>
               <tr>
-                <td><strong>Status:</strong></td>
+                <td>Status:</td>
                 <td>
-                  {% if participant.status == 'active' %}
-                  <span class="badge badge-success">Active</span>
-                  {% elif participant.status == 'screening' %}
-                  <span class="badge badge-warning">Screening</span>
-                  {% elif participant.status == 'completed' %}
-                  <span class="badge badge-info">Completed</span>
-                  {% elif participant.status == 'withdrawn' %}
-                  <span class="badge badge-secondary">Withdrawn</span>
-                  {% elif participant.status == 'lost' %}
-                  <span class="badge badge-danger">Lost</span>
-                  {% endif %}
+                  <span class="profile-status status-{{ participant.status }}">
+                    {{ participant.get_status_display }}
+                  </span>
                 </td>
               </tr>
               <tr>
-                <td><strong>Enrollment Date:</strong></td>
+                <td>Enrollment Date:</td>
                 <td>{{ participant.enrollment_date|date:"Y-m-d"|default:"-" }}</td>
               </tr>
             </table>
@@ -143,17 +451,19 @@
 
         {% if participant.notes %}
         <hr>
-        <h6 class="text-muted">Notes</h6>
-        <p>{{ participant.notes }}</p>
+        <span class="text-muted">Notes</span>
+        <div class="notes-box">
+          {{ participant.notes|linebreaks }}
+        </div>
         {% endif %}
 
         <hr>
-        <div class="row">
+        <div class="row metadata">
           <div class="col-md-6">
-            <small class="text-muted">Created by: {{ participant.created_by.username|default:"System" }}</small>
+            Created by: {{ participant.created_by.username|default:"System" }}
           </div>
           <div class="col-md-6 text-end">
-            <small class="text-muted">Last updated: {{ participant.updated_at|date:"Y-m-d H:i" }}</small>
+            Last updated: {{ participant.updated_at|date:"Y-m-d H:i" }}
           </div>
         </div>
       </div>
@@ -161,33 +471,75 @@
   </div>
 
   <div class="col-lg-4">
+    <!-- SUSAR Reports Card -->
     <div class="card">
       <div class="card-body">
-        <h4 class="card-title">SUSAR Reports ({{ susars.count }})</h4>
-        {% if susars %}
-        <ul class="list-unstyled">
-          {% for susar in susars %}
-          <li class="mb-3 border-bottom pb-2">
-            <a href="{% url 'susars_detail' susar.id %}"><strong>{{ susar.susar_id }}</strong></a>
-            <br>
-            <small class="text-muted">{{ susar.get_severity_display }}</small>
-            <br>
-            <small>{{ susar.onset_date|date:"Y-m-d" }}</small>
-            {% if susar.follow_up_required %}
-            <span class="badge badge-warning badge-sm">Follow-up Required</span>
-            {% endif %}
-          </li>
-          {% endfor %}
-        </ul>
-        {% else %}
-        <p class="text-muted">No SUSAR reports</p>
-        {% endif %}
+        <h6 class="text-muted">SUSAR Reports</h6>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="mb-0" style="font-size: 1rem;">Reports ({{ susars.count }})</h5>
+          {% if user.role != 'viewer' %}
+          <a href="{% url 'susars_create' %}" class="btn btn-primary btn-sm">
+            <i class="mdi mdi-plus"></i> New
+          </a>
+          {% endif %}
+        </div>
         
-        {% if user.role != 'viewer' %}
-        <a href="{% url 'susars_create' %}" class="btn btn-primary btn-sm w-100">
-          <i class="mdi mdi-plus"></i> Report New SUSAR
-        </a>
+        {% if susars %}
+        <div class="list-group list-group-flush">
+          {% for susar in susars %}
+          <a href="{% url 'susars_detail' susar.id %}" class="list-group-item list-group-item-action border-0 py-2 px-0">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <strong style="font-size: 0.8125rem;">{{ susar.susar_id }}</strong>
+                <div class="mt-1">
+                  <small class="text-muted">{{ susar.get_severity_display }}</small>
+                  <small class="text-muted ms-2">• {{ susar.onset_date|date:"M d, Y" }}</small>
+                </div>
+              </div>
+              {% if susar.follow_up_required %}
+              <span class="badge badge-warning badge-sm">Follow-up</span>
+              {% endif %}
+            </div>
+          </a>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-4">
+          <div class="text-muted mb-2" style="font-size: 0.75rem;">No SUSAR reports</div>
+          {% if user.role != 'viewer' %}
+          <a href="{% url 'susars_create' %}" class="btn btn-outline-primary btn-sm">
+            <i class="mdi mdi-plus"></i> Create First Report
+          </a>
+          {% endif %}
+        </div>
         {% endif %}
+      </div>
+    </div>
+
+    <!-- Quick Stats Card -->
+    <div class="card">
+      <div class="card-body">
+        <h6 class="text-muted">Quick Stats</h6>
+        <div class="row text-center">
+          <div class="col-6 mb-3">
+            <div style="font-size: 0.875rem; color: #6c757d;">Study Duration</div>
+            <div style="font-size: 1.125rem; font-weight: 600;">{{ participant.get_study_duration|default:"-" }}</div>
+          </div>
+          <div class="col-6 mb-3">
+            <div style="font-size: 0.875rem; color: #6c757d;">Age</div>
+            <div style="font-size: 1.125rem; font-weight: 600;">{{ participant.get_age|default:"-" }}</div>
+          </div>
+          <div class="col-6">
+            <div style="font-size: 0.875rem; color: #6c757d;">SUSAR Count</div>
+            <div style="font-size: 1.125rem; font-weight: 600;">{{ susars.count }}</div>
+          </div>
+          <div class="col-6">
+            <div style="font-size: 0.875rem; color: #6c757d;">Follow-ups</div>
+            <div style="font-size: 1.125rem; font-weight: 600;">
+              {{ susars|length }}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
