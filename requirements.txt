@@ -1,0 +1,22 @@
+django
+djangorestframework
+django-cors-headers
+
+pillow
+
+django-phonenumber-field
+phonenumbers
+
+# Excel support
+openpyxl
+xlsxwriter
+pandas
+
+# PDF support
+reportlab
+weasyprint
+xhtml2pdf
+
+# Utilities (commonly needed)
+python-dateutil
+pytz
