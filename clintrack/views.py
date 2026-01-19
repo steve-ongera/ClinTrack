@@ -923,7 +923,7 @@ def susars_pending(request):
 
 
 # ============================================
-# USER/STAFF VIEWS
+# USER/STAFF Management VIEWS
 # ============================================
 
 @login_required
