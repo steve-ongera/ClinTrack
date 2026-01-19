@@ -1,0 +1,296 @@
+/* custom_admin.css - ClinTrack Admin Styling */
+/* static/admin/custom.css - ClinTrack Admin Styling */
+
+/* Badge enhancements */
+.badge.rounded-pill {
+    padding: 0.25em 0.6em;
+    font-size: 0.85em;
+    font-weight: 500;
+}
+
+/* Status pills */
+.status-pill {
+    display: inline-block;
+    padding: 0.25em 0.6em;
+    font-size: 0.85em;
+    font-weight: 500;
+    border-radius: 50rem;
+    border: 1px solid transparent;
+}
+
+.status-pill.active {
+    background-color: rgba(0, 210, 132, 0.1);
+    color: #00d284;
+    border-color: rgba(0, 210, 132, 0.2);
+}
+
+.status-pill.screening {
+    background-color: rgba(255, 87, 48, 0.1);
+    color: #ff5730;
+    border-color: rgba(255, 87, 48, 0.2);
+}
+
+.status-pill.completed {
+    background-color: rgba(0, 207, 244, 0.1);
+    color: #00cff4;
+    border-color: rgba(0, 207, 244, 0.2);
+}
+
+.status-pill.withdrawn {
+    background-color: rgba(160, 160, 160, 0.1);
+    color: #a0a0a0;
+    border-color: rgba(160, 160, 160, 0.2);
+}
+
+.status-pill.lost {
+    background-color: rgba(255, 8, 84, 0.1);
+    color: #ff0854;
+    border-color: rgba(255, 8, 84, 0.2);
+}
+
+/* Admin header customization */
+#header {
+    background: linear-gradient(135deg, #0033c4 0%, #0029a3 100%);
+    color: white;
+}
+
+#branding h1 {
+    color: white;
+    font-weight: 600;
+}
+
+#branding h1 span {
+    font-weight: 400;
+    opacity: 0.9;
+}
+
+/* Card-like fieldset styling */
+fieldset.collapse {
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+fieldset.collapse h2 {
+    font-size: 1.1em;
+    color: #495057;
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+fieldset.wide .form-row {
+    margin-bottom: 15px;
+}
+
+/* Table improvements */
+#changelist table thead th {
+    background: #f8f9fa;
+    font-weight: 600;
+    color: #495057;
+}
+
+#changelist table tbody tr:hover {
+    background-color: rgba(0, 51, 196, 0.02);
+}
+
+/* Bootstrap icon alignment */
+.bi {
+    vertical-align: -0.125em;
+    margin-right: 0.25em;
+}
+
+/* Small text for muted elements */
+.text-muted {
+    color: #6c757d !important;
+}
+
+/* Timeline styling */
+.timeline-item {
+    margin-bottom: 15px;
+}
+/* Timeline styling */
+.timeline {
+    position: relative;
+    padding-left: 20px;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #dee2e6;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -20px;
+    top: 0;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid white;
+}
+
+.timeline-content {
+    margin-left: 10px;
+    padding-bottom: 10px;
+}
+
+/* Badge enhancements */
+.badge.rounded-pill {
+    padding: 0.25em 0.6em;
+    font-size: 0.85em;
+    font-weight: 500;
+}
+
+/* Status pills */
+.status-pill {
+    display: inline-block;
+    padding: 0.25em 0.6em;
+    font-size: 0.85em;
+    font-weight: 500;
+    border-radius: 50rem;
+    border: 1px solid transparent;
+}
+
+.status-pill.active {
+    background-color: rgba(0, 210, 132, 0.1);
+    color: #00d284;
+    border-color: rgba(0, 210, 132, 0.2);
+}
+
+.status-pill.screening {
+    background-color: rgba(255, 87, 48, 0.1);
+    color: #ff5730;
+    border-color: rgba(255, 87, 48, 0.2);
+}
+
+.status-pill.completed {
+    background-color: rgba(0, 207, 244, 0.1);
+    color: #00cff4;
+    border-color: rgba(0, 207, 244, 0.2);
+}
+
+.status-pill.withdrawn {
+    background-color: rgba(160, 160, 160, 0.1);
+    color: #a0a0a0;
+    border-color: rgba(160, 160, 160, 0.2);
+}
+
+.status-pill.lost {
+    background-color: rgba(255, 8, 84, 0.1);
+    color: #ff0854;
+    border-color: rgba(255, 8, 84, 0.2);
+}
+
+/* Admin header customization */
+#header {
+    background: linear-gradient(135deg, #0033c4 0%, #0029a3 100%);
+    color: white;
+}
+
+#branding h1 {
+    color: white;
+    font-weight: 600;
+}
+
+#branding h1 span {
+    font-weight: 400;
+    opacity: 0.9;
+}
+
+/* Card-like fieldset styling */
+fieldset.collapse {
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+fieldset.collapse h2 {
+    font-size: 1.1em;
+    color: #495057;
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+fieldset.wide .form-row {
+    margin-bottom: 15px;
+}
+
+/* Table improvements */
+#changelist table thead th {
+    background: #f8f9fa;
+    font-weight: 600;
+    color: #495057;
+}
+
+#changelist table tbody tr:hover {
+    background-color: rgba(0, 51, 196, 0.02);
+}
+
+/* Action buttons */
+.button, input[type=submit], input[type=button], .submit-row input, a.button {
+    background: #0033c4;
+    border-radius: 4px;
+    padding: 8px 15px;
+    font-weight: 500;
+}
+
+.button:hover, input[type=submit]:hover, input[type=button]:hover, .submit-row input:hover, a.button:hover {
+    background: #0029a3;
+}
+
+/* Filter sidebar */
+#changelist-filter {
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+}
+
+#changelist-filter h2 {
+    font-size: 0.9em;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #6c757d;
+    border-bottom: 1px solid #dee2e6;
+}
+
+/* Search box */
+#toolbar form input[type="text"] {
+    border-radius: 4px;
+    border: 1px solid #ced4da;
+    padding: 8px 12px;
+}
+
+#toolbar form input[type="text"]:focus {
+    border-color: #0033c4;
+    box-shadow: 0 0 0 0.2rem rgba(0, 51, 196, 0.25);
+}
+
+/* Responsive improvements */
+@media (max-width: 767px) {
+    .object-tools {
+        margin-top: 10px;
+    }
+    
+    #changelist-filter {
+        margin-top: 20px;
+    }
+}
+
+/* Bootstrap icon alignment */
+.bi {
+    vertical-align: -0.125em;
+}
