@@ -56,6 +56,18 @@ urlpatterns = [
     path('staff/create/', views.users_create, name='users_create'),
     path('profile/', views.users_profile, name='users_profile'),
     path('settings/', views.users_settings, name='users_settings'),
+    # Settings URLs
+    path('settings/update-profile/', views.update_profile, name='update_profile'),
+    path('settings/update-password/', views.update_password, name='update_password'),
+    path('settings/update-notifications/', views.update_notifications, name='update_notifications'),
+    path('settings/update-appearance/', views.update_appearance, name='update_appearance'),
+    path('settings/setup-2fa/', views.setup_2fa, name='setup_2fa'),
+    path('settings/revoke-session/', views.revoke_session, name='revoke_session'),
+    path('settings/revoke-all-sessions/', views.revoke_all_sessions, name='revoke_all_sessions'),
+    path('settings/export-data/', views.export_personal_data, name='export_personal_data'),
+    path('settings/download-activity/', views.download_activity_log, name='download_activity_log'),
+    path('settings/delete-account/', views.delete_account, name='delete_account'),
+    
     
     # Attendance
     path('attendance/', views.attendance_list, name='attendance_list'),

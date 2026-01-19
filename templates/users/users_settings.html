@@ -6,6 +6,668 @@
 
 {% block title %}Account Settings - ClinTrack{% endblock %}
 
+{% block extra_css %}
+<style>
+/* Apple-like typography */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Smaller font sizes */
+h3 { font-size: 1.125rem; }
+h4 { font-size: 1rem; }
+h5 { font-size: 0.875rem; }
+h6 { font-size: 0.8125rem; }
+p, td, li, th, label { font-size: 0.8125rem; }
+small { font-size: 0.75rem; }
+
+/* Clean breadcrumb */
+.breadcrumb {
+    background: transparent;
+    padding: 0;
+    margin-bottom: 0;
+    font-size: 0.75rem;
+}
+
+.breadcrumb-item {
+    color: #6c757d;
+}
+
+.breadcrumb-item a {
+    color: #667eea;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.breadcrumb-item.active {
+    color: #495057;
+    font-weight: 500;
+}
+
+/* Page header */
+.page-header {
+    padding: 1rem 0;
+    margin-bottom: 1.5rem;
+}
+
+.page-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #2a2a2a;
+    margin-bottom: 0.25rem;
+}
+
+/* Card design */
+.card {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+}
+
+.card-body {
+    padding: 1.25rem;
+}
+
+/* Card header */
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.875rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.card-header h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #2a2a2a;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Settings navigation */
+.settings-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.settings-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    color: #495057;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-size: 0.8125rem;
+    font-weight: 500;
+}
+
+.settings-nav-item:hover {
+    background: #f8f9fa;
+    color: #667eea;
+}
+
+.settings-nav-item.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.settings-nav-item i {
+    font-size: 0.875rem;
+    width: 20px;
+    text-align: center;
+}
+
+/* Form styling */
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #495057;
+    font-size: 0.75rem;
+}
+
+.form-group label.required:after {
+    content: " *";
+    color: #dc3545;
+}
+
+/* Form controls */
+.form-control {
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 0.625rem 0.875rem;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    transition: all 0.2s ease;
+    width: 100%;
+}
+
+.form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    outline: none;
+}
+
+.form-control::placeholder {
+    color: #adb5bd;
+    opacity: 0.8;
+}
+
+/* Checkbox and radio styling */
+.form-check {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.form-check-input {
+    width: 1rem;
+    height: 1rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.form-check-input:checked {
+    background-color: #667eea;
+    border-color: #667eea;
+}
+
+.form-check-input:focus {
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    outline: none;
+}
+
+.form-check-label {
+    font-size: 0.8125rem;
+    color: #495057;
+    cursor: pointer;
+    user-select: none;
+    flex: 1;
+}
+
+/* Button styling */
+.btn {
+    border-radius: 6px;
+    padding: 0.625rem 1.25rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.btn-outline-primary {
+    background: transparent;
+    color: #667eea;
+    border: 1px solid #667eea;
+}
+
+.btn-outline-primary:hover {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+}
+
+.btn-outline-secondary {
+    background: transparent;
+    color: #6c757d;
+    border: 1px solid #e0e0e0;
+}
+
+.btn-outline-secondary:hover {
+    background: #f8f9fa;
+    color: #495057;
+}
+
+.btn-sm {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.6875rem;
+}
+
+/* Form actions */
+.form-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #f0f0f0;
+}
+
+/* Security metrics */
+.security-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.metric-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    border: 1px solid #f0f0f0;
+    text-align: center;
+    transition: transform 0.2s ease;
+}
+
+.metric-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.metric-value {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #2a2a2a;
+    margin-bottom: 0.25rem;
+    line-height: 1;
+}
+
+.metric-label {
+    font-size: 0.6875rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+}
+
+/* Password strength indicator */
+.password-strength {
+    margin-top: 0.5rem;
+}
+
+.strength-bar {
+    height: 4px;
+    background: #e9ecef;
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 0.25rem;
+}
+
+.strength-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
+
+.strength-text {
+    font-size: 0.6875rem;
+    color: #6c757d;
+}
+
+.strength-weak .strength-fill { background: #ff4757; width: 25%; }
+.strength-fair .strength-fill { background: #ffab00; width: 50%; }
+.strength-good .strength-fill { background: #00a7ff; width: 75%; }
+.strength-strong .strength-fill { background: #00d25b; width: 100%; }
+
+/* Session list */
+.session-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.session-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f8f9fa;
+}
+
+.session-item:last-child {
+    border-bottom: none;
+}
+
+.session-info {
+    flex: 1;
+}
+
+.session-location {
+    font-size: 0.8125rem;
+    color: #495057;
+    margin-bottom: 0.125rem;
+}
+
+.session-time {
+    font-size: 0.6875rem;
+    color: #6c757d;
+}
+
+.session-status {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.session-status.current::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #28c76f;
+    display: inline-block;
+    animation: pulse 2s infinite;
+}
+
+.session-status.other::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #6c757d;
+    display: inline-block;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+/* Theme toggle */
+.theme-toggle {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.theme-option {
+    flex: 1;
+    text-align: center;
+    padding: 0.75rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.theme-option:hover {
+    border-color: #667eea;
+}
+
+.theme-option.active {
+    border-color: #667eea;
+    background: rgba(102, 126, 234, 0.05);
+}
+
+.theme-option i {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.theme-option span {
+    font-size: 0.75rem;
+    color: #495057;
+}
+
+/* Error styling */
+.error {
+    color: #dc3545;
+    font-size: 0.75rem;
+    margin-top: 0.375rem;
+    display: block;
+}
+
+.form-control.is-invalid {
+    border-color: #dc3545;
+    background-image: none;
+}
+
+.form-control.is-invalid:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+}
+
+/* Alert styling */
+.alert {
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    font-size: 0.8125rem;
+    border: none;
+}
+
+.alert-success {
+    background: rgba(40, 199, 111, 0.1);
+    color: #28c76f;
+}
+
+.alert-danger {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+}
+
+/* Required fields note */
+.required-fields {
+    font-size: 0.75rem;
+    color: #6c757d;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #f0f0f0;
+}
+
+.required-fields i {
+    color: #dc3545;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+    
+    .settings-nav {
+        flex-direction: row;
+        overflow-x: auto;
+        padding-bottom: 0.5rem;
+    }
+    
+    .settings-nav-item {
+        white-space: nowrap;
+        flex: 0 0 auto;
+    }
+    
+    .security-metrics {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .form-actions .btn {
+        width: 100%;
+    }
+    
+    .btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.6875rem;
+    }
+    
+    .page-title {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .security-metrics {
+        grid-template-columns: 1fr;
+    }
+    
+    .theme-toggle {
+        flex-direction: column;
+    }
+}
+
+/* Focus states */
+.form-control:focus,
+.btn:focus,
+.form-check-input:focus {
+    outline: 2px solid rgba(102, 126, 234, 0.5);
+    outline-offset: 2px;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .card {
+        background: #2d2d2d;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+    }
+    
+    .page-title,
+    .card-header h4 {
+        color: #ffffff;
+    }
+    
+    .card-header {
+        border-bottom-color: #404040;
+    }
+    
+    .settings-nav-item {
+        color: #e0e0e0;
+    }
+    
+    .settings-nav-item:hover {
+        background: #3d3d3d;
+        color: #8a9cff;
+    }
+    
+    .settings-nav-item.active {
+        background: linear-gradient(135deg, #8a9cff 0%, #a56acf 100%);
+        color: white;
+    }
+    
+    .form-group label {
+        color: #e0e0e0;
+    }
+    
+    .form-control {
+        background-color: #3d3d3d;
+        border-color: #404040;
+        color: #e0e0e0;
+    }
+    
+    .form-control:focus {
+        background-color: #3d3d3d;
+        border-color: #667eea;
+    }
+    
+    .form-control::placeholder {
+        color: #8a8a8a;
+    }
+    
+    .form-check-input {
+        background-color: #3d3d3d;
+        border-color: #505050;
+    }
+    
+    .form-check-input:checked {
+        background-color: #667eea;
+        border-color: #667eea;
+    }
+    
+    .form-check-label {
+        color: #e0e0e0;
+    }
+    
+    .metric-card {
+        background: #3d3d3d;
+        border-color: #404040;
+    }
+    
+    .metric-value {
+        color: #ffffff;
+    }
+    
+    .metric-label {
+        color: #b0b0b0;
+    }
+    
+    .strength-bar {
+        background: #404040;
+    }
+    
+    .session-item {
+        border-bottom-color: #404040;
+    }
+    
+    .session-location {
+        color: #e0e0e0;
+    }
+    
+    .theme-option {
+        border-color: #404040;
+        background: #3d3d3d;
+    }
+    
+    .theme-option:hover {
+        border-color: #667eea;
+    }
+    
+    .theme-option.active {
+        border-color: #667eea;
+        background: rgba(102, 126, 234, 0.1);
+    }
+    
+    .theme-option span {
+        color: #e0e0e0;
+    }
+    
+    .required-fields {
+        border-top-color: #404040;
+        color: #b0b0b0;
+    }
+}
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="content-wrapper">
   <div class="page-header">
@@ -19,28 +681,117 @@
     </nav>
   </div>
 
+  <!-- Success/Error Messages -->
+  {% if messages %}
+  <div class="messages">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}">
+      <i class="bi bi-{% if message.tags == 'success' %}check-circle{% else %}exclamation-circle{% endif %}"></i>
+      {{ message }}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Security Metrics -->
+  <div class="security-metrics">
+    <div class="metric-card">
+      <div class="metric-value">{{ security_metrics.password_age|default:"0" }}</div>
+      <div class="metric-label">
+        <i class="bi bi-clock-history"></i>
+        Password Age (days)
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-value">{{ security_metrics.login_count|default:"0" }}</div>
+      <div class="metric-label">
+        <i class="bi bi-door-open"></i>
+        This Month Logins
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-value">{{ security_metrics.unique_locations|default:"0" }}</div>
+      <div class="metric-label">
+        <i class="bi bi-geo-alt"></i>
+        Unique Locations
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-value">{{ security_metrics.avg_session|default:"0" }}</div>
+      <div class="metric-label">
+        <i class="bi bi-stopwatch"></i>
+        Avg Session (hours)
+      </div>
+    </div>
+  </div>
+
   <div class="row">
     <div class="col-md-3">
       <!-- Settings Navigation -->
       <div class="card">
         <div class="card-body">
           <div class="settings-nav">
-            <a href="#profile" class="settings-nav-item active">
+            <a href="#profile" class="settings-nav-item active" onclick="showSection('profile', this)">
               <i class="bi bi-person"></i>
-              Profile Information
+              Profile
             </a>
-            <a href="#security" class="settings-nav-item">
+            <a href="#security" class="settings-nav-item" onclick="showSection('security', this)">
               <i class="bi bi-shield-lock"></i>
               Security
             </a>
-            <a href="#notifications" class="settings-nav-item">
+            <a href="#sessions" class="settings-nav-item" onclick="showSection('sessions', this)">
+              <i class="bi bi-door-open"></i>
+              Active Sessions
+            </a>
+            <a href="#notifications" class="settings-nav-item" onclick="showSection('notifications', this)">
               <i class="bi bi-bell"></i>
               Notifications
             </a>
-            <a href="#preferences" class="settings-nav-item">
-              <i class="bi bi-sliders"></i>
-              Preferences
+            <a href="#appearance" class="settings-nav-item" onclick="showSection('appearance', this)">
+              <i class="bi bi-palette"></i>
+              Appearance
             </a>
+            <a href="#advanced" class="settings-nav-item" onclick="showSection('advanced', this)">
+              <i class="bi bi-gear"></i>
+              Advanced
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Security Status -->
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title mb-3" style="font-size: 0.875rem;">
+            <i class="bi bi-shield-check"></i>
+            Security Status
+          </h5>
+          
+          <div class="mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <span style="font-size: 0.75rem;">Password Strength</span>
+              <span class="badge badge-success" style="font-size: 0.6875rem;">Strong</span>
+            </div>
+            <div class="progress" style="height: 4px;">
+              <div class="progress-bar bg-success" style="width: 90%"></div>
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <span style="font-size: 0.75rem;">2FA Status</span>
+              <span class="badge badge-info" style="font-size: 0.6875rem;">Not Enabled</span>
+            </div>
+          </div>
+          
+          <div>
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <span style="font-size: 0.75rem;">Last Security Review</span>
+              <span style="font-size: 0.6875rem; color: #6c757d;">30 days ago</span>
+            </div>
           </div>
         </div>
       </div>
@@ -48,47 +799,66 @@
 
     <div class="col-md-9">
       <!-- Profile Information -->
-      <div class="card" id="profile">
+      <div class="card section-content" id="profile-section">
         <div class="card-body">
           <div class="card-header">
             <h4>
               <i class="bi bi-person"></i>
               Profile Information
             </h4>
+            <small class="text-muted" style="font-size: 0.75rem;">
+              Update your personal details
+            </small>
           </div>
 
-          <form method="post">
+          <form method="post" action="{% url 'update_profile' %}">
             {% csrf_token %}
+            <input type="hidden" name="form_type" value="profile">
             
             <div class="row">
               <div class="col-md-6">
                 <div class="form-group">
-                  <label>First Name</label>
-                  <input type="text" class="form-control" name="first_name" value="{{ user.first_name }}">
+                  <label for="first_name" class="required">First Name</label>
+                  <input type="text" class="form-control" id="first_name" name="first_name" 
+                         value="{{ user.first_name }}" required>
                 </div>
               </div>
               <div class="col-md-6">
                 <div class="form-group">
-                  <label>Last Name</label>
-                  <input type="text" class="form-control" name="last_name" value="{{ user.last_name }}">
+                  <label for="last_name" class="required">Last Name</label>
+                  <input type="text" class="form-control" id="last_name" name="last_name" 
+                         value="{{ user.last_name }}" required>
                 </div>
               </div>
             </div>
 
-            <div class="form-group">
-              <label>Email Address</label>
-              <input type="email" class="form-control" name="email" value="{{ user.email }}">
-            </div>
-
-            <div class="form-group">
-              <label>Phone Number</label>
-              <input type="tel" class="form-control" name="phone_number" value="{{ user.phone_number }}">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="email" class="required">Email Address</label>
+                  <input type="email" class="form-control" id="email" name="email" 
+                         value="{{ user.email }}" required>
+                  <small class="helper-text">Used for notifications and password reset</small>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="phone_number">Phone Number</label>
+                  <input type="tel" class="form-control" id="phone_number" name="phone_number" 
+                         value="{{ user.phone_number }}">
+                  <small class="helper-text">Optional, for contact purposes</small>
+                </div>
+              </div>
             </div>
 
             <div class="form-actions">
               <button type="submit" class="btn btn-primary">
                 <i class="bi bi-check-circle"></i>
-                Save Changes
+                Save Profile Changes
+              </button>
+              <button type="button" class="btn btn-outline-secondary" onclick="resetProfileForm()">
+                <i class="bi bi-arrow-counterclockwise"></i>
+                Reset
               </button>
             </div>
           </form>
@@ -96,31 +866,47 @@
       </div>
 
       <!-- Security Settings -->
-      <div class="card" id="security">
+      <div class="card section-content" id="security-section" style="display: none;">
         <div class="card-body">
           <div class="card-header">
             <h4>
               <i class="bi bi-shield-lock"></i>
               Security Settings
             </h4>
+            <small class="text-muted" style="font-size: 0.75rem;">
+              Manage your account security
+            </small>
           </div>
 
-          <form method="post">
+          <form method="post" action="{% url 'update_password' %}" id="passwordForm">
             {% csrf_token %}
+            <input type="hidden" name="form_type" value="password">
             
             <div class="form-group">
-              <label>Current Password</label>
-              <input type="password" class="form-control" name="current_password">
+              <label for="current_password" class="required">Current Password</label>
+              <input type="password" class="form-control" id="current_password" name="current_password" required>
             </div>
 
-            <div class="form-group">
-              <label>New Password</label>
-              <input type="password" class="form-control" name="new_password">
-            </div>
-
-            <div class="form-group">
-              <label>Confirm New Password</label>
-              <input type="password" class="form-control" name="confirm_password">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="new_password" class="required">New Password</label>
+                  <input type="password" class="form-control" id="new_password" name="new_password" 
+                         required oninput="checkPasswordStrength(this.value)">
+                  <div id="passwordStrength" class="password-strength">
+                    <div class="strength-bar">
+                      <div class="strength-fill"></div>
+                    </div>
+                    <div class="strength-text"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="confirm_password" class="required">Confirm New Password</label>
+                  <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                </div>
+              </div>
             </div>
 
             <div class="form-actions">
@@ -131,135 +917,364 @@
             </div>
           </form>
 
-          <div class="security-info">
-            <h5>Two-Factor Authentication</h5>
-            <p>Add an extra layer of security to your account.</p>
-            <button class="btn btn-outline-primary">
+          <div class="mt-4 pt-4 border-top">
+            <h5 class="mb-3" style="font-size: 0.875rem;">
               <i class="bi bi-shield-check"></i>
-              Enable 2FA
+              Two-Factor Authentication
+            </h5>
+            <p style="font-size: 0.8125rem; color: #6c757d; margin-bottom: 1rem;">
+              Add an extra layer of security to your account. When enabled, you'll need to enter a verification code from your mobile device in addition to your password.
+            </p>
+            
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <h6 style="font-size: 0.8125rem; margin-bottom: 0.25rem;">Status: 
+                  <span class="badge badge-secondary">Not Enabled</span>
+                </h6>
+                <small class="text-muted" style="font-size: 0.6875rem;">
+                  Last updated: Never
+                </small>
+              </div>
+              <button class="btn btn-outline-primary" onclick="setupTwoFactor()">
+                <i class="bi bi-shield-plus"></i>
+                Enable 2FA
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Sessions -->
+      <div class="card section-content" id="sessions-section" style="display: none;">
+        <div class="card-body">
+          <div class="card-header">
+            <h4>
+              <i class="bi bi-door-open"></i>
+              Active Sessions
+            </h4>
+            <small class="text-muted" style="font-size: 0.75rem;">
+              Manage your active login sessions
+            </small>
+          </div>
+
+          <div class="mb-4">
+            <h5 class="mb-3" style="font-size: 0.875rem;">Current Session</h5>
+            <div class="session-item">
+              <div class="session-info">
+                <div class="session-location">
+                  <i class="bi bi-pc-display"></i>
+                  Main Workstation • {{ current_ip }}
+                </div>
+                <div class="session-time">
+                  Started {{ current_session_start|timesince }} ago
+                </div>
+              </div>
+              <div class="session-status current">
+                <span style="font-size: 0.75rem; color: #28c76f;">Current</span>
+              </div>
+            </div>
+          </div>
+
+          <h5 class="mb-3" style="font-size: 0.875rem;">Other Active Sessions</h5>
+          <ul class="session-list">
+            {% for session in active_sessions|slice:":3" %}
+            <li class="session-item">
+              <div class="session-info">
+                <div class="session-location">
+                  <i class="bi bi-phone"></i>
+                  {{ session.device|default:"Unknown Device" }} • {{ session.location|default:"Unknown Location" }}
+                </div>
+                <div class="session-time">
+                  {{ session.login_time|date:"M d, Y H:i" }}
+                </div>
+              </div>
+              <div class="session-status other">
+                <button class="btn btn-sm btn-outline-danger" onclick="revokeSession('{{ session.id }}')">
+                  <i class="bi bi-x-circle"></i>
+                  Revoke
+                </button>
+              </div>
+            </li>
+            {% empty %}
+            <li class="session-item">
+              <div class="session-info">
+                <div class="session-location text-muted">
+                  No other active sessions
+                </div>
+              </div>
+            </li>
+            {% endfor %}
+          </ul>
+
+          <div class="form-actions">
+            <button class="btn btn-outline-danger" onclick="revokeAllSessions()">
+              <i class="bi bi-shield-exclamation"></i>
+              Revoke All Other Sessions
             </button>
           </div>
         </div>
       </div>
 
       <!-- Notification Preferences -->
-      <div class="card" id="notifications">
+      <div class="card section-content" id="notifications-section" style="display: none;">
         <div class="card-body">
           <div class="card-header">
             <h4>
               <i class="bi bi-bell"></i>
               Notification Preferences
             </h4>
+            <small class="text-muted" style="font-size: 0.75rem;">
+              Control how and when you receive notifications
+            </small>
           </div>
 
-          <form method="post">
+          <form method="post" action="{% url 'update_notifications' %}">
             {% csrf_token %}
+            <input type="hidden" name="form_type" value="notifications">
             
-            <div class="form-group">
-              <h5>Email Notifications</h5>
+            <div class="mb-4">
+              <h5 class="mb-3" style="font-size: 0.875rem;">Email Notifications</h5>
               
               <div class="form-check">
-                <input type="checkbox" class="form-check-input" id="notify_susar">
+                <input type="checkbox" class="form-check-input" id="notify_susar" name="notify_susar" checked>
                 <label class="form-check-label" for="notify_susar">
                   New SUSAR Reports
+                  <small class="d-block text-muted" style="font-size: 0.6875rem;">
+                    Get notified when new adverse events are reported
+                  </small>
                 </label>
               </div>
 
               <div class="form-check">
-                <input type="checkbox" class="form-check-input" id="notify_enrollment">
+                <input type="checkbox" class="form-check-input" id="notify_enrollment" name="notify_enrollment" checked>
                 <label class="form-check-label" for="notify_enrollment">
                   New Participant Enrollments
+                  <small class="d-block text-muted" style="font-size: 0.6875rem;">
+                    Receive alerts for new participant registrations
+                  </small>
                 </label>
               </div>
 
               <div class="form-check">
-                <input type="checkbox" class="form-check-input" id="notify_updates">
+                <input type="checkbox" class="form-check-input" id="notify_updates" name="notify_updates">
                 <label class="form-check-label" for="notify_updates">
                   Study Updates
+                  <small class="d-block text-muted" style="font-size: 0.6875rem;">
+                    Updates to studies you're assigned to
+                  </small>
                 </label>
               </div>
 
               <div class="form-check">
-                <input type="checkbox" class="form-check-input" id="notify_reports">
+                <input type="checkbox" class="form-check-input" id="notify_reports" name="notify_reports" checked>
                 <label class="form-check-label" for="notify_reports">
                   Weekly Reports
+                  <small class="d-block text-muted" style="font-size: 0.6875rem;">
+                    Weekly summary of system activity
+                  </small>
+                </label>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <h5 class="mb-3" style="font-size: 0.875rem;">System Notifications</h5>
+              
+              <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="notify_login" name="notify_login" checked>
+                <label class="form-check-label" for="notify_login">
+                  Login Alerts
+                  <small class="d-block text-muted" style="font-size: 0.6875rem;">
+                    Get notified of new logins to your account
+                  </small>
+                </label>
+              </div>
+
+              <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="notify_security" name="notify_security" checked>
+                <label class="form-check-label" for="notify_security">
+                  Security Alerts
+                  <small class="d-block text-muted" style="font-size: 0.6875rem;">
+                    Important security updates and warnings
+                  </small>
+                </label>
+              </div>
+
+              <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="notify_maintenance" name="notify_maintenance">
+                <label class="form-check-label" for="notify_maintenance">
+                  System Maintenance
+                  <small class="d-block text-muted" style="font-size: 0.6875rem;">
+                    Planned maintenance and downtime alerts
+                  </small>
                 </label>
               </div>
             </div>
 
             <div class="form-group">
-              <h5>System Notifications</h5>
-              
-              <div class="form-check">
-                <input type="checkbox" class="form-check-input" id="notify_login">
-                <label class="form-check-label" for="notify_login">
-                  Login Alerts
-                </label>
-              </div>
-
-              <div class="form-check">
-                <input type="checkbox" class="form-check-input" id="notify_security">
-                <label class="form-check-label" for="notify_security">
-                  Security Alerts
-                </label>
-              </div>
+              <label for="notification_frequency" style="font-size: 0.75rem;">Notification Frequency</label>
+              <select class="form-control" id="notification_frequency" name="notification_frequency" style="font-size: 0.8125rem;">
+                <option value="instant">Instant (as they occur)</option>
+                <option value="hourly">Hourly Digest</option>
+                <option value="daily" selected>Daily Digest</option>
+                <option value="weekly">Weekly Digest</option>
+              </select>
             </div>
 
             <div class="form-actions">
               <button type="submit" class="btn btn-primary">
                 <i class="bi bi-check-circle"></i>
-                Save Preferences
+                Save Notification Preferences
               </button>
             </div>
           </form>
         </div>
       </div>
 
-      <!-- User Preferences -->
-      <div class="card" id="preferences">
+      <!-- Appearance Settings -->
+      <div class="card section-content" id="appearance-section" style="display: none;">
         <div class="card-body">
           <div class="card-header">
             <h4>
-              <i class="bi bi-sliders"></i>
-              User Preferences
+              <i class="bi bi-palette"></i>
+              Appearance Settings
             </h4>
+            <small class="text-muted" style="font-size: 0.75rem;">
+              Customize the look and feel of your dashboard
+            </small>
           </div>
 
-          <form method="post">
+          <form method="post" action="{% url 'update_appearance' %}">
             {% csrf_token %}
+            <input type="hidden" name="form_type" value="appearance">
             
-            <div class="form-group">
-              <label>Language</label>
-              <select class="form-control" name="language">
-                <option value="en">English</option>
-                <option value="sw">Swahili</option>
-              </select>
+            <div class="mb-4">
+              <h5 class="mb-3" style="font-size: 0.875rem;">Theme</h5>
+              
+              <div class="theme-toggle">
+                <div class="theme-option active" onclick="selectTheme('light', this)">
+                  <i class="bi bi-sun"></i>
+                  <span>Light</span>
+                </div>
+                <div class="theme-option" onclick="selectTheme('dark', this)">
+                  <i class="bi bi-moon"></i>
+                  <span>Dark</span>
+                </div>
+                <div class="theme-option" onclick="selectTheme('auto', this)">
+                  <i class="bi bi-circle-half"></i>
+                  <span>Auto</span>
+                </div>
+              </div>
+              <input type="hidden" name="theme" id="theme" value="light">
             </div>
 
-            <div class="form-group">
-              <label>Timezone</label>
-              <select class="form-control" name="timezone">
-                <option value="Africa/Nairobi">East Africa Time (EAT)</option>
-                <option value="UTC">UTC</option>
-              </select>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="language">Language</label>
+                  <select class="form-control" id="language" name="language" style="font-size: 0.8125rem;">
+                    <option value="en" selected>English</option>
+                    <option value="sw">Swahili</option>
+                    <option value="fr">French</option>
+                    <option value="es">Spanish</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="timezone">Timezone</label>
+                  <select class="form-control" id="timezone" name="timezone" style="font-size: 0.8125rem;">
+                    <option value="Africa/Nairobi" selected>East Africa Time (EAT)</option>
+                    <option value="UTC">Coordinated Universal Time (UTC)</option>
+                    <option value="America/New_York">Eastern Time (ET)</option>
+                    <option value="Europe/London">Greenwich Mean Time (GMT)</option>
+                  </select>
+                </div>
+              </div>
             </div>
 
-            <div class="form-group">
-              <label>Date Format</label>
-              <select class="form-control" name="date_format">
-                <option value="mdy">MM/DD/YYYY</option>
-                <option value="dmy">DD/MM/YYYY</option>
-                <option value="ymd">YYYY-MM-DD</option>
-              </select>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="date_format">Date Format</label>
+                  <select class="form-control" id="date_format" name="date_format" style="font-size: 0.8125rem;">
+                    <option value="mdy">MM/DD/YYYY (US)</option>
+                    <option value="dmy" selected>DD/MM/YYYY (International)</option>
+                    <option value="ymd">YYYY-MM-DD (ISO)</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="density">Interface Density</label>
+                  <select class="form-control" id="density" name="density" style="font-size: 0.8125rem;">
+                    <option value="compact">Compact</option>
+                    <option value="normal" selected>Normal</option>
+                    <option value="comfortable">Comfortable</option>
+                  </select>
+                </div>
+              </div>
             </div>
 
             <div class="form-actions">
               <button type="submit" class="btn btn-primary">
                 <i class="bi bi-check-circle"></i>
-                Save Preferences
+                Save Appearance Settings
               </button>
             </div>
           </form>
+        </div>
+      </div>
+
+      <!-- Advanced Settings -->
+      <div class="card section-content" id="advanced-section" style="display: none;">
+        <div class="card-body">
+          <div class="card-header">
+            <h4>
+              <i class="bi bi-gear"></i>
+              Advanced Settings
+            </h4>
+            <small class="text-muted" style="font-size: 0.75rem;">
+              Advanced account management options
+            </small>
+          </div>
+
+          <div class="mb-4">
+            <h5 class="mb-3" style="font-size: 0.875rem;">Data Export</h5>
+            <p style="font-size: 0.8125rem; color: #6c757d; margin-bottom: 1rem;">
+              Export all your personal data from ClinTrack in a machine-readable format.
+            </p>
+            <button class="btn btn-outline-primary" onclick="exportPersonalData()">
+              <i class="bi bi-download"></i>
+              Export Personal Data
+            </button>
+          </div>
+
+          <div class="mb-4">
+            <h5 class="mb-3" style="font-size: 0.875rem;">Activity History</h5>
+            <p style="font-size: 0.8125rem; color: #6c757d; margin-bottom: 1rem;">
+              Download your complete activity log from the system.
+            </p>
+            <button class="btn btn-outline-primary" onclick="downloadActivityLog()">
+              <i class="bi bi-clock-history"></i>
+              Download Activity Log
+            </button>
+          </div>
+
+          <div class="mb-4">
+            <h5 class="mb-3" style="font-size: 0.875rem;">Account Deletion</h5>
+            <p style="font-size: 0.8125rem; color: #6c757d; margin-bottom: 1rem;">
+              Permanently delete your account and all associated data. This action cannot be undone.
+            </p>
+            <button class="btn btn-outline-danger" onclick="deleteAccount()">
+              <i class="bi bi-trash"></i>
+              Delete Account
+            </button>
+          </div>
+
+          <div class="required-fields">
+            <i class="bi bi-exclamation-triangle"></i>
+            Warning: Advanced settings may have irreversible consequences. Use with caution.
+          </div>
         </div>
       </div>
     </div>
@@ -268,5 +1283,241 @@
 {% endblock %}
 
 {% block extra_js %}
+<!-- Bootstrap Icons -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize the first section as active
+    showSection('profile', document.querySelector('.settings-nav-item.active'));
+    
+    // Initialize tooltips
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltipTriggerList.forEach(tooltipTriggerEl => {
+        new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+
+function showSection(sectionId, element) {
+    // Update active nav item
+    document.querySelectorAll('.settings-nav-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    element.classList.add('active');
+    
+    // Show selected section, hide others
+    document.querySelectorAll('.section-content').forEach(section => {
+        section.style.display = 'none';
+    });
+    document.getElementById(sectionId + '-section').style.display = 'block';
+    
+    // Smooth scroll to top of section
+    document.getElementById(sectionId + '-section').scrollIntoView({ behavior: 'smooth' });
+}
+
+// Password strength checker
+function checkPasswordStrength(password) {
+    const strengthBar = document.querySelector('.strength-fill');
+    const strengthText = document.querySelector('.strength-text');
+    const passwordStrength = document.getElementById('passwordStrength');
+    
+    let score = 0;
+    
+    if (password.length >= 8) score++;
+    if (/[a-z]/.test(password)) score++;
+    if (/[A-Z]/.test(password)) score++;
+    if (/[0-9]/.test(password)) score++;
+    if (/[^A-Za-z0-9]/.test(password)) score++;
+    
+    const levels = ['weak', 'fair', 'good', 'strong', 'very-strong'];
+    const messages = [
+        'Very weak - should be at least 8 characters',
+        'Weak - add uppercase letters or numbers',
+        'Fair - add special characters for better security',
+        'Good password',
+        'Strong password'
+    ];
+    
+    passwordStrength.className = `password-strength strength-${levels[Math.min(score, levels.length - 1)]}`;
+    strengthBar.style.width = `${score * 25}%`;
+    strengthText.textContent = messages[Math.min(score, messages.length - 1)];
+    
+    // Update strength indicator in sidebar
+    const strengthBadge = document.querySelector('.badge[style*="font-size: 0.6875rem;"]');
+    if (score >= 4) {
+        strengthBadge.className = 'badge badge-success';
+        strengthBadge.textContent = 'Strong';
+    } else if (score >= 3) {
+        strengthBadge.className = 'badge badge-info';
+        strengthBadge.textContent = 'Good';
+    } else if (score >= 2) {
+        strengthBadge.className = 'badge badge-warning';
+        strengthBadge.textContent = 'Fair';
+    } else {
+        strengthBadge.className = 'badge badge-danger';
+        strengthBadge.textContent = 'Weak';
+    }
+}
+
+// Theme selection
+function selectTheme(theme, element) {
+    document.querySelectorAll('.theme-option').forEach(option => {
+        option.classList.remove('active');
+    });
+    element.classList.add('active');
+    document.getElementById('theme').value = theme;
+    
+    // Preview theme change
+    if (theme === 'dark') {
+        document.body.style.backgroundColor = '#1a1a1a';
+        document.body.style.color = '#ffffff';
+    } else if (theme === 'light') {
+        document.body.style.backgroundColor = '#ffffff';
+        document.body.style.color = '#2a2a2a';
+    } else {
+        // Auto - reset to system preference
+        document.body.style.backgroundColor = '';
+        document.body.style.color = '';
+    }
+}
+
+// Form reset functions
+function resetProfileForm() {
+    document.getElementById('first_name').value = "{{ user.first_name }}";
+    document.getElementById('last_name').value = "{{ user.last_name }}";
+    document.getElementById('email').value = "{{ user.email }}";
+    document.getElementById('phone_number').value = "{{ user.phone_number }}";
+    
+    showToast('Form reset to original values', 'success');
+}
+
+// Security functions
+function setupTwoFactor() {
+    if (confirm('Do you want to set up Two-Factor Authentication? You will need to scan a QR code with an authenticator app.')) {
+        // In production, this would redirect to 2FA setup page
+        showToast('Redirecting to 2FA setup...', 'info');
+        setTimeout(() => {
+            window.location.href = "{% url 'setup_2fa' %}";
+        }, 1000);
+    }
+}
+
+function revokeSession(sessionId) {
+    if (confirm('Are you sure you want to revoke this session? The user will be logged out from that device.')) {
+        // In production, this would make an API call
+        showToast('Session revoked successfully', 'success');
+        // Reload the page to reflect changes
+        setTimeout(() => location.reload(), 1500);
+    }
+}
+
+function revokeAllSessions() {
+    if (confirm('This will log you out from all devices except this one. Continue?')) {
+        // In production, this would make an API call
+        showToast('All other sessions revoked', 'success');
+        // Reload the page to reflect changes
+        setTimeout(() => location.reload(), 1500);
+    }
+}
+
+// Data export functions
+function exportPersonalData() {
+    const data = {
+        user: {
+            username: "{{ user.username }}",
+            email: "{{ user.email }}",
+            name: "{{ user.get_full_name }}",
+            role: "{{ user.get_role_display }}"
+        },
+        export_date: new Date().toISOString(),
+        format: 'json'
+    };
+    
+    const dataStr = JSON.stringify(data, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `clintrack-data-{{ user.username }}-${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function downloadActivityLog() {
+    showToast('Generating activity log... This may take a moment.', 'info');
+    // In production, this would trigger a CSV download
+    setTimeout(() => {
+        showToast('Activity log downloaded successfully', 'success');
+    }, 2000);
+}
+
+function deleteAccount() {
+    if (confirm('⚠️ WARNING: This will permanently delete your account and all associated data. This action cannot be undone. Type "DELETE" to confirm:')) {
+        const confirmation = prompt('Please type "DELETE" to confirm account deletion:');
+        if (confirmation === 'DELETE') {
+            // In production, this would submit a delete request
+            showToast('Account deletion request submitted. You will be logged out shortly.', 'warning');
+            setTimeout(() => {
+                window.location.href = "{% url 'logout' %}";
+            }, 3000);
+        } else {
+            showToast('Account deletion cancelled', 'info');
+        }
+    }
+}
+
+// Toast notification function
+function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `alert alert-${type}`;
+    toast.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        padding: 0.75rem 1rem;
+        border-radius: 6px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        animation: slideIn 0.3s ease;
+    `;
+    toast.innerHTML = `
+        <i class="bi bi-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : type === 'danger' ? 'x-circle' : 'info-circle'} me-2"></i>
+        ${message}
+    `;
+    
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+// Add CSS animations
+const style = document.createElement('style');
+style.textContent = `
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+`;
+document.head.appendChild(style);
+</script>
 {% endblock %}

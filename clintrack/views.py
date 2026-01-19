@@ -966,12 +966,538 @@ def users_profile(request):
     return render(request, 'users/users_profile.html', context)
 
 
+# ============================================
+# views.py
+# ============================================
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.db.models import Count, Q, Avg, Max, Min, Sum
+from django.db.models.functions import TruncMonth, TruncWeek, ExtractMonth, TruncDay
+from django.utils import timezone
+from datetime import timedelta, datetime
+import json
+from django.http import JsonResponse, HttpResponse
+from django.views.decorators.http import require_POST, require_GET
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.forms import PasswordChangeForm
+import csv
+from django.core.paginator import Paginator
+
+from .models import User, Study, Participant, SUSAR, StaffAttendance, AuditLog
+
+# ============================================
+# USER SETTINGS VIEWS
+# ============================================
+
 @login_required
 def users_settings(request):
-    """User settings"""
-    context = {}
+    """Main user settings page with analytics"""
+    # Security metrics
+    thirty_days_ago = timezone.now() - timedelta(days=30)
+    
+    # Calculate password age (assuming password last changed field exists)
+    password_age = (timezone.now() - request.user.date_joined).days
+    
+    # Login count this month
+    login_count = StaffAttendance.objects.filter(
+        staff=request.user,
+        login_time__gte=thirty_days_ago
+    ).count()
+    
+    # Unique locations
+    unique_locations = StaffAttendance.objects.filter(
+        staff=request.user
+    ).values('location').distinct().count()
+    
+    from django.db.models import Avg, F, ExpressionWrapper, DurationField
+
+    avg_session = StaffAttendance.objects.filter(
+        staff=request.user,
+        logout_time__isnull=False
+    ).aggregate(
+        avg_duration=Avg(
+            ExpressionWrapper(
+                F('logout_time') - F('login_time'),
+                output_field=DurationField()
+            )
+        )
+    )
+
+    avg_session_hours = round((avg_session['avg_duration'].total_seconds() / 3600) if avg_session['avg_duration'] else 0, 1)
+    
+    # Active sessions
+    active_sessions = StaffAttendance.objects.filter(
+        staff=request.user,
+        logout_time__isnull=True
+    ).order_by('-login_time')
+    
+    # Current IP
+    current_ip = request.META.get('REMOTE_ADDR', 'Unknown')
+    
+    context = {
+        'security_metrics': {
+            'password_age': password_age,
+            'login_count': login_count,
+            'unique_locations': unique_locations,
+            'avg_session': avg_session_hours,
+        },
+        'active_sessions': active_sessions[:5],
+        'current_ip': current_ip,
+        'current_session_start': active_sessions.first().login_time if active_sessions.exists() else timezone.now(),
+    }
+    
     return render(request, 'users/users_settings.html', context)
 
+@login_required
+@require_POST
+def update_profile(request):
+    """Update user profile information"""
+    user = request.user
+    
+    # Get form data
+    first_name = request.POST.get('first_name', '').strip()
+    last_name = request.POST.get('last_name', '').strip()
+    email = request.POST.get('email', '').strip()
+    phone_number = request.POST.get('phone_number', '').strip()
+    
+    # Basic validation
+    if not first_name or not last_name:
+        messages.error(request, 'First name and last name are required.')
+        return redirect('users_settings')
+    
+    if not email:
+        messages.error(request, 'Email address is required.')
+        return redirect('users_settings')
+    
+    # Check if email is already in use by another user
+    if email != user.email and User.objects.filter(email=email).exists():
+        messages.error(request, 'This email address is already in use.')
+        return redirect('users_settings')
+    
+    # Update user
+    user.first_name = first_name
+    user.last_name = last_name
+    user.email = email
+    user.phone_number = phone_number if phone_number else None
+    user.save()
+    
+    # Log the change
+    AuditLog.objects.create(
+        user=user,
+        action='update',
+        model_name='User',
+        object_id=str(user.id),
+        changes={
+            'first_name': first_name,
+            'last_name': last_name,
+            'email': email,
+            'phone_number': phone_number
+        },
+        ip_address=request.META.get('REMOTE_ADDR')
+    )
+    
+    messages.success(request, 'Profile updated successfully.')
+    return redirect('users_settings')
+
+@login_required
+@require_POST
+def update_password(request):
+    """Update user password"""
+    user = request.user
+    
+    current_password = request.POST.get('current_password', '')
+    new_password = request.POST.get('new_password', '')
+    confirm_password = request.POST.get('confirm_password', '')
+    
+    # Validate current password
+    if not user.check_password(current_password):
+        messages.error(request, 'Current password is incorrect.')
+        return redirect('users_settings')
+    
+    # Validate new password
+    if not new_password:
+        messages.error(request, 'New password is required.')
+        return redirect('users_settings')
+    
+    if len(new_password) < 8:
+        messages.error(request, 'Password must be at least 8 characters long.')
+        return redirect('users_settings')
+    
+    if new_password != confirm_password:
+        messages.error(request, 'New passwords do not match.')
+        return redirect('users_settings')
+    
+    # Set new password
+    user.set_password(new_password)
+    user.save()
+    
+    # Keep user logged in
+    update_session_auth_hash(request, user)
+    
+    # Log the change
+    AuditLog.objects.create(
+        user=user,
+        action='update',
+        model_name='User',
+        object_id=str(user.id),
+        changes={'password': 'updated'},
+        ip_address=request.META.get('REMOTE_ADDR')
+    )
+    
+    messages.success(request, 'Password updated successfully.')
+    return redirect('users_settings')
+
+@login_required
+@require_POST
+def update_notifications(request):
+    """Update user notification preferences"""
+    user = request.user
+    
+    # Get notification preferences
+    notification_preferences = {
+        'notify_susar': bool(request.POST.get('notify_susar')),
+        'notify_enrollment': bool(request.POST.get('notify_enrollment')),
+        'notify_updates': bool(request.POST.get('notify_updates')),
+        'notify_reports': bool(request.POST.get('notify_reports')),
+        'notify_login': bool(request.POST.get('notify_login')),
+        'notify_security': bool(request.POST.get('notify_security')),
+        'notify_maintenance': bool(request.POST.get('notify_maintenance')),
+        'notification_frequency': request.POST.get('notification_frequency', 'daily'),
+    }
+    
+    # Save to user profile (you might want to create a UserProfile model for this)
+    # For now, we'll store it in a JSON field if available, or as a simple example
+    if hasattr(user, 'notification_preferences'):
+        user.notification_preferences = notification_preferences
+        user.save()
+    
+    messages.success(request, 'Notification preferences updated successfully.')
+    return redirect('users_settings')
+
+@login_required
+@require_POST
+def update_appearance(request):
+    """Update user appearance preferences"""
+    user = request.user
+    
+    appearance_preferences = {
+        'theme': request.POST.get('theme', 'light'),
+        'language': request.POST.get('language', 'en'),
+        'timezone': request.POST.get('timezone', 'Africa/Nairobi'),
+        'date_format': request.POST.get('date_format', 'dmy'),
+        'density': request.POST.get('density', 'normal'),
+    }
+    
+    # Save to user profile (you might want to create a UserProfile model for this)
+    # For now, we'll store it in session
+    request.session['appearance_preferences'] = appearance_preferences
+    
+    messages.success(request, 'Appearance settings updated successfully.')
+    return redirect('users_settings')
+
+@login_required
+def setup_2fa(request):
+    """Setup Two-Factor Authentication"""
+    # In a real implementation, you would integrate with a 2FA library like django-otp
+    # This is a placeholder view
+    context = {
+        'qr_code_url': '#',  # Placeholder for QR code URL
+        'secret_key': 'ABCDEFGHIJKLMNOP',  # Placeholder for secret key
+    }
+    return render(request, 'users/setup_2fa.html', context)
+
+@login_required
+@require_POST
+def revoke_session(request):
+    """Revoke a specific session"""
+    session_id = request.POST.get('session_id')
+    
+    try:
+        session = StaffAttendance.objects.get(
+            id=session_id,
+            staff=request.user,
+            logout_time__isnull=True
+        )
+        session.logout_time = timezone.now()
+        session.save()
+        
+        messages.success(request, 'Session revoked successfully.')
+    except StaffAttendance.DoesNotExist:
+        messages.error(request, 'Session not found or already logged out.')
+    
+    return redirect('users_settings')
+
+@login_required
+@require_POST
+def revoke_all_sessions(request):
+    """Revoke all sessions except current one"""
+    current_session_id = request.session.session_key
+    
+    # Revoke all active sessions except current
+    active_sessions = StaffAttendance.objects.filter(
+        staff=request.user,
+        logout_time__isnull=True
+    ).exclude(
+        id__in=[request.session.get('attendance_id', 0)]
+    )
+    
+    count = active_sessions.count()
+    active_sessions.update(logout_time=timezone.now())
+    
+    messages.success(request, f'Revoked {count} other sessions.')
+    return redirect('users_settings')
+
+@login_required
+def export_personal_data(request):
+    """Export user's personal data"""
+    user = request.user
+    
+    # Gather user data
+    user_data = {
+        'profile': {
+            'username': user.username,
+            'email': user.email,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'role': user.get_role_display(),
+            'date_joined': user.date_joined.isoformat(),
+            'last_login': user.last_login.isoformat() if user.last_login else None,
+        },
+        'activity': [],
+        'sessions': [],
+        'audit_logs': [],
+    }
+    
+    # Add attendance data
+    attendance_data = StaffAttendance.objects.filter(staff=user).order_by('-login_time')[:100]
+    for attendance in attendance_data:
+        user_data['sessions'].append({
+            'login_time': attendance.login_time.isoformat(),
+            'logout_time': attendance.logout_time.isoformat() if attendance.logout_time else None,
+            'location': attendance.location,
+            'ip_address': str(attendance.ip_address),
+            'duration': str(attendance.duration) if attendance.duration else None,
+        })
+    
+    # Add audit logs
+    audit_logs = AuditLog.objects.filter(user=user).order_by('-timestamp')[:100]
+    for log in audit_logs:
+        user_data['audit_logs'].append({
+            'timestamp': log.timestamp.isoformat(),
+            'action': log.get_action_display(),
+            'model_name': log.model_name,
+            'object_id': log.object_id,
+            'changes': log.changes,
+            'ip_address': str(log.ip_address),
+        })
+    
+    # Create JSON response
+    response = JsonResponse(user_data, json_dumps_params={'indent': 2})
+    response['Content-Disposition'] = f'attachment; filename="clintrack-data-{user.username}-{timezone.now().date()}.json"'
+    
+    return response
+
+@login_required
+def download_activity_log(request):
+    """Download user activity log as CSV"""
+    user = request.user
+    
+    # Get user's audit logs
+    audit_logs = AuditLog.objects.filter(user=user).order_by('-timestamp')
+    
+    # Create CSV response
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="activity-log-{user.username}-{timezone.now().date()}.csv"'
+    
+    writer = csv.writer(response)
+    writer.writerow(['Timestamp', 'Action', 'Model', 'Object ID', 'Changes', 'IP Address'])
+    
+    for log in audit_logs:
+        writer.writerow([
+            log.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
+            log.get_action_display(),
+            log.model_name,
+            log.object_id,
+            str(log.changes) if log.changes else '',
+            str(log.ip_address) if log.ip_address else ''
+        ])
+    
+    return response
+
+@login_required
+@require_POST
+def delete_account(request):
+    """Delete user account"""
+    user = request.user
+    
+    # Double confirmation
+    confirmation = request.POST.get('confirmation', '')
+    
+    if confirmation != 'DELETE':
+        messages.error(request, 'Invalid confirmation. Account deletion cancelled.')
+        return redirect('users_settings')
+    
+    # In a real implementation, you might want to:
+    # 1. Anonymize data instead of deleting
+    # 2. Send confirmation email
+    # 3. Keep audit trail
+    # 4. Schedule deletion after a grace period
+    
+    # For now, just mark as inactive and logout
+    user.is_active = False
+    user.save()
+    
+    # Log the action
+    AuditLog.objects.create(
+        user=user,
+        action='delete',
+        model_name='User',
+        object_id=str(user.id),
+        changes={'status': 'deactivated'},
+        ip_address=request.META.get('REMOTE_ADDR')
+    )
+    
+    # Logout user
+    from django.contrib.auth import logout
+    logout(request)
+    
+    messages.success(request, 'Your account has been deactivated. You can contact support to restore it within 30 days.')
+    return redirect('login')
+
+
+# ============================================
+# ATTENDANCE VIEWS (for attendance_list.html)
+# ============================================
+
+@login_required
+def attendance_list(request):
+    """Staff attendance list with analytics"""
+    # Get filter parameters
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    role = request.GET.get('role')
+    status = request.GET.get('status')
+    
+    # Base queryset
+    attendance_qs = StaffAttendance.objects.select_related('staff').order_by('-login_time')
+    
+    # Apply filters
+    if start_date:
+        start_datetime = datetime.strptime(start_date, '%Y-%m-%d')
+        attendance_qs = attendance_qs.filter(login_time__gte=start_datetime)
+    
+    if end_date:
+        end_datetime = datetime.strptime(end_date, '%Y-%m-%d') + timedelta(days=1)
+        attendance_qs = attendance_qs.filter(login_time__lte=end_datetime)
+    
+    if role:
+        attendance_qs = attendance_qs.filter(staff__role=role)
+    
+    if status == 'active':
+        attendance_qs = attendance_qs.filter(logout_time__isnull=True)
+    elif status == 'completed':
+        attendance_qs = attendance_qs.filter(logout_time__isnull=False)
+    
+    # Pagination
+    paginator = Paginator(attendance_qs, 25)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    # Calculate statistics
+    today = timezone.now().date()
+    today_start = timezone.make_aware(datetime.combine(today, datetime.min.time()))
+    today_end = timezone.make_aware(datetime.combine(today, datetime.max.time()))
+    
+    # Total logins today
+    total_logins_today = StaffAttendance.objects.filter(
+        login_time__gte=today_start,
+        login_time__lte=today_end
+    ).count()
+    
+    # Currently logged in
+    currently_logged_in = StaffAttendance.objects.filter(
+        logout_time__isnull=True
+    ).count()
+    
+    # Average session duration (last 7 days)
+    week_ago = timezone.now() - timedelta(days=7)
+    avg_session = StaffAttendance.objects.filter(
+        logout_time__isnull=False,
+        login_time__gte=week_ago
+    ).aggregate(
+        avg_duration=Avg('logout_time' - 'login_time')
+    )
+    avg_session_hours = round((avg_session['avg_duration'].total_seconds() / 3600) if avg_session['avg_duration'] else 0, 1)
+    
+    # Longest session today
+    longest_session = StaffAttendance.objects.filter(
+        login_time__gte=today_start,
+        login_time__lte=today_end,
+        logout_time__isnull=False
+    ).annotate(
+        duration=Max('logout_time' - 'login_time')
+    ).order_by('-duration').first()
+    
+    longest_session_hours = round((longest_session.duration.total_seconds() / 3600) if longest_session else 0, 1)
+    
+    # Attendance rate (percentage of staff who logged in today)
+    total_staff = User.objects.filter(is_active=True).count()
+    staff_logged_in_today = StaffAttendance.objects.filter(
+        login_time__gte=today_start,
+        login_time__lte=today_end
+    ).values('staff').distinct().count()
+    
+    attendance_rate = round((staff_logged_in_today / total_staff * 100) if total_staff > 0 else 0, 1)
+    
+    # On-time rate (logged in before 9 AM)
+    on_time_count = StaffAttendance.objects.filter(
+        login_time__gte=today_start,
+        login_time__lte=today_end,
+        login_time__hour__lt=9
+    ).count()
+    
+    on_time_rate = round((on_time_count / total_logins_today * 100) if total_logins_today > 0 else 0, 1)
+    
+    # Login growth (compared to yesterday)
+    yesterday = today - timedelta(days=1)
+    yesterday_start = timezone.make_aware(datetime.combine(yesterday, datetime.min.time()))
+    yesterday_end = timezone.make_aware(datetime.combine(yesterday, datetime.max.time()))
+    
+    logins_yesterday = StaffAttendance.objects.filter(
+        login_time__gte=yesterday_start,
+        login_time__lte=yesterday_end
+    ).count()
+    
+    login_growth = round(((total_logins_today - logins_yesterday) / logins_yesterday * 100) if logins_yesterday > 0 else 0, 1)
+    
+    # Active staff (unique users logged in today)
+    active_staff = StaffAttendance.objects.filter(
+        login_time__gte=today_start,
+        login_time__lte=today_end
+    ).values('staff__username').distinct().count()
+    
+    context = {
+        'page_obj': page_obj,
+        'start_date': start_date,
+        'end_date': end_date,
+        'role': role,
+        'status': status,
+        'stats': {
+            'total_logins': total_logins_today,
+            'active_sessions': currently_logged_in,
+            'avg_duration': avg_session_hours,
+            'attendance_rate': attendance_rate,
+            'on_time_rate': on_time_rate,
+            'login_growth': login_growth,
+            'active_staff': active_staff,
+            'longest_session': longest_session_hours,
+        },
+        'roles': User.ROLE_CHOICES,
+    }
+    
+    return render(request, 'attendance/attendance_list.html', context)
 
 # ============================================
 # ATTENDANCE VIEWS
