@@ -579,3 +579,453 @@ def get_client_ip(request):
     else:
         ip = request.META.get('REMOTE_ADDR')
     return ip
+
+
+# ============================================
+# views.py - ClinTrack Views
+# ============================================
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.db.models import Q, Count
+from django.core.paginator import Paginator
+from django.http import JsonResponse
+from .models import Participant, Study, SUSAR, User, StaffAttendance, AuditLog
+from .forms import (
+    ParticipantForm, StudyForm, SUSARForm, 
+    UserForm, StaffAttendanceForm
+)
+
+# ============================================
+# PARTICIPANT VIEWS
+# ============================================
+
+@login_required
+def participant_list(request):
+    """List all participants with filters"""
+    participants = Participant.objects.select_related('study', 'created_by').all()
+    
+    # Filters
+    search = request.GET.get('search', '')
+    study_filter = request.GET.get('study', '')
+    status_filter = request.GET.get('status', '')
+    
+    if search:
+        participants = participants.filter(
+            Q(participant_id__icontains=search) |
+            Q(first_name__icontains=search) |
+            Q(last_name__icontains=search) |
+            Q(primary_phone__icontains=search)
+        )
+    
+    if study_filter:
+        participants = participants.filter(study_id=study_filter)
+    
+    if status_filter:
+        participants = participants.filter(status=status_filter)
+    
+    # Pagination
+    paginator = Paginator(participants, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    studies = Study.objects.filter(is_active=True)
+    
+    context = {
+        'page_obj': page_obj,
+        'studies': studies,
+        'search': search,
+        'study_filter': study_filter,
+        'status_filter': status_filter,
+        'status_choices': Participant.STATUS_CHOICES,
+    }
+    return render(request, 'participants/participant_list.html', context)
+
+
+@login_required
+def participant_detail(request, pk):
+    """View participant details"""
+    participant = get_object_or_404(Participant, pk=pk)
+    susars = participant.susars.all().order_by('-onset_date')
+    
+    context = {
+        'participant': participant,
+        'susars': susars,
+    }
+    return render(request, 'participants/participant_detail.html', context)
+
+
+@login_required
+def participant_create(request):
+    """Create new participant"""
+    if request.user.role not in ['admin', 'coordinator']:
+        messages.error(request, 'You do not have permission to add participants.')
+        return redirect('participant_list')
+    
+    if request.method == 'POST':
+        form = ParticipantForm(request.POST)
+        if form.is_valid():
+            participant = form.save(commit=False)
+            participant.created_by = request.user
+            participant.save()
+            messages.success(request, f'Participant {participant.participant_id} created successfully.')
+            return redirect('participant_detail', pk=participant.pk)
+    else:
+        form = ParticipantForm()
+    
+    context = {'form': form}
+    return render(request, 'participants/participant_form.html', context)
+
+
+@login_required
+def participant_update(request, pk):
+    """Update participant"""
+    participant = get_object_or_404(Participant, pk=pk)
+    
+    if request.user.role not in ['admin', 'coordinator']:
+        messages.error(request, 'You do not have permission to edit participants.')
+        return redirect('participant_detail', pk=pk)
+    
+    if request.method == 'POST':
+        form = ParticipantForm(request.POST, instance=participant)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Participant updated successfully.')
+            return redirect('participant_detail', pk=pk)
+    else:
+        form = ParticipantForm(instance=participant)
+    
+    context = {'form': form, 'participant': participant}
+    return render(request, 'participants/participant_form.html', context)
+
+
+@login_required
+def participant_delete(request, pk):
+    """Delete participant"""
+    if request.user.role != 'admin':
+        messages.error(request, 'Only administrators can delete participants.')
+        return redirect('participant_list')
+    
+    participant = get_object_or_404(Participant, pk=pk)
+    
+    if request.method == 'POST':
+        participant.delete()
+        messages.success(request, 'Participant deleted successfully.')
+        return redirect('participant_list')
+    
+    context = {'participant': participant}
+    return render(request, 'participants/participant_confirm_delete.html', context)
+
+
+@login_required
+def participant_search(request):
+    """Advanced participant search"""
+    results = []
+    
+    if request.method == 'GET' and request.GET:
+        query = Q()
+        
+        participant_id = request.GET.get('participant_id', '')
+        first_name = request.GET.get('first_name', '')
+        last_name = request.GET.get('last_name', '')
+        phone = request.GET.get('phone', '')
+        location = request.GET.get('location', '')
+        
+        if participant_id:
+            query &= Q(participant_id__icontains=participant_id)
+        if first_name:
+            query &= Q(first_name__icontains=first_name)
+        if last_name:
+            query &= Q(last_name__icontains=last_name)
+        if phone:
+            query &= Q(primary_phone__icontains=phone) | Q(secondary_phone__icontains=phone)
+        if location:
+            query &= Q(location__icontains=location)
+        
+        results = Participant.objects.filter(query).select_related('study')[:50]
+    
+    context = {'results': results}
+    return render(request, 'participants/participant_search.html', context)
+
+
+# ============================================
+# STUDY VIEWS
+# ============================================
+
+@login_required
+def study_list(request):
+    """List all studies"""
+    studies = Study.objects.annotate(
+        participant_count=Count('participants')
+    ).order_by('-is_active', 'name')
+    
+    context = {'studies': studies}
+    return render(request, 'studies/study_list.html', context)
+
+
+@login_required
+def study_detail(request, pk):
+    """View study details"""
+    study = get_object_or_404(Study, pk=pk)
+    participants = study.participants.all()[:20]
+    
+    stats = {
+        'total': study.participants.count(),
+        'active': study.participants.filter(status='active').count(),
+        'completed': study.participants.filter(status='completed').count(),
+        'screening': study.participants.filter(status='screening').count(),
+    }
+    
+    context = {
+        'study': study,
+        'participants': participants,
+        'stats': stats,
+    }
+    return render(request, 'studies/study_detail.html', context)
+
+
+@login_required
+def study_create(request):
+    """Create new study"""
+    if request.user.role != 'admin':
+        messages.error(request, 'Only administrators can create studies.')
+        return redirect('study_list')
+    
+    if request.method == 'POST':
+        form = StudyForm(request.POST)
+        if form.is_valid():
+            study = form.save()
+            messages.success(request, f'Study {study.code} created successfully.')
+            return redirect('study_detail', pk=study.pk)
+    else:
+        form = StudyForm()
+    
+    context = {'form': form}
+    return render(request, 'studies/study_form.html', context)
+
+
+@login_required
+def study_update(request, pk):
+    """Update study"""
+    study = get_object_or_404(Study, pk=pk)
+    
+    if request.user.role != 'admin':
+        messages.error(request, 'Only administrators can edit studies.')
+        return redirect('study_detail', pk=pk)
+    
+    if request.method == 'POST':
+        form = StudyForm(request.POST, instance=study)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Study updated successfully.')
+            return redirect('study_detail', pk=pk)
+    else:
+        form = StudyForm(instance=study)
+    
+    context = {'form': form, 'study': study}
+    return render(request, 'studies/study_form.html', context)
+
+
+# ============================================
+# SUSAR VIEWS
+# ============================================
+
+@login_required
+def susars_list(request):
+    """List all SUSAR reports"""
+    susars = SUSAR.objects.select_related('participant', 'reported_by').all()
+    
+    # Filters
+    severity_filter = request.GET.get('severity', '')
+    follow_up_filter = request.GET.get('follow_up', '')
+    
+    if severity_filter:
+        susars = susars.filter(severity=severity_filter)
+    
+    if follow_up_filter == 'pending':
+        susars = susars.filter(follow_up_required=True)
+    
+    paginator = Paginator(susars, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'page_obj': page_obj,
+        'severity_choices': SUSAR.SEVERITY_CHOICES,
+        'severity_filter': severity_filter,
+    }
+    return render(request, 'susars/susars_list.html', context)
+
+
+@login_required
+def susars_detail(request, pk):
+    """View SUSAR details"""
+    susar = get_object_or_404(SUSAR, pk=pk)
+    
+    context = {'susar': susar}
+    return render(request, 'susars/susars_detail.html', context)
+
+
+@login_required
+def susars_create(request):
+    """Create new SUSAR report"""
+    if request.user.role == 'viewer':
+        messages.error(request, 'Viewers cannot create SUSAR reports.')
+        return redirect('susars_list')
+    
+    if request.method == 'POST':
+        form = SUSARForm(request.POST)
+        if form.is_valid():
+            susar = form.save(commit=False)
+            susar.reported_by = request.user
+            susar.save()
+            messages.success(request, f'SUSAR {susar.susar_id} reported successfully.')
+            return redirect('susars_detail', pk=susar.pk)
+    else:
+        form = SUSARForm()
+    
+    context = {'form': form}
+    return render(request, 'susars/susars_form.html', context)
+
+
+@login_required
+def susars_update(request, pk):
+    """Update SUSAR report"""
+    susar = get_object_or_404(SUSAR, pk=pk)
+    
+    if request.user.role == 'viewer':
+        messages.error(request, 'Viewers cannot edit SUSAR reports.')
+        return redirect('susars_detail', pk=pk)
+    
+    if request.method == 'POST':
+        form = SUSARForm(request.POST, instance=susar)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'SUSAR updated successfully.')
+            return redirect('susars_detail', pk=pk)
+    else:
+        form = SUSARForm(instance=susar)
+    
+    context = {'form': form, 'susar': susar}
+    return render(request, 'susars/susars_form.html', context)
+
+
+@login_required
+def susars_pending(request):
+    """List pending follow-up SUSARs"""
+    susars = SUSAR.objects.filter(
+        follow_up_required=True
+    ).select_related('participant', 'reported_by')
+    
+    context = {'susars': susars}
+    return render(request, 'susars/susars_pending.html', context)
+
+
+# ============================================
+# USER/STAFF VIEWS
+# ============================================
+
+@login_required
+def users_list(request):
+    """List all staff members"""
+    if request.user.role != 'admin':
+        messages.error(request, 'Only administrators can view staff list.')
+        return redirect('dashboard')
+    
+    users = User.objects.all().order_by('-is_active', 'username')
+    
+    context = {'users': users}
+    return render(request, 'users/users_list.html', context)
+
+
+@login_required
+def users_create(request):
+    """Create new staff member"""
+    if request.user.role != 'admin':
+        messages.error(request, 'Only administrators can create staff accounts.')
+        return redirect('users_list')
+    
+    if request.method == 'POST':
+        form = UserForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            messages.success(request, f'User {user.username} created successfully.')
+            return redirect('users_list')
+    else:
+        form = UserForm()
+    
+    context = {'form': form}
+    return render(request, 'users/users_form.html', context)
+
+
+@login_required
+def users_profile(request):
+    """View/Edit user profile"""
+    context = {'user': request.user}
+    return render(request, 'users/users_profile.html', context)
+
+
+@login_required
+def users_settings(request):
+    """User settings"""
+    context = {}
+    return render(request, 'users/users_settings.html', context)
+
+
+# ============================================
+# ATTENDANCE VIEWS
+# ============================================
+
+@login_required
+def attendance_list(request):
+    """List staff attendance"""
+    if request.user.role != 'admin':
+        messages.error(request, 'Only administrators can view attendance.')
+        return redirect('dashboard')
+    
+    attendances = StaffAttendance.objects.select_related('staff').all()
+    
+    paginator = Paginator(attendances, 30)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {'page_obj': page_obj}
+    return render(request, 'attendance/attendance_list.html', context)
+
+
+# ============================================
+# AUDIT LOG VIEWS
+# ============================================
+
+@login_required
+def audit_logs(request):
+    """View audit logs"""
+    if request.user.role != 'admin':
+        messages.error(request, 'Only administrators can view audit logs.')
+        return redirect('dashboard')
+    
+    logs = AuditLog.objects.select_related('user').all()
+    
+    paginator = Paginator(logs, 50)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {'page_obj': page_obj}
+    return render(request, 'audit/audit_logs.html', context)
+
+
+# ============================================
+# REPORTS VIEWS
+# ============================================
+
+@login_required
+def reports_index(request):
+    """Reports dashboard"""
+    if request.user.role not in ['admin', 'coordinator']:
+        messages.error(request, 'You do not have permission to view reports.')
+        return redirect('dashboard')
+    
+    context = {}
+    return render(request, 'reports/reports_index.html', context)
+
