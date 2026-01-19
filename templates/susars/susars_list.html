@@ -1,0 +1,480 @@
+<!-- ========================================== -->
+<!-- 1. susars/susars_list.html -->
+<!-- ========================================== -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}SUSAR Reports - ClinTrack{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Apple-like typography */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Smaller font sizes */
+h4 { font-size: 1.125rem; }
+h5 { font-size: 1rem; }
+p, td, li, th { font-size: 0.8125rem; }
+small { font-size: 0.75rem; }
+
+/* Clean breadcrumb */
+.breadcrumb {
+    background: transparent;
+    padding: 0;
+    margin-bottom: 0;
+    font-size: 0.75rem;
+}
+
+.breadcrumb-item {
+    color: #6c757d;
+}
+
+.breadcrumb-item a {
+    color: #667eea;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.breadcrumb-item.active {
+    color: #495057;
+    font-weight: 500;
+}
+
+/* Page header */
+.page-header {
+    padding: 1rem 0;
+    margin-bottom: 1.5rem;
+}
+
+.page-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #2a2a2a;
+    margin-bottom: 0.25rem;
+}
+
+/* Card design */
+.card {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+}
+
+.card-body {
+    padding: 1.25rem;
+}
+
+/* Card header with action buttons */
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.875rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.card-header h4 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #2a2a2a;
+    margin: 0;
+}
+
+/* Button styling */
+.btn {
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.btn-sm {
+    padding: 0.25rem 0.625rem;
+    font-size: 0.6875rem;
+    border-radius: 4px;
+    min-width: 60px;
+}
+
+.btn-info {
+    background: rgba(0, 167, 255, 0.1);
+    color: #00a7ff;
+    border: 1px solid rgba(0, 167, 255, 0.2);
+}
+
+.btn-info:hover {
+    background: rgba(0, 167, 255, 0.2);
+    transform: translateY(-1px);
+}
+
+.btn-warning {
+    background: linear-gradient(135deg, #ffab00 0%, #ff9900 100%);
+    color: white;
+}
+
+.btn-warning:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(255, 171, 0, 0.2);
+}
+
+/* Filter section */
+.filter-section {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+.filter-row {
+    display: flex;
+    gap: 1rem;
+    align-items: end;
+}
+
+.form-group {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+.form-label {
+    font-size: 0.6875rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.375rem;
+    font-weight: 600;
+}
+
+.form-control, .form-select {
+    font-size: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    outline: none;
+}
+
+/* Table styling */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 6px;
+    border: 1px solid #f0f0f0;
+}
+
+.table {
+    margin-bottom: 0;
+    font-size: 0.75rem;
+    color: #495057;
+}
+
+.table thead th {
+    border: none;
+    background: #f8f9fa;
+    font-weight: 600;
+    color: #6c757d;
+    padding: 0.75rem 1rem;
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.table tbody td {
+    padding: 0.75rem 1rem;
+    vertical-align: middle;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.table tbody tr:hover {
+    background-color: rgba(102, 126, 234, 0.03);
+}
+
+/* Badge styling */
+.badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-weight: 500;
+    font-size: 0.6875rem;
+    letter-spacing: 0.3px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.badge.mild { background: rgba(40, 199, 111, 0.1); color: #28c76f; border: 1px solid rgba(40, 199, 111, 0.2); }
+.badge.moderate { background: rgba(255, 171, 0, 0.1); color: #ffab00; border: 1px solid rgba(255, 171, 0, 0.2); }
+.badge.severe { background: rgba(255, 107, 0, 0.1); color: #ff6b00; border: 1px solid rgba(255, 107, 0, 0.2); }
+.badge.life_threatening { background: rgba(220, 53, 69, 0.1); color: #dc3545; border: 1px solid rgba(220, 53, 69, 0.2); }
+.badge.fatal { background: rgba(0, 0, 0, 0.1); color: #000; border: 1px solid rgba(0, 0, 0, 0.2); }
+
+/* Pagination */
+.pagination {
+    gap: 0.5rem;
+}
+
+.page-link {
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    color: #667eea;
+    font-size: 0.75rem;
+    padding: 0.375rem 0.75rem;
+    transition: all 0.2s ease;
+}
+
+.page-link:hover {
+    background: rgba(102, 126, 234, 0.1);
+    border-color: #667eea;
+}
+
+.page-item.active .page-link {
+    background: #667eea;
+    border-color: #667eea;
+}
+
+/* Empty state */
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #6c757d;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    color: #e0e0e0;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.empty-state h5 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    font-size: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .filter-row {
+        flex-direction: column;
+    }
+    
+    .table thead th,
+    .table tbody td {
+        padding: 0.5rem;
+        font-size: 0.6875rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+  <div class="page-header">
+    <h3 class="page-title">SUSAR Reports</h3>
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+        <li class="breadcrumb-item active">SUSARs</li>
+      </ol>
+    </nav>
+  </div>
+
+  <!-- Filter Section -->
+  <div class="filter-section">
+    <form method="get" id="filterForm">
+      <div class="filter-row">
+        <div class="form-group">
+          <label class="form-label">Severity</label>
+          <select name="severity" class="form-select" onchange="document.getElementById('filterForm').submit()">
+            <option value="">All Severities</option>
+            {% for value, label in severity_choices %}
+            <option value="{{ value }}" {% if severity_filter == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Follow-up Status</label>
+          <select name="follow_up" class="form-select" onchange="document.getElementById('filterForm').submit()">
+            <option value="">All</option>
+            <option value="pending" {% if request.GET.follow_up == 'pending' %}selected{% endif %}>Pending Follow-up</option>
+          </select>
+        </div>
+        <div>
+          <a href="{% url 'susars_list' %}" class="btn btn-sm btn-secondary">
+            <i class="bi bi-x-circle"></i>
+            Clear
+          </a>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Main Card -->
+  <div class="card">
+    <div class="card-body">
+      <div class="card-header">
+        <h4>
+          <i class="bi bi-exclamation-triangle me-2"></i>
+          All SUSAR Reports ({{ page_obj.paginator.count }})
+        </h4>
+        {% if user.role != 'viewer' %}
+        <a href="{% url 'susars_create' %}" class="btn btn-primary">
+          <i class="bi bi-plus-circle"></i>
+          Report SUSAR
+        </a>
+        {% endif %}
+      </div>
+
+      {% if page_obj %}
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>SUSAR ID</th>
+              <th>Participant</th>
+              <th>Event Description</th>
+              <th>Severity</th>
+              <th>Onset Date</th>
+              <th>Follow-up</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for susar in page_obj %}
+            <tr>
+              <td>
+                <a href="{% url 'susars_detail' susar.pk %}" class="text-decoration-none">
+                  <code style="font-size: 0.75rem;">{{ susar.susar_id }}</code>
+                </a>
+              </td>
+              <td>
+                <a href="{% url 'participant_detail' susar.participant.pk %}" class="text-decoration-none">
+                  {{ susar.participant.participant_id }}
+                </a>
+              </td>
+              <td>{{ susar.event_description|truncatechars:50 }}</td>
+              <td>
+                <span class="badge {{ susar.severity }}">
+                  <i class="bi bi-circle-fill"></i>
+                  {{ susar.get_severity_display }}
+                </span>
+              </td>
+              <td>{{ susar.onset_date|date:"M d, Y" }}</td>
+              <td>
+                {% if susar.follow_up_required %}
+                <span class="badge moderate">
+                  <i class="bi bi-clock"></i>
+                  Pending
+                </span>
+                {% else %}
+                <span class="badge mild">
+                  <i class="bi bi-check-circle"></i>
+                  Complete
+                </span>
+                {% endif %}
+              </td>
+              <td>
+                <a href="{% url 'susars_detail' susar.pk %}" class="btn btn-sm btn-info" title="View Details">
+                  <i class="bi bi-eye"></i>
+                </a>
+                {% if user.role != 'viewer' %}
+                <a href="{% url 'susars_update' susar.pk %}" class="btn btn-sm btn-warning" title="Edit">
+                  <i class="bi bi-pencil"></i>
+                </a>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      {% if page_obj.has_other_pages %}
+      <nav aria-label="Page navigation" class="mt-3">
+        <ul class="pagination justify-content-center">
+          {% if page_obj.has_previous %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if severity_filter %}&severity={{ severity_filter }}{% endif %}">
+              <i class="bi bi-chevron-left"></i>
+            </a>
+          </li>
+          {% endif %}
+
+          {% for num in page_obj.paginator.page_range %}
+          {% if page_obj.number == num %}
+          <li class="page-item active">
+            <span class="page-link">{{ num }}</span>
+          </li>
+          {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ num }}{% if severity_filter %}&severity={{ severity_filter }}{% endif %}">{{ num }}</a>
+          </li>
+          {% endif %}
+          {% endfor %}
+
+          {% if page_obj.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if severity_filter %}&severity={{ severity_filter }}{% endif %}">
+              <i class="bi bi-chevron-right"></i>
+            </a>
+          </li>
+          {% endif %}
+        </ul>
+      </nav>
+      {% endif %}
+
+      {% else %}
+      <div class="empty-state">
+        <i class="bi bi-inbox"></i>
+        <h5>No SUSAR Reports</h5>
+        <p>No SUSAR reports have been filed yet.</p>
+        {% if user.role != 'viewer' %}
+        <a href="{% url 'susars_create' %}" class="btn btn-primary btn-sm">
+          <i class="bi bi-plus-circle"></i>
+          Report First SUSAR
+        </a>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+{% endblock %}
