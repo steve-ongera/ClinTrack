@@ -17,10 +17,10 @@
 <div class="page-header flex-wrap">
   <div class="header-left">
     {% if user.role == 'admin' or user.role == 'coordinator' %}
-    <button class="btn btn-primary mb-2 mb-md-0 me-2" onclick="location.href='{% url 'participants:create' %}'">Add New Participant</button>
-    <button class="btn btn-outline-primary bg-white mb-2 mb-md-0" onclick="location.href='{% url 'reports:export' %}'">Export Reports</button>
+    <button class="btn btn-primary mb-2 mb-md-0 me-2" onclick="location.href='{% url 'participant_create' %}'">Add New Participant</button>
+    <button class="btn btn-outline-primary bg-white mb-2 mb-md-0" onclick="location.href='#'">Export Reports</button>
     {% else %}
-    <button class="btn btn-outline-primary bg-white mb-2 mb-md-0 me-2" onclick="location.href='{% url 'participants:list' %}'">View Participants</button>
+    <button class="btn btn-outline-primary bg-white mb-2 mb-md-0 me-2" onclick="location.href='{% url 'participant_list' %}'">View Participants</button>
     {% endif %}
   </div>
   <div class="header-right d-flex flex-wrap mt-2 mt-sm-0">
@@ -33,7 +33,7 @@
       </a>
     </div>
     {% if user.role != 'viewer' %}
-    <button type="button" class="btn btn-primary mt-2 mt-sm-0 btn-icon-text" onclick="location.href='{% url 'susars:create' %}'">
+    <button type="button" class="btn btn-primary mt-2 mt-sm-0 btn-icon-text" onclick="location.href='{% url 'susars_create' %}'">
       <i class="mdi mdi-plus-circle"></i> Report SUSAR
     </button>
     {% endif %}
@@ -73,7 +73,7 @@
             </div>
           </div>
         </div>
-        <p class="text-muted font-13 mt-2 mt-sm-0">Monthly enrollment tracking. <a class="text-muted font-13" href="{% url 'reports:index' %}"><u>View detailed reports</u></a></p>
+        <p class="text-muted font-13 mt-2 mt-sm-0">Monthly enrollment tracking. <a class="text-muted font-13" href="{% url 'reports_index' %}"><u>View detailed reports</u></a></p>
         <div class="chart-container">
           <canvas id="enrollmentChart"></canvas>
         </div>
@@ -88,7 +88,7 @@
           <h1 class="font-20 font-weight-semibold">System</h1>
           <p>Clinical Research Management</p>
           <p class="font-10 font-weight-semibold">{{ user_role }} Dashboard</p>
-          <button class="btn bg-white font-12" onclick="location.href='{% url 'participants:list' %}'">View Participants</button>
+          <button class="btn bg-white font-12" onclick="location.href='{% url 'participant_list' %}'">View Participants</button>
         </div>
       </div>
     </div>
@@ -150,7 +150,7 @@
         <h5 class="font-weight-semibold">{{ active_studies }} Active Research Studies</h5>
         <div class="d-flex justify-content-between font-weight-semibold">
           <p class="mb-0"><i class="mdi mdi-star star-color pe-1"></i>In Progress</p>
-          <p class="mb-0"><a href="{% url 'studies:list' %}">View All</a></p>
+          <p class="mb-0"><a href="{% url 'study_list' %}">View All</a></p>
         </div>
       </div>
     </div>
@@ -168,7 +168,7 @@
         <h5 class="font-weight-semibold">Screening & Enrollment</h5>
         <div class="d-flex justify-content-between font-weight-semibold">
           <p class="mb-0"><i class="mdi mdi-star star-color pe-1"></i>{{ screening_participants }} Screening</p>
-          <p class="mb-0"><a href="{% url 'participants:list' %}">View</a></p>
+          <p class="mb-0"><a href="{% url 'participant_list' %}">View</a></p>
         </div>
       </div>
     </div>
@@ -187,7 +187,7 @@
         <div class="d-flex justify-content-between font-weight-semibold">
           <p class="mb-0"><i class="mdi mdi-star star-color pe-1"></i>Excellent</p>
           {% if user.role == 'admin' %}
-          <p class="mb-0"><a href="{% url 'audit:logs' %}">Audit Trail</a></p>
+          <p class="mb-0"><a href="{% url 'audit_logs' %}">Audit Trail</a></p>
           {% else %}
           <p class="mb-0">Monitored</p>
           {% endif %}
@@ -262,7 +262,7 @@
             <tbody>
               {% for participant in recent_participants %}
               <tr>
-                <td><a href="{% url 'participants:detail' participant.id %}">{{ participant.participant_id }}</a></td>
+                <td><a href="{% url 'participant_detail' participant.id %}">{{ participant.participant_id }}</a></td>
                 <td>{{ participant.get_full_name }}</td>
                 <td>{{ participant.study.code }}</td>
                 <td>
@@ -288,7 +288,7 @@
             </tbody>
           </table>
         </div>
-        <a class="text-black font-13 d-block pt-2 pb-2 pb-lg-0 font-weight-bold ps-4" href="{% url 'participants:list' %}">Show more</a>
+        <a class="text-black font-13 d-block pt-2 pb-2 pb-lg-0 font-weight-bold ps-4" href="{% url 'participant_list' %}">Show more</a>
       </div>
     </div>
   </div>
