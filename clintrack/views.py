@@ -347,6 +347,27 @@ def coordinator_dashboard(request):
         outcome__in=['recovering', 'not_recovered', 'unknown']
     ).count()
     
+    # === WEEKLY ENROLLMENT (Last 8 weeks) ===
+    eight_weeks_ago = end_date - timedelta(weeks=8)
+    
+    # Generate weekly enrollment data for chart
+    weekly_data = []
+    weekly_labels = []
+    
+    # Create list of last 8 weeks
+    for i in range(8):
+        week_start = end_date - timedelta(weeks=i)
+        week_start = week_start - timedelta(days=week_start.weekday())  # Start of week (Monday)
+        week_end = week_start + timedelta(days=6)
+        
+        week_participants = Participant.objects.filter(
+            enrollment_date__gte=week_start.date(),
+            enrollment_date__lte=week_end.date()
+        ).count()
+        
+        weekly_data.insert(0, week_participants)
+        weekly_labels.insert(0, f"W{week_start.isocalendar()[1]}")
+    
     # === STUDY BREAKDOWN ===
     study_breakdown = Study.objects.annotate(
         total=Count('participants'),
@@ -355,15 +376,99 @@ def coordinator_dashboard(request):
         susars=Count('participants__susars')
     )
     
-    # === WEEKLY ENROLLMENT (Last 8 weeks) ===
-    eight_weeks_ago = end_date - timedelta(weeks=8)
-    weekly_enrollment = Participant.objects.filter(
-        enrollment_date__gte=eight_weeks_ago.date()
-    ).annotate(
-        week=TruncWeek('enrollment_date')
-    ).values('week').annotate(
-        count=Count('id')
-    ).order_by('week')
+    # Prepare study data for chart
+    study_data = {
+        'labels': [],
+        'participant_counts': [],
+        'susar_counts': [],
+        'colors': []
+    }
+    
+    study_colors = [
+        'rgba(0, 51, 196, 0.8)',      # Primary blue
+        'rgba(0, 210, 132, 0.8)',     # Success green
+        'rgba(255, 87, 48, 0.8)',     # Warning orange
+        'rgba(0, 207, 244, 0.8)',     # Info cyan
+        'rgba(160, 160, 160, 0.8)',   # Secondary gray
+        'rgba(255, 8, 84, 0.8)',      # Danger pink
+    ]
+    
+    for i, study in enumerate(study_breakdown):
+        study_data['labels'].append(study.code[:15])
+        study_data['participant_counts'].append(study.total)
+        study_data['susar_counts'].append(study.susars)
+        study_data['colors'].append(study_colors[i % len(study_colors)])
+    
+    # === STATUS BREAKDOWN ===
+    status_breakdown = Participant.objects.values('status').annotate(count=Count('id'))
+    
+    # Prepare status data for chart
+    status_data = {
+        'labels': [],
+        'data': [],
+        'colors': []
+    }
+    
+    status_mapping = {
+        'active': {'label': 'Active', 'color': 'rgba(0, 210, 132, 0.8)'},
+        'screening': {'label': 'Screening', 'color': 'rgba(255, 87, 48, 0.8)'},
+        'completed': {'label': 'Completed', 'color': 'rgba(0, 207, 244, 0.8)'},
+        'withdrawn': {'label': 'Withdrawn', 'color': 'rgba(160, 160, 160, 0.8)'},
+        'lost': {'label': 'Lost to Follow-up', 'color': 'rgba(255, 8, 84, 0.8)'},
+    }
+    
+    for status in status_breakdown:
+        status_key = status['status']
+        if status_key in status_mapping:
+            status_data['labels'].append(status_mapping[status_key]['label'])
+            status_data['data'].append(status['count'])
+            status_data['colors'].append(status_mapping[status_key]['color'])
+    
+    # === MONTHLY SUSAR TREND ===
+    monthly_susar_data = []
+    monthly_susar_labels = []
+    
+    for i in range(6):  # Last 6 months
+        month_start = end_date - timedelta(days=30*i)
+        month_start = month_start.replace(day=1)
+        if i == 0:
+            month_end = end_date
+        else:
+            next_month = month_start.replace(day=28) + timedelta(days=4)
+            month_end = next_month - timedelta(days=next_month.day)
+        
+        month_susars = SUSAR.objects.filter(
+            detection_date__gte=month_start,
+            detection_date__lte=month_end
+        ).count()
+        
+        monthly_susar_data.insert(0, month_susars)
+        monthly_susar_labels.insert(0, month_start.strftime('%b'))
+    
+    # === PENDING SUSARS BY SEVERITY ===
+    pending_by_severity = SUSAR.objects.filter(
+        follow_up_required=True
+    ).values('severity').annotate(count=Count('id'))
+    
+    severity_data = {
+        'labels': [],
+        'data': [],
+        'colors': []
+    }
+    
+    severity_colors = {
+        'mild': 'rgba(0, 210, 132, 0.8)',
+        'moderate': 'rgba(255, 171, 0, 0.8)',
+        'severe': 'rgba(255, 87, 48, 0.8)',
+        'life_threatening': 'rgba(255, 8, 84, 0.8)',
+        'fatal': 'rgba(108, 117, 125, 0.8)',
+    }
+    
+    for item in pending_by_severity:
+        severity_key = item['severity']
+        severity_data['labels'].append(severity_key.capitalize())
+        severity_data['data'].append(item['count'])
+        severity_data['colors'].append(severity_colors.get(severity_key, 'rgba(160, 160, 160, 0.8)'))
     
     # === RECENT SUSARS REQUIRING FOLLOW-UP ===
     pending_susars_list = SUSAR.objects.filter(
@@ -373,9 +478,6 @@ def coordinator_dashboard(request):
     # === RECENT PARTICIPANTS ===
     recent_participants = Participant.objects.select_related('study').order_by('-created_at')[:10]
     
-    # === STATUS BREAKDOWN ===
-    status_breakdown = Participant.objects.values('status').annotate(count=Count('id'))
-    
     context = {
         'user_role': 'Study Coordinator',
         'total_participants': total_participants,
@@ -384,14 +486,21 @@ def coordinator_dashboard(request):
         'total_susars': total_susars,
         'pending_susars': pending_susars,
         'study_breakdown': study_breakdown,
-        'weekly_enrollment': list(weekly_enrollment),
         'pending_susars_list': pending_susars_list,
         'recent_participants': recent_participants,
         'status_breakdown': status_breakdown,
+        
+        # Chart Data
+        'weekly_enrollment_data': weekly_data,
+        'weekly_enrollment_labels': weekly_labels,
+        'study_data_json': json.dumps(study_data),
+        'status_data_json': json.dumps(status_data),
+        'monthly_susar_data': monthly_susar_data,
+        'monthly_susar_labels': monthly_susar_labels,
+        'severity_data_json': json.dumps(severity_data),
     }
     
     return render(request, 'dashboards/coordinator_dashboard.html', context)
-
 
 @login_required
 def staff_dashboard(request):

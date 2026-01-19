@@ -1,0 +1,1246 @@
+<!-- ========================================== -->
+<!-- dashboards/coordinator_dashboard.html -->
+<!-- ========================================== -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Coordinator Dashboard - ClinTrack{% endblock %}
+
+{% block extra_css %}
+<style>
+:root {
+    --primary-fade: rgba(0, 51, 196, 0.08);
+    --warning-fade: rgba(255, 87, 48, 0.08);
+    --info-fade: rgba(0, 207, 244, 0.08);
+    --success-fade: rgba(0, 210, 132, 0.08);
+    --danger-fade: rgba(255, 8, 84, 0.08);
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+}
+
+.small-chart {
+    height: 250px;
+}
+
+/* Apple-like typography */
+body {
+    font-family: var(--bs-font-sans-serif);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    color: var(--bs-body-color);
+    background-color: var(--bs-body-bg);
+}
+
+/* Smaller font sizes */
+h3 { font-size: 1.125rem; font-weight: 600; color: var(--bs-gray-dark); }
+h4 { font-size: 1rem; font-weight: 600; color: var(--bs-gray-dark); }
+h5 { font-size: 0.875rem; font-weight: 600; color: var(--bs-gray-dark); }
+p, td, li, th, label, .form-control, .btn { font-size: 0.8125rem; }
+small { font-size: 0.75rem; }
+
+/* Clean breadcrumb */
+.breadcrumb {
+    background: transparent;
+    padding: 0;
+    margin-bottom: 0;
+    font-size: 0.75rem;
+}
+
+.breadcrumb-item {
+    color: var(--bs-gray-600);
+}
+
+.breadcrumb-item a {
+    color: var(--bs-primary);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.breadcrumb-item.active {
+    color: var(--bs-gray-700);
+    font-weight: 500;
+}
+
+/* Page header */
+.page-header {
+    padding: 1rem 0;
+    margin-bottom: 1.5rem;
+}
+
+.page-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--bs-gray-dark);
+    margin-bottom: 0.25rem;
+}
+
+/* Card design */
+.card {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+    background: var(--bs-white);
+}
+
+.card-body {
+    padding: 1.25rem;
+}
+
+/* Card header */
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.875rem;
+    border-bottom: 1px solid var(--bs-gray-200);
+    background: transparent;
+    border: none;
+}
+
+.card-header h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--bs-gray-dark);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Stats grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.stat-card {
+    background: var(--bs-white);
+    border-radius: 8px;
+    padding: 1.25rem;
+    border: 1px solid var(--bs-gray-200);
+    transition: transform 0.2s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.stat-value {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: var(--bs-gray-dark);
+    margin-bottom: 0.25rem;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: var(--bs-gray-600);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.stat-change {
+    font-size: 0.6875rem;
+    padding: 0.125rem 0.375rem;
+    border-radius: 3px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-top: 0.5rem;
+}
+
+.stat-change.positive {
+    background: rgba(0, 210, 132, 0.1);
+    color: var(--bs-success);
+}
+
+.stat-change.negative {
+    background: rgba(255, 8, 84, 0.1);
+    color: var(--bs-danger);
+}
+
+/* Chart tabs */
+.chart-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--bs-gray-200);
+    margin-bottom: 1rem;
+}
+
+.chart-tab {
+    padding: 0.5rem 1rem;
+    font-size: 0.8125rem;
+    color: var(--bs-gray-600);
+    background: none;
+    border: none;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.chart-tab:hover {
+    color: var(--bs-gray-700);
+}
+
+.chart-tab.active {
+    color: var(--bs-primary);
+    border-bottom-color: var(--bs-primary);
+    font-weight: 500;
+}
+
+/* Study breakdown */
+.study-breakdown-item {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--bs-gray-200);
+}
+
+.study-breakdown-item:last-child {
+    border-bottom: none;
+}
+
+.study-progress {
+    height: 6px;
+    background: var(--bs-gray-200);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 0.5rem;
+}
+
+.study-progress-bar {
+    height: 100%;
+    background: var(--bs-primary);
+    border-radius: 3px;
+}
+
+/* Badge styling */
+.badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-weight: 500;
+    font-size: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.badge-success {
+    background: rgba(0, 210, 132, 0.1);
+    color: var(--bs-success);
+    border: 1px solid rgba(0, 210, 132, 0.2);
+}
+
+.badge-warning {
+    background: rgba(255, 87, 48, 0.1);
+    color: var(--bs-warning);
+    border: 1px solid rgba(255, 87, 48, 0.2);
+}
+
+.badge-info {
+    background: rgba(0, 207, 244, 0.1);
+    color: var(--bs-info);
+    border: 1px solid rgba(0, 207, 244, 0.2);
+}
+
+.badge-danger {
+    background: rgba(255, 8, 84, 0.1);
+    color: var(--bs-danger);
+    border: 1px solid rgba(255, 8, 84, 0.2);
+}
+
+.badge-secondary {
+    background: rgba(160, 160, 160, 0.1);
+    color: var(--bs-secondary);
+    border: 1px solid rgba(160, 160, 160, 0.2);
+}
+
+/* Table styling */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 6px;
+    border: 1px solid var(--bs-gray-200);
+}
+
+.table {
+    margin-bottom: 0;
+    font-size: 0.8125rem;
+    color: var(--bs-gray-700);
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.table thead th {
+    border: none;
+    background: var(--bs-gray-100);
+    font-weight: 600;
+    color: var(--bs-gray-700);
+    padding: 0.75rem 1rem;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.table tbody td {
+    padding: 0.75rem 1rem;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--bs-gray-200);
+}
+
+.table tbody tr:hover {
+    background-color: rgba(var(--bs-primary-rgb), 0.03);
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Status indicators */
+.status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.status-indicator.active::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--bs-success);
+    display: inline-block;
+    animation: pulse 2s infinite;
+}
+
+.status-indicator.completed::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--bs-secondary);
+    display: inline-block;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+/* Button styling */
+.btn {
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.btn-sm {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.75rem;
+}
+
+.btn-primary {
+    background: var(--bs-primary);
+    color: var(--bs-white);
+}
+
+.btn-primary:hover {
+    background: #0029a3;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 51, 196, 0.2);
+}
+
+.btn-outline-primary {
+    background: transparent;
+    color: var(--bs-primary);
+    border: 1px solid var(--bs-primary);
+}
+
+.btn-outline-primary:hover {
+    background: rgba(var(--bs-primary-rgb), 0.1);
+}
+
+.btn-outline-secondary {
+    background: transparent;
+    color: var(--bs-gray-600);
+    border: 1px solid var(--bs-gray-300);
+}
+
+.btn-outline-secondary:hover {
+    background: var(--bs-gray-100);
+    color: var(--bs-gray-700);
+}
+
+/* Pagination */
+.pagination-wrapper {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--bs-gray-200);
+}
+
+.pagination {
+    margin-bottom: 0;
+}
+
+.page-link {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.75rem;
+    border: 1px solid var(--bs-gray-300);
+    color: var(--bs-primary);
+    background: var(--bs-white);
+}
+
+.page-item.active .page-link {
+    background: var(--bs-primary);
+    border-color: var(--bs-primary);
+    color: var(--bs-white);
+}
+
+/* Empty state */
+.empty-state {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: var(--bs-gray-600);
+}
+
+.empty-state i {
+    font-size: 2.5rem;
+    color: var(--bs-gray-300);
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.empty-state h5 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--bs-gray-700);
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    font-size: 0.75rem;
+    margin-bottom: 1.5rem;
+    max-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Card actions */
+.card-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+/* Legend styling */
+.chart-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 1rem;
+    font-size: 0.75rem;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .chart-container {
+        height: 250px;
+    }
+    
+    .chart-tabs {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+    }
+    
+    .chart-tab {
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+    
+    .table thead th,
+    .table tbody td {
+        padding: 0.5rem;
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .empty-state {
+        padding: 1.5rem 1rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+  <div class="page-header">
+    <h3 class="page-title">Study Coordinator Dashboard</h3>
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+        <li class="breadcrumb-item active">Coordinator View</li>
+      </ol>
+    </nav>
+  </div>
+
+  <!-- Key Metrics -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-value">{{ total_participants }}</div>
+      <div class="stat-label">
+        <i class="bi bi-people"></i>
+        Total Participants
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-value">{{ active_participants }}</div>
+      <div class="stat-label">
+        <i class="bi bi-check-circle"></i>
+        Active Participants
+      </div>
+      <div class="stat-change positive">
+        <i class="bi bi-arrow-up"></i>
+        {{ total_participants|default:1|divisibleby:active_participants|default:0 }}% of total
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-value">{{ screening_participants }}</div>
+      <div class="stat-label">
+        <i class="bi bi-search"></i>
+        In Screening
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-value">{{ total_susars }}</div>
+      <div class="stat-label">
+        <i class="bi bi-clipboard2-pulse"></i>
+        SUSAR Reports
+      </div>
+      <div class="stat-change negative">
+        <i class="bi bi-exclamation-triangle"></i>
+        {{ pending_susars }} pending
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Section -->
+  <div class="row">
+    <!-- Weekly Enrollment Trend -->
+    <div class="col-lg-8">
+      <div class="card">
+        <div class="card-body">
+          <div class="card-header">
+            <h4>
+              <i class="bi bi-graph-up"></i>
+              Weekly Enrollment Trend
+            </h4>
+            <div class="chart-tabs">
+              <button class="chart-tab active" onclick="changeTimeFrame('weekly')">Weekly</button>
+              <button class="chart-tab" onclick="changeTimeFrame('monthly')">Monthly</button>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas id="enrollmentChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Status Distribution -->
+    <div class="col-lg-4">
+      <div class="card">
+        <div class="card-body">
+          <div class="card-header">
+            <h4>
+              <i class="bi bi-pie-chart"></i>
+              Participant Status
+            </h4>
+          </div>
+          <div class="chart-container small-chart">
+            <canvas id="statusChart"></canvas>
+          </div>
+          <div id="status-legend" class="chart-legend"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mt-4">
+    <!-- Study Distribution -->
+    <div class="col-lg-6">
+      <div class="card">
+        <div class="card-body">
+          <div class="card-header">
+            <h4>
+              <i class="bi bi-bar-chart"></i>
+              Study Distribution
+            </h4>
+          </div>
+          <div class="chart-container small-chart">
+            <canvas id="studyChart"></canvas>
+          </div>
+          <div id="study-legend" class="chart-legend"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Monthly SUSAR Trend -->
+    <div class="col-lg-6">
+      <div class="card">
+        <div class="card-body">
+          <div class="card-header">
+            <h4>
+              <i class="bi bi-activity"></i>
+              SUSAR Reports Trend
+            </h4>
+          </div>
+          <div class="chart-container small-chart">
+            <canvas id="susarTrendChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pending SUSARs by Severity -->
+  <div class="row mt-4">
+    <div class="col-lg-4">
+      <div class="card">
+        <div class="card-body">
+          <div class="card-header">
+            <h4>
+              <i class="bi bi-exclamation-triangle"></i>
+              Pending SUSARs by Severity
+            </h4>
+          </div>
+          <div class="chart-container small-chart">
+            <canvas id="severityChart"></canvas>
+          </div>
+          <div id="severity-legend" class="chart-legend"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Study Breakdown Table -->
+    <div class="col-lg-8">
+      <div class="card">
+        <div class="card-body">
+          <div class="card-header">
+            <h4>
+              <i class="bi bi-diagram-3"></i>
+              Study Breakdown
+            </h4>
+            <button class="btn btn-sm btn-outline-secondary" onclick="location.href='{% url 'study_list' %}'">
+              <i class="bi bi-arrow-right"></i>
+              View All
+            </button>
+          </div>
+          
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Study Code</th>
+                  <th>Study Name</th>
+                  <th>Participants</th>
+                  <th>Active</th>
+                  <th>Screening</th>
+                  <th>SUSARs</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for study in study_breakdown %}
+                <tr>
+                  <td><code>{{ study.code }}</code></td>
+                  <td>{{ study.name|truncatechars:30 }}</td>
+                  <td>
+                    <strong>{{ study.total }}</strong>
+                    <div class="study-progress">
+                      <div class="study-progress-bar" style="width: {% widthratio study.total total_participants 100 %}%"></div>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="badge badge-success">{{ study.active }}</span>
+                  </td>
+                  <td>
+                    <span class="badge badge-warning">{{ study.screening }}</span>
+                  </td>
+                  <td>
+                    {% if study.susars > 0 %}
+                    <span class="badge badge-danger">{{ study.susars }}</span>
+                    {% else %}
+                    <span class="badge badge-secondary">0</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <button class="btn btn-sm btn-outline-primary" onclick="location.href='{% url 'study_detail' study.id %}'">
+                      <i class="bi bi-eye"></i>
+                      View
+                    </button>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="7" class="text-center py-3 text-muted">
+                    No studies available
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Activities Row -->
+  <div class="row mt-4">
+    <!-- Recent Participants -->
+    <div class="col-lg-6">
+      <div class="card">
+        <div class="card-body">
+          <div class="card-header">
+            <h4>
+              <i class="bi bi-clock-history"></i>
+              Recent Participants
+            </h4>
+            <button class="btn btn-sm btn-outline-primary" onclick="location.href='{% url 'participant_create' %}'">
+              <i class="bi bi-plus"></i>
+              Add New
+            </button>
+          </div>
+          
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Study</th>
+                  <th>Status</th>
+                  <th>Enrolled</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for participant in recent_participants %}
+                <tr>
+                  <td>
+                    <a href="{% url 'participant_detail' participant.id %}">{{ participant.participant_id }}</a>
+                  </td>
+                  <td>{{ participant.get_full_name }}</td>
+                  <td>{{ participant.study.code }}</td>
+                  <td>
+                    {% if participant.status == 'active' %}
+                    <span class="badge badge-success">Active</span>
+                    {% elif participant.status == 'screening' %}
+                    <span class="badge badge-warning">Screening</span>
+                    {% elif participant.status == 'completed' %}
+                    <span class="badge badge-info">Completed</span>
+                    {% elif participant.status == 'withdrawn' %}
+                    <span class="badge badge-secondary">Withdrawn</span>
+                    {% elif participant.status == 'lost' %}
+                    <span class="badge badge-danger">Lost</span>
+                    {% endif %}
+                  </td>
+                  <td>{{ participant.created_at|date:"M d, Y" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="5" class="text-center py-3 text-muted">
+                    No recent participants
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Pending SUSARs -->
+    <div class="col-lg-6">
+      <div class="card">
+        <div class="card-body">
+          <div class="card-header">
+            <h4>
+              <i class="bi bi-exclamation-circle"></i>
+              Pending SUSAR Follow-ups
+              {% if pending_susars > 0 %}
+              <span class="badge badge-danger ms-2">{{ pending_susars }}</span>
+              {% endif %}
+            </h4>
+            <button class="btn btn-sm btn-outline-primary" onclick="location.href='{% url 'susars_list' %}?follow_up_required=true'">
+              <i class="bi bi-arrow-right"></i>
+              View All
+            </button>
+          </div>
+          
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>SUSAR ID</th>
+                  <th>Participant</th>
+                  <th>Severity</th>
+                  <th>Onset Date</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for susar in pending_susars_list %}
+                <tr>
+                  <td>
+                    <a href="{% url 'susars_detail' susar.id %}">{{ susar.susar_id }}</a>
+                  </td>
+                  <td>{{ susar.participant.participant_id }}</td>
+                  <td>
+                    {% if susar.severity == 'mild' %}
+                    <span class="badge badge-success">{{ susar.get_severity_display }}</span>
+                    {% elif susar.severity == 'moderate' %}
+                    <span class="badge badge-warning">{{ susar.get_severity_display }}</span>
+                    {% elif susar.severity == 'severe' %}
+                    <span class="badge badge-danger">{{ susar.get_severity_display }}</span>
+                    {% elif susar.severity == 'life_threatening' %}
+                    <span class="badge badge-danger">{{ susar.get_severity_display }}</span>
+                    {% else %}
+                    <span class="badge badge-secondary">{{ susar.get_severity_display }}</span>
+                    {% endif %}
+                  </td>
+                  <td>{{ susar.onset_date|date:"M d, Y" }}</td>
+                  <td>
+                    {% if susar.outcome == 'recovering' %}
+                    <span class="status-indicator active">
+                      <i class="bi bi-circle-fill"></i>
+                      Recovering
+                    </span>
+                    {% elif susar.outcome == 'not_recovered' %}
+                    <span class="badge badge-warning">Not Recovered</span>
+                    {% elif susar.outcome == 'unknown' %}
+                    <span class="badge badge-secondary">Unknown</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="5" class="text-center py-3 text-muted">
+                    No pending SUSAR follow-ups
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+// Chart instances
+let enrollmentChart, statusChart, studyChart, susarTrendChart, severityChart;
+
+// Parse JSON data from Django context
+const studyData = {{ study_data_json|safe }};
+const statusData = {{ status_data_json|safe }};
+const severityData = {{ severity_data_json|safe }};
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize all charts
+    initEnrollmentChart('weekly');
+    initStatusChart();
+    initStudyChart();
+    initSusarTrendChart();
+    initSeverityChart();
+    
+    // Initialize tooltips
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltipTriggerList.forEach(tooltipTriggerEl => {
+        new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+
+function changeTimeFrame(timeframe) {
+    // Update active tab
+    document.querySelectorAll('.chart-tab').forEach(tab => tab.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    // In a real implementation, this would fetch new data based on timeframe
+    // For now, we'll just update the chart title
+    const chartTitle = timeframe === 'weekly' ? 'Weekly Enrollment Trend' : 'Monthly Enrollment Trend';
+    document.querySelector('#enrollmentChart').closest('.card').querySelector('h4').innerHTML = 
+        `<i class="bi bi-graph-up"></i> ${chartTitle}`;
+}
+
+function initEnrollmentChart(timeframe = 'weekly') {
+    const ctx = document.getElementById('enrollmentChart').getContext('2d');
+    
+    // Weekly enrollment data from Django context
+    const weeklyData = {{ weekly_enrollment_data|safe }};
+    const weeklyLabels = {{ weekly_enrollment_labels|safe }};
+    
+    if (enrollmentChart) {
+        enrollmentChart.destroy();
+    }
+    
+    enrollmentChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: weeklyLabels,
+            datasets: [{
+                label: 'Participants Enrolled',
+                data: weeklyData,
+                borderColor: 'var(--bs-primary)',
+                backgroundColor: 'rgba(0, 51, 196, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: 'var(--bs-primary)',
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                    titleFont: { size: 12 },
+                    bodyFont: { size: 12 },
+                    padding: 10
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Number of Participants',
+                        font: { size: 12 }
+                    }
+                },
+                x: {
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Week',
+                        font: { size: 12 }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function initStatusChart() {
+    const ctx = document.getElementById('statusChart').getContext('2d');
+    
+    statusChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: statusData.labels,
+            datasets: [{
+                data: statusData.data,
+                backgroundColor: statusData.colors,
+                borderColor: 'white',
+                borderWidth: 2,
+                spacing: 3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '65%',
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.raw || 0;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = Math.round((value / total) * 100);
+                            return `${label}: ${value} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+    
+    // Generate legend
+    const legend = document.getElementById('status-legend');
+    let legendHTML = '';
+    statusData.labels.forEach((label, index) => {
+        legendHTML += `
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: ${statusData.colors[index]}"></div>
+                <span>${label}: ${statusData.data[index]}</span>
+            </div>
+        `;
+    });
+    legend.innerHTML = legendHTML;
+}
+
+function initStudyChart() {
+    const ctx = document.getElementById('studyChart').getContext('2d');
+    
+    studyChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: studyData.labels,
+            datasets: [{
+                label: 'Participants',
+                data: studyData.participant_counts,
+                backgroundColor: studyData.colors,
+                borderColor: studyData.colors.map(color => color.replace('0.8)', '1)')),
+                borderWidth: 1,
+                borderRadius: 4,
+                borderSkipped: false
+            }, {
+                label: 'SUSARs',
+                data: studyData.susar_counts,
+                backgroundColor: studyData.colors.map(color => color.replace('0.8)', '0.4)')),
+                borderColor: studyData.colors.map(color => color.replace('0.8)', '1)')),
+                borderWidth: 1,
+                borderRadius: 4,
+                borderSkipped: false
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        font: { size: 11 },
+                        boxWidth: 12
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    },
+                    ticks: {
+                        stepSize: 1
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+    
+    // Generate legend
+    const legend = document.getElementById('study-legend');
+    let legendHTML = '';
+    studyData.labels.forEach((label, index) => {
+        legendHTML += `
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: ${studyData.colors[index]}"></div>
+                <span>${label}: ${studyData.participant_counts[index]} participants</span>
+            </div>
+        `;
+    });
+    legend.innerHTML = legendHTML;
+}
+
+function initSusarTrendChart() {
+    const ctx = document.getElementById('susarTrendChart').getContext('2d');
+    
+    // Monthly SUSAR data from Django context
+    const monthlyData = {{ monthly_susar_data|safe }};
+    const monthlyLabels = {{ monthly_susar_labels|safe }};
+    
+    susarTrendChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: monthlyLabels,
+            datasets: [{
+                label: 'SUSAR Reports',
+                data: monthlyData,
+                borderColor: 'var(--bs-danger)',
+                backgroundColor: 'rgba(255, 8, 84, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.3,
+                pointBackgroundColor: 'var(--bs-danger)',
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Number of Reports',
+                        font: { size: 12 }
+                    }
+                },
+                x: {
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Month',
+                        font: { size: 12 }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function initSeverityChart() {
+    const ctx = document.getElementById('severityChart').getContext('2d');
+    
+    severityChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: severityData.labels,
+            datasets: [{
+                data: severityData.data,
+                backgroundColor: severityData.colors,
+                borderColor: 'white',
+                borderWidth: 2,
+                spacing: 3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '65%',
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+    
+    // Generate legend
+    const legend = document.getElementById('severity-legend');
+    let legendHTML = '';
+    severityData.labels.forEach((label, index) => {
+        if (severityData.data[index] > 0) {
+            legendHTML += `
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: ${severityData.colors[index]}"></div>
+                    <span>${label}: ${severityData.data[index]}</span>
+                </div>
+            `;
+        }
+    });
+    legend.innerHTML = legendHTML;
+}
+
+// Auto-refresh dashboard every 2 minutes
+setTimeout(() => {
+    if (document.hasFocus()) {
+        window.location.reload();
+    }
+}, 120000);
+</script>
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+{% endblock %}
