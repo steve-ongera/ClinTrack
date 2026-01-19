@@ -6,6 +6,564 @@
 
 {% block title %}Audit Logs - ClinTrack{% endblock %}
 
+{% block extra_css %}
+<style>
+/* Apple-like typography */
+body {
+    font-family: var(--bs-font-sans-serif);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    color: var(--bs-body-color);
+    background-color: var(--bs-body-bg);
+}
+
+/* Smaller font sizes */
+h3 { font-size: 1.125rem; font-weight: 600; color: var(--bs-gray-dark); }
+h4 { font-size: 1rem; font-weight: 600; color: var(--bs-gray-dark); }
+h5 { font-size: 0.875rem; font-weight: 600; color: var(--bs-gray-dark); }
+p, td, li, th, label, .form-control, .btn { font-size: 0.8125rem; }
+small { font-size: 0.75rem; }
+
+/* Clean breadcrumb */
+.breadcrumb {
+    background: transparent;
+    padding: 0;
+    margin-bottom: 0;
+    font-size: 0.75rem;
+}
+
+.breadcrumb-item {
+    color: var(--bs-gray-600);
+}
+
+.breadcrumb-item a {
+    color: var(--bs-primary);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.breadcrumb-item.active {
+    color: var(--bs-gray-700);
+    font-weight: 500;
+}
+
+/* Page header */
+.page-header {
+    padding: 1rem 0;
+    margin-bottom: 1.5rem;
+}
+
+.page-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--bs-gray-dark);
+    margin-bottom: 0.25rem;
+}
+
+/* Card design */
+.card {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+    background: var(--bs-white);
+}
+
+.card-body {
+    padding: 1.25rem;
+}
+
+/* Card header */
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.875rem;
+    border-bottom: 1px solid var(--bs-gray-200);
+    background: transparent;
+    border: none;
+}
+
+.card-header h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--bs-gray-dark);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Stats cards (if needed for audit summary) */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.stat-card {
+    background: var(--bs-white);
+    border-radius: 8px;
+    padding: 1.25rem;
+    border: 1px solid var(--bs-gray-200);
+    transition: transform 0.2s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--bs-gray-dark);
+    margin-bottom: 0.25rem;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: var(--bs-gray-600);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Filter form */
+.filter-form {
+    background: var(--bs-gray-100);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--bs-gray-200);
+}
+
+.form-group {
+    margin-bottom: 0;
+}
+
+.form-group label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--bs-gray-700);
+    margin-bottom: 0.25rem;
+    display: block;
+}
+
+.form-control {
+    border: 1px solid var(--bs-gray-300);
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8125rem;
+    transition: all 0.2s ease;
+    background: var(--bs-white);
+    color: var(--bs-gray-800);
+}
+
+.form-control:focus {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.1);
+    outline: none;
+}
+
+/* Button styling */
+.btn {
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.btn-sm {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.75rem;
+}
+
+.btn-primary {
+    background: var(--bs-primary);
+    color: var(--bs-white);
+}
+
+.btn-primary:hover {
+    background: #0029a3;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 51, 196, 0.2);
+}
+
+.btn-secondary {
+    background: var(--bs-secondary);
+    color: var(--bs-white);
+}
+
+.btn-secondary:hover {
+    background: #888888;
+    transform: translateY(-1px);
+}
+
+.btn-outline-secondary {
+    background: transparent;
+    color: var(--bs-gray-600);
+    border: 1px solid var(--bs-gray-300);
+}
+
+.btn-outline-secondary:hover {
+    background: var(--bs-gray-100);
+    color: var(--bs-gray-700);
+}
+
+.btn-info {
+    background: var(--bs-info);
+    color: var(--bs-white);
+}
+
+.form-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--bs-gray-200);
+}
+
+/* Table styling */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 6px;
+    border: 1px solid var(--bs-gray-200);
+}
+
+.table {
+    margin-bottom: 0;
+    font-size: 0.8125rem;
+    color: var(--bs-gray-700);
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+}
+
+.table thead th {
+    border: none;
+    background: var(--bs-gray-100);
+    font-weight: 600;
+    color: var(--bs-gray-700);
+    padding: 0.75rem 1rem;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    border-bottom: 1px solid var(--bs-gray-300);
+}
+
+.table tbody td {
+    padding: 0.75rem 1rem;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--bs-gray-200);
+}
+
+.table tbody tr:hover {
+    background-color: rgba(var(--bs-primary-rgb), 0.03);
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Badge styling */
+.badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-weight: 500;
+    font-size: 0.75rem;
+    letter-spacing: 0.3px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.badge-action-create {
+    background: rgba(var(--bs-success-rgb), 0.1);
+    color: var(--bs-success);
+    border: 1px solid rgba(var(--bs-success-rgb), 0.2);
+}
+
+.badge-action-update {
+    background: rgba(var(--bs-info-rgb), 0.1);
+    color: var(--bs-info);
+    border: 1px solid rgba(var(--bs-info-rgb), 0.2);
+}
+
+.badge-action-delete {
+    background: rgba(var(--bs-danger-rgb), 0.1);
+    color: var(--bs-danger);
+    border: 1px solid rgba(var(--bs-danger-rgb), 0.2);
+}
+
+.badge-action-view {
+    background: rgba(var(--bs-warning-rgb), 0.1);
+    color: var(--bs-warning);
+    border: 1px solid rgba(var(--bs-warning-rgb), 0.2);
+}
+
+/* Timestamp styling */
+.timestamp {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.timestamp .date {
+    font-weight: 500;
+    color: var(--bs-gray-800);
+    font-size: 0.8125rem;
+}
+
+.timestamp .time {
+    font-size: 0.75rem;
+    color: var(--bs-gray-600);
+}
+
+/* User info */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.user-info i {
+    font-size: 1rem;
+    color: var(--bs-primary);
+}
+
+/* Code styling */
+code {
+    font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+    font-size: 0.75rem;
+    background: var(--bs-gray-100);
+    padding: 0.125rem 0.375rem;
+    border-radius: 3px;
+    color: var(--bs-gray-700);
+    border: 1px solid var(--bs-gray-200);
+}
+
+/* Modal styling */
+.modal-content {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--bs-gray-200);
+    padding: 1rem 1.5rem;
+}
+
+.modal-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--bs-gray-dark);
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.modal-body pre {
+    font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+    font-size: 0.75rem;
+    background: var(--bs-gray-100);
+    padding: 1rem;
+    border-radius: 4px;
+    overflow: auto;
+    max-height: 400px;
+    margin: 0;
+    border: 1px solid var(--bs-gray-200);
+}
+
+.modal-footer {
+    border-top: 1px solid var(--bs-gray-200);
+    padding: 1rem 1.5rem;
+}
+
+.modal .close {
+    font-size: 1.5rem;
+    color: var(--bs-gray-600);
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+}
+
+.modal .close:hover {
+    opacity: 1;
+    color: var(--bs-gray-800);
+}
+
+/* Pagination */
+.pagination-wrapper {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--bs-gray-200);
+}
+
+.pagination {
+    margin-bottom: 0;
+}
+
+.page-link {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.75rem;
+    border: 1px solid var(--bs-gray-300);
+    color: var(--bs-primary);
+    background: var(--bs-white);
+    transition: all 0.2s ease;
+}
+
+.page-link:hover {
+    background: var(--bs-gray-100);
+    border-color: var(--bs-gray-400);
+    color: var(--bs-primary);
+}
+
+.page-item.active .page-link {
+    background: var(--bs-primary);
+    border-color: var(--bs-primary);
+    color: var(--bs-white);
+}
+
+.page-item.disabled .page-link {
+    color: var(--bs-gray-500);
+    background: var(--bs-gray-100);
+    border-color: var(--bs-gray-300);
+}
+
+/* Empty state */
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--bs-gray-600);
+}
+
+.empty-state i {
+    font-size: 2.5rem;
+    color: var(--bs-gray-300);
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.empty-state h5 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--bs-gray-700);
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    font-size: 0.75rem;
+    margin-bottom: 1.5rem;
+    max-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Card actions */
+.card-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+    
+    .card-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .filter-form .row {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .filter-form .col-md-3 {
+        width: 100%;
+    }
+    
+    .table thead th,
+    .table tbody td {
+        padding: 0.5rem;
+        font-size: 0.75rem;
+    }
+    
+    /* Hide less important columns on mobile */
+    .table td:nth-child(5), /* Object ID */
+    .table th:nth-child(5),
+    .table td:nth-child(6), /* IP Address */
+    .table th:nth-child(6) {
+        display: none;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .form-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 576px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .empty-state {
+        padding: 2rem 1rem;
+    }
+}
+
+/* Focus states */
+.form-control:focus,
+.btn:focus {
+    outline: 2px solid rgba(var(--bs-primary-rgb), 0.3);
+    outline-offset: 2px;
+}
+
+/* Row hover effect */
+.row > * {
+    transition: transform 0.2s ease;
+}
+
+.row > *:hover {
+    transform: translateY(-2px);
+}
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="content-wrapper">
   <div class="page-header">
@@ -18,230 +576,290 @@
     </nav>
   </div>
 
-  <div class="row">
-    <div class="col-12">
-      <!-- Filter Card -->
-      <div class="card">
-        <div class="card-body">
-          <div class="card-header">
-            <h4>
-              <i class="bi bi-funnel"></i>
-              Filters
-            </h4>
-          </div>
-
-          <form method="get" class="filter-form">
-            <div class="row">
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label>User</label>
-                  <select class="form-control" name="user">
-                    <option value="">All Users</option>
-                    <option value="admin">Administrator</option>
-                    <option value="coordinator">Study Coordinator</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label>Action</label>
-                  <select class="form-control" name="action">
-                    <option value="">All Actions</option>
-                    <option value="create">Create</option>
-                    <option value="update">Update</option>
-                    <option value="delete">Delete</option>
-                    <option value="view">View</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label>Model</label>
-                  <select class="form-control" name="model">
-                    <option value="">All Models</option>
-                    <option value="participant">Participant</option>
-                    <option value="study">Study</option>
-                    <option value="susar">SUSAR</option>
-                    <option value="user">User</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label>Date Range</label>
-                  <input type="date" class="form-control" name="date_from">
-                </div>
-              </div>
-            </div>
-
-            <div class="form-actions">
-              <button type="submit" class="btn btn-primary">
-                <i class="bi bi-search"></i>
-                Apply Filters
-              </button>
-              <button type="reset" class="btn btn-secondary">
-                <i class="bi bi-x-circle"></i>
-                Clear
-              </button>
-            </div>
-          </form>
+  
+  <!-- Audit Logs Table -->
+  <div class="card">
+    <div class="card-body">
+      <div class="card-header">
+        <h4>
+          <i class="bi bi-file-text"></i>
+          Audit Trail
+          <span class="badge bg-light text-dark ms-2" style="font-size: 0.75rem;">
+            {{ page_obj.paginator.count|default:"0" }}
+          </span>
+        </h4>
+        <div class="card-actions">
+          <button class="btn btn-sm btn-outline-secondary" onclick="toggleColumns()">
+            <i class="bi bi-columns-gap"></i>
+            Columns
+          </button>
+          <button class="btn btn-sm btn-outline-secondary" onclick="refreshLogs()">
+            <i class="bi bi-arrow-clockwise"></i>
+            Refresh
+          </button>
         </div>
       </div>
 
-      <!-- Audit Logs Table -->
-      <div class="card">
-        <div class="card-body">
-          <div class="card-header">
-            <h4>
-              <i class="bi bi-file-text"></i>
-              Audit Trail
-            </h4>
-            <button class="btn btn-sm btn-outline-secondary">
-              <i class="bi bi-download"></i>
-              Export Logs
-            </button>
-          </div>
-
-          {% if page_obj %}
-          <div class="table-responsive">
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>Timestamp</th>
-                  <th>User</th>
-                  <th>Action</th>
-                  <th>Model</th>
-                  <th>Object ID</th>
-                  <th>IP Address</th>
-                  <th>Details</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for log in page_obj %}
-                <tr>
-                  <td>
-                    <div class="timestamp">
-                      <div class="date">{{ log.timestamp|date:"M d, Y" }}</div>
-                      <div class="time">{{ log.timestamp|date:"H:i:s" }}</div>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="user-info">
-                      <i class="bi bi-person-circle"></i>
-                      {{ log.user.get_full_name|default:log.user.username }}
-                    </div>
-                  </td>
-                  <td>
-                    <span class="badge badge-action-{{ log.action }}">
-                      {% if log.action == 'create' %}
-                        <i class="bi bi-plus-circle"></i>
-                      {% elif log.action == 'update' %}
-                        <i class="bi bi-pencil"></i>
-                      {% elif log.action == 'delete' %}
-                        <i class="bi bi-trash"></i>
-                      {% else %}
-                        <i class="bi bi-eye"></i>
-                      {% endif %}
-                      {{ log.get_action_display }}
-                    </span>
-                  </td>
-                  <td>
-                    <code>{{ log.model_name }}</code>
-                  </td>
-                  <td>
-                    <code>{{ log.object_id }}</code>
-                  </td>
-                  <td>
-                    <code>{{ log.ip_address|default:"-" }}</code>
-                  </td>
-                  <td>
-                    {% if log.changes %}
-                    <button class="btn btn-sm btn-info" data-toggle="modal" data-target="#changesModal{{ log.id }}">
-                      <i class="bi bi-info-circle"></i>
-                      View Changes
-                    </button>
-                    {% else %}
-                    <span class="text-muted">-</span>
-                    {% endif %}
-                  </td>
-                </tr>
-
-                <!-- Changes Modal -->
-                {% if log.changes %}
-                <div class="modal fade" id="changesModal{{ log.id }}" tabindex="-1">
-                  <div class="modal-dialog">
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <h5 class="modal-title">Change Details</h5>
-                        <button type="button" class="close" data-dismiss="modal">
-                          <span>&times;</span>
-                        </button>
-                      </div>
-                      <div class="modal-body">
-                        <pre>{{ log.changes|safe }}</pre>
-                      </div>
-                      <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                      </div>
+      {% if page_obj %}
+      <div class="table-responsive">
+        <table class="table" id="auditLogsTable">
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>User</th>
+              <th>Action</th>
+              <th>Model</th>
+              <th>Object ID</th>
+              <th>IP Address</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for log in page_obj %}
+            <tr>
+              <td>
+                <div class="timestamp">
+                  <div class="date">{{ log.timestamp|date:"M d, Y" }}</div>
+                  <div class="time">{{ log.timestamp|date:"H:i:s" }}</div>
+                </div>
+              </td>
+              <td>
+                <div class="user-info">
+                  <i class="bi bi-person-circle"></i>
+                  <div>
+                    <div class="user-name">{{ log.user.get_full_name|default:log.user.username }}</div>
+                    <div class="user-username" style="font-size: 0.6875rem; color: var(--bs-gray-600);">
+                      {{ log.user.username }}
                     </div>
                   </div>
                 </div>
-                {% endif %}
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-
-          <!-- Pagination -->
-          {% if page_obj.has_other_pages %}
-          <div class="pagination-wrapper">
-            <nav aria-label="Page navigation">
-              <ul class="pagination">
-                {% if page_obj.has_previous %}
-                <li class="page-item">
-                  <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
-                </li>
-                {% endif %}
-
-                {% for num in page_obj.paginator.page_range %}
-                  {% if page_obj.number == num %}
-                  <li class="page-item active">
-                    <span class="page-link">{{ num }}</span>
-                  </li>
-                  {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                  <li class="page-item">
-                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-                  </li>
+              </td>
+              <td>
+                <span class="badge badge-action-{{ log.action }}">
+                  {% if log.action == 'create' %}
+                    <i class="bi bi-plus-circle"></i>
+                  {% elif log.action == 'update' %}
+                    <i class="bi bi-pencil"></i>
+                  {% elif log.action == 'delete' %}
+                    <i class="bi bi-trash"></i>
+                  {% else %}
+                    <i class="bi bi-eye"></i>
                   {% endif %}
-                {% endfor %}
+                  {{ log.get_action_display }}
+                </span>
+              </td>
+              <td>
+                <code>{{ log.model_name }}</code>
+              </td>
+              <td>
+                <code>{{ log.object_id }}</code>
+              </td>
+              <td>
+                <code>{{ log.ip_address|default:"-" }}</code>
+              </td>
+              <td>
+                {% if log.changes %}
+                <button class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#changesModal{{ log.id }}">
+                  <i class="bi bi-info-circle"></i>
+                  View Changes
+                </button>
+                {% else %}
+                <span class="text-muted" style="font-size: 0.75rem;">No changes</span>
+                {% endif %}
+              </td>
+            </tr>
 
-                {% if page_obj.has_next %}
+            <!-- Changes Modal -->
+            {% if log.changes %}
+            <div class="modal fade" id="changesModal{{ log.id }}" tabindex="-1" aria-hidden="true">
+              <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title">Change Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                    <div class="mb-3">
+                      <small class="text-muted">
+                        <i class="bi bi-clock"></i>
+                        {{ log.timestamp|date:"M d, Y H:i:s" }}
+                        • 
+                        <i class="bi bi-person"></i>
+                        {{ log.user.get_full_name|default:log.user.username }}
+                      </small>
+                    </div>
+                    <pre>{{ log.changes|safe }}</pre>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="copyChanges('{{ log.id }}')">
+                      <i class="bi bi-clipboard"></i>
+                      Copy
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      {% if page_obj.has_other_pages %}
+      <div class="pagination-wrapper">
+        <div class="d-flex justify-content-between align-items-center">
+          <small class="text-muted">
+            Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} records
+          </small>
+          <nav aria-label="Page navigation">
+            <ul class="pagination mb-0">
+              {% if page_obj.has_previous %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                  Previous
+                </a>
+              </li>
+              {% endif %}
+
+              {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <li class="page-item active">
+                  <span class="page-link">{{ num }}</span>
+                </li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
                 <li class="page-item">
-                  <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                  <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                    {{ num }}
+                  </a>
                 </li>
                 {% endif %}
-              </ul>
-            </nav>
-          </div>
-          {% endif %}
+              {% endfor %}
 
-          {% else %}
-          <div class="empty-state">
-            <i class="bi bi-file-text-x"></i>
-            <h5>No Audit Logs</h5>
-            <p>No audit logs found matching your criteria.</p>
-          </div>
-          {% endif %}
+              {% if page_obj.has_next %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                  Next
+                </a>
+              </li>
+              {% endif %}
+            </ul>
+          </nav>
         </div>
       </div>
+      {% endif %}
+
+      {% else %}
+      <div class="empty-state">
+        <i class="bi bi-file-text-x"></i>
+        <h5>No Audit Logs Found</h5>
+        <p>No audit logs match your current filters.</p>
+        <a href="{% url 'audit_logs' %}" class="btn btn-primary btn-sm">
+          <i class="bi bi-x-circle"></i>
+          Clear Filters
+        </a>
+      </div>
+      {% endif %}
     </div>
   </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
+<!-- Bootstrap Icons -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tooltips
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltipTriggerList.forEach(tooltipTriggerEl => {
+        new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    // Set default date range to last 30 days if not set
+    const dateFrom = document.querySelector('input[name="date_from"]');
+    const dateTo = document.querySelector('input[name="date_to"]');
+    
+    if (!dateFrom.value && !dateTo.value) {
+        const today = new Date();
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(today.getDate() - 30);
+        
+        dateFrom.value = thirtyDaysAgo.toISOString().split('T')[0];
+        dateTo.value = today.toISOString().split('T')[0];
+    }
+});
+
+function exportAuditLogs() {
+    const filters = {
+        user: document.querySelector('select[name="user"]').value,
+        action: document.querySelector('select[name="action"]').value,
+        model: document.querySelector('select[name="model"]').value,
+        date_from: document.querySelector('input[name="date_from"]').value,
+        date_to: document.querySelector('input[name="date_to"]').value,
+        page: "{{ page_obj.number|default:1 }}"
+    };
+    
+    const queryString = new URLSearchParams(filters).toString();
+    window.location.href = `#`;
+}
+
+function toggleColumns() {
+    const table = document.getElementById('auditLogsTable');
+    const headers = table.querySelectorAll('th');
+    const cells = table.querySelectorAll('td');
+    
+    // Toggle visibility of less important columns (Object ID, IP Address)
+    const columnIndices = [4, 5]; // Object ID and IP Address columns (0-based)
+    
+    columnIndices.forEach(index => {
+        // Toggle header
+        if (headers[index]) {
+            headers[index].style.display = headers[index].style.display === 'none' ? '' : 'none';
+        }
+        
+        // Toggle cells
+        cells.forEach((cell, cellIndex) => {
+            if ((cellIndex - index) % headers.length === 0) {
+                cell.style.display = cell.style.display === 'none' ? '' : 'none';
+            }
+        });
+    });
+}
+
+function refreshLogs() {
+    window.location.reload();
+}
+
+function copyChanges(logId) {
+    const modal = document.querySelector(`#changesModal${logId} .modal-body pre`);
+    if (modal) {
+        const text = modal.textContent;
+        navigator.clipboard.writeText(text).then(() => {
+            const btn = document.querySelector(`#changesModal${logId} .modal-footer .btn-primary`);
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="bi bi-check-circle"></i> Copied!';
+            btn.classList.remove('btn-primary');
+            btn.classList.add('btn-success');
+            
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.classList.remove('btn-success');
+                btn.classList.add('btn-primary');
+            }, 2000);
+        });
+    }
+}
+
+// Auto-refresh every 5 minutes if on first page
+{% if page_obj.number == 1 %}
+setTimeout(() => {
+    if (document.hasFocus()) {
+        refreshLogs();
+    }
+}, 300000); // 5 minutes
+{% endif %}
+</script>
 {% endblock %}
