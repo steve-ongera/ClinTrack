@@ -4,7 +4,7 @@
     <li class="nav-item nav-profile border-bottom">
       <a href="#" class="nav-link flex-column">
         <div class="nav-profile-image">
-          <img src="{% static 'assets/images/faces/face1.jpg' %}" alt="profile" />
+          <img src="{% static 'assets/images/profile.png' %}" alt="profile" />
         </div>
         <div class="nav-profile-text d-flex ms-0 mb-3 flex-column">
           <span class="font-weight-semibold mb-1 mt-2 text-center">{{ user.get_full_name|default:user.username }}</span>
@@ -16,7 +16,7 @@
       <a class="nav-link d-block" href="{% url 'dashboard' %}">
         <img class="sidebar-brand-logo" src="{% static 'assets/images/logo.svg' %}" alt="" />
         <img class="sidebar-brand-logomini" src="{% static 'assets/images/logo-mini.svg' %}" alt="" />
-        <div class="small font-weight-light pt-1">ClinTrack System</div>
+        <div class="sidebar-brand-logo">ClinTrack MIS System</div>
       </a>
       <form class="d-flex align-items-center" action="#">
         <div class="input-group">
